@@ -63,6 +63,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/** Espacio que ocupa la barra de navegación abajo: las pantallas lo suman a su relleno para que el contenido pase por detrás del cristal. */
+val LocalNavInset = androidx.compose.runtime.compositionLocalOf { 0.dp }
+
 data class NavDest(@StringRes val labelRes: Int, val icon: ImageVector, val iconSelected: ImageVector)
 
 val GalleryNavItems = listOf(
@@ -312,6 +315,8 @@ fun GlassNavBar(
                 .height(barHeight)
                 .glassSurface(
                     state = backdrop,
+                clear = true,
+                refract = true,
                     tint = scheme.surfaceContainerHigh.copy(alpha = 0.42f),
                     fallback = scheme.surfaceContainerHigh.copy(alpha = 0.95f),
                     corner = tuning.corner(barHeight),
@@ -531,6 +536,8 @@ private fun FullNavBar(
             .fillMaxWidth()
             .glassSurface(
                 state = backdrop,
+                clear = true,
+                refract = true,
                 tint = scheme.surfaceContainer.copy(alpha = 0.55f),
                 fallback = scheme.surfaceContainer,
                 corner = 0.dp,
@@ -605,6 +612,8 @@ private fun IslandNavBar(
             .height(barHeight)
             .glassSurface(
                 state = backdrop,
+                clear = true,
+                refract = true,
                 tint = scheme.surfaceContainerHigh.copy(alpha = 0.45f),
                 fallback = scheme.surfaceContainerHigh.copy(alpha = 0.96f),
                 corner = tuning.corner(barHeight),
@@ -658,6 +667,8 @@ private fun IndicatorNavBar(
             .height(barHeight)
             .glassSurface(
                 state = backdrop,
+                clear = true,
+                refract = true,
                 tint = scheme.surfaceContainerHigh.copy(alpha = 0.45f),
                 fallback = scheme.surfaceContainerHigh.copy(alpha = 0.96f),
                 corner = tuning.corner(barHeight),
@@ -727,6 +738,8 @@ private fun BubbleNavBar(
             .height(barHeight)
             .glassSurface(
                 state = backdrop,
+                clear = true,
+                refract = true,
                 tint = scheme.surfaceContainerHigh.copy(alpha = 0.45f),
                 fallback = scheme.surfaceContainerHigh.copy(alpha = 0.96f),
                 corner = tuning.corner(barHeight),

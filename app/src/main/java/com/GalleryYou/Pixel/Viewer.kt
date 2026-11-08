@@ -1,5 +1,7 @@
 package com.GalleryYou.Pixel
 
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.compose.ui.graphics.RectangleShape
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -300,8 +302,14 @@ fun ViewerScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .backdropBlur(backdrop, colors.surface.copy(alpha = 0.45f))
                         .statusBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .glassSurface(
+                            state = backdrop,
+                            tint = colors.surface.copy(alpha = 0.45f),
+                            fallback = colors.surface.copy(alpha = 0.92f),
+                            corner = 28.dp,
+                        )
                         .padding(horizontal = 4.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -477,7 +485,7 @@ private fun PlayerFrame(
                 alpha = ((scale - 0.85f) / 0.15f).coerceIn(0f, 1f)
             }
             .size(width, height)
-            .clip(RoundedCornerShape(20.dp)),
+            .clip(RectangleShape),
     ) {
         content()
     }
@@ -526,26 +534,18 @@ private fun Modifier.panelBorder(
         }
     }
 
-/** Reserva espacio para la barra superior y el panel de controles y ajusta el marco al video. */
+/**
+ * Escenario del video: ocupa TODA la pantalla (sin márgenes ni espacio reservado para las barras, que
+ * ahora flotan encima en cristal). [fill] = false ajusta el video entero al ancho/alto; true lo rellena
+ * recortando lo que sobre.
+ */
 @Composable
 private fun VideoStage(
     aspect: Float,
-    chrome: Boolean,
     settings: AppSettings,
+    fill: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val statusTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val topPad by animateDpAsState(
-        targetValue = if (chrome) statusTop + 72.dp else 24.dp,
-        animationSpec = motion(settings.animations),
-        label = "stageTop",
-    )
-    val bottomPad by animateDpAsState(
-        targetValue = if (chrome) navBottom + (if (settings.playerFloating) 138.dp else 122.dp) else 24.dp,
-        animationSpec = motion(settings.animations),
-        label = "stageBottom",
-    )
     var shown by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { shown = true }
     val appear by animateFloatAsState(
@@ -555,16 +555,17 @@ private fun VideoStage(
     )
 
     BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp, top = topPad, bottom = bottomPad),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         if (maxWidth.value > 0f && maxHeight.value > 0f && aspect > 0f) {
             val boxAspect = maxWidth.value / maxHeight.value
             val w: Dp
             val h: Dp
-            if (aspect >= boxAspect) {
+            if (fill) {
+                w = maxWidth
+                h = maxHeight
+            } else if (aspect >= boxAspect) {
                 w = maxWidth
                 h = maxWidth / aspect
             } else {
@@ -598,7 +599,6 @@ private fun VideoPage(
         Box(Modifier.fillMaxSize()) {
             VideoStage(
                 aspect = initialAspect(m),
-                chrome = chrome,
                 settings = settings,
             ) {
                 Box(
@@ -654,6 +654,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
     var speed by remember { mutableFloatStateOf(1f) }
     var muted by remember { mutableStateOf(false) }
     var speedMenu by remember { mutableStateOf(false) }
+    var fillScreen by remember { mutableStateOf(false) }
     var flashDir by remember { mutableIntStateOf(0) }
     var lastDir by remember { mutableIntStateOf(1) }
     var flashTick by remember { mutableIntStateOf(0) }
@@ -728,14 +729,21 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
     Box(Modifier.fillMaxSize()) {
         VideoStage(
             aspect = aspect,
-            chrome = chrome,
             settings = settings,
+            fill = fillScreen,
         ) {
             AndroidView(
                 factory = { ctx ->
-                    // PlayerView con TextureView (ver res/layout/view_player.xml) para poder recortar las esquinas.
+                    // PlayerView con TextureView (ver res/layout/view_player.xml).
                     (LayoutInflater.from(ctx).inflate(R.layout.view_player, null, false) as PlayerView).apply {
                         setPlayer(exo)
+                    }
+                },
+                update = {
+                    it.resizeMode = if (fillScreen) {
+                        AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    } else {
+                        AspectRatioFrameLayout.RESIZE_MODE_FIT
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
@@ -908,17 +916,33 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                             }
                         }
 
-                        IconButton(
-                            modifier = Modifier.align(Alignment.CenterEnd).size(40.dp),
-                            onClick = {
-                                muted = !muted
-                                exo.volume = if (muted) 0f else 1f
-                            },
+                        Row(
+                            Modifier.align(Alignment.CenterEnd),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
-                                contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
-                            )
+                            // Ajustar (video entero) / rellenar (cubre toda la pantalla recortando).
+                            IconButton(
+                                modifier = Modifier.size(40.dp),
+                                onClick = { fillScreen = !fillScreen },
+                            ) {
+                                Icon(
+                                    AppIcons.Frame,
+                                    contentDescription = null,
+                                    tint = if (fillScreen) scheme.primary else LocalContentColor.current,
+                                )
+                            }
+                            IconButton(
+                                modifier = Modifier.size(40.dp),
+                                onClick = {
+                                    muted = !muted
+                                    exo.volume = if (muted) 0f else 1f
+                                },
+                            ) {
+                                Icon(
+                                    if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
+                                    contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
+                                )
+                            }
                         }
                     }
                 }

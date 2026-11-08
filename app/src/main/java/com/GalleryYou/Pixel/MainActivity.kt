@@ -472,23 +472,12 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                     }
                                 }
                             } else {
-                                Box(
-                                    Modifier.backdropBlur(
-                                        backdrop,
-                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                                    ),
-                                ) {
-                                    TopAppBar(
-                                        title = { Text(stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums)) },
-                                        colors = TopAppBarDefaults.topAppBarColors(
-                                            containerColor = if (backdrop.enabled) {
-                                                androidx.compose.ui.graphics.Color.Transparent
-                                            } else {
-                                                MaterialTheme.colorScheme.surface
-                                            },
-                                        ),
-                                    )
-                                }
+                                FloatingHeader(
+                                    title = stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums),
+                                    filter = if (tab == 0) filterMode else null,
+                                    onFilter = { filterMode = it },
+                                    backdrop = backdrop,
+                                )
                             }
                             }
                         }
@@ -513,9 +502,9 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                         top = padding.calculateTopPadding(),
                         bottom = padding.calculateBottomPadding(),
                     )
-                    val bottomOnly = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = padding.calculateBottomPadding())
+                    // Papelera y Ajustes ocupan todo el alto: su contenido pasa por detrás de la barra de cristal.
+                    val navInset = padding.calculateBottomPadding()
+                    val bottomOnly = Modifier.fillMaxSize()
                     AnimatedContent(
                         modifier = Modifier.fillMaxSize().backdropSource(backdrop),
                         targetState = tab,
@@ -539,9 +528,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                     padding = gridPadding,
                                     settings = settings,
                                     selected = selected,
-                                    header = {
-                                        FilterRow(selected = filterMode, onSelect = { filterMode = it })
-                                    },
+                                    header = null,
                                     onClick = { m, index ->
                                         if (selected.isNotEmpty()) toggle(m) else open(filtered, index)
                                     },
@@ -556,18 +543,22 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                 onOpen = { openAlbumId = it.id },
                             )
 
-                            2 -> Box(bottomOnly) {
-                                TrashScreen(
-                                    items = trash,
-                                    settings = settings,
-                                    onBack = { tab = 0 },
-                                    onRestore = { restoreItems(it) },
-                                    onDeleteForever = { deleteForever(it) },
-                                )
+                            2 -> CompositionLocalProvider(LocalNavInset provides navInset) {
+                                Box(bottomOnly) {
+                                    TrashScreen(
+                                        items = trash,
+                                        settings = settings,
+                                        onBack = { tab = 0 },
+                                        onRestore = { restoreItems(it) },
+                                        onDeleteForever = { deleteForever(it) },
+                                    )
+                                }
                             }
 
-                            else -> Box(bottomOnly) {
-                                SettingsScreen(settings = settings, updater = updater, onBack = { tab = 0 })
+                            else -> CompositionLocalProvider(LocalNavInset provides navInset) {
+                                Box(bottomOnly) {
+                                    SettingsScreen(settings = settings, updater = updater, onBack = { tab = 0 })
+                                }
                             }
                         }
                     }

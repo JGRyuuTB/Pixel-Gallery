@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 1.4.4
+
+- Fotos y Álbumes: el título y los filtros ahora van en un encabezado flotante de cristal, con filtros en píldoras totalmente redondeadas e iconos circulares. El contenido pasa por detrás con desenfoque.
+- Reproductor: el video ocupa toda la pantalla, sin márgenes ni espacio sobrante arriba y abajo. La barra superior y el panel de controles flotan encima en cristal. Nuevo botón para ajustar el video entero o rellenar la pantalla.
+- Desenfoque Acrílico: refracción al máximo (lente más gruesa y dispersión cromática más fuerte), incluso con Liquid Glass apagado.
+- Barra de navegación: sin fondo, solo desenfoque y refracción. Ajustes y Papelera pasan por detrás de la barra en lugar de cortarse encima.
+
 ## 1.4.3
 
 - Desenfoque Acrílico: ahora es un cristal esmerilado claro que se ve también sobre fondos oscuros (Ajustes, reproductor), no solo sobre fotos. Escarcha recibe un toque más suave del mismo efecto.

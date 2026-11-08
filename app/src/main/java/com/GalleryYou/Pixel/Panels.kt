@@ -123,7 +123,9 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                // El final de la lista queda libre de la barra de cristal flotante.
+                .padding(bottom = LocalNavInset.current),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             SettingsGroup(stringResource(R.string.settings_language)) {
@@ -578,7 +580,7 @@ fun TrashScreen(
     ) { padding ->
         val gridPadding = PaddingValues(
             top = padding.calculateTopPadding(),
-            bottom = padding.calculateBottomPadding(),
+            bottom = padding.calculateBottomPadding() + LocalNavInset.current,
         )
         when {
             !supported -> EmptyState(gridPadding, stringResource(R.string.trash_needs_android11))

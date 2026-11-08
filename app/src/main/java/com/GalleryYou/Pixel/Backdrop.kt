@@ -74,6 +74,12 @@ class BlurStyle(
     val tintAlpha: Float,
     /** Sube el negro del fondo borroso (0 a 255): da aspecto de cristal esmerilado aunque detrás todo sea oscuro. */
     val lift: Float = 0f,
+    /** Fuerza de la refracción (1 = normal). Se aplica con Liquid Glass activado en Android 13+. */
+    val refraction: Float = 1f,
+    /** true = refracta siempre (en Android 13+), aunque Liquid Glass esté apagado. */
+    val forceRefraction: Boolean = false,
+    /** Dispersión cromática de la lente: separación de rojo y azul en el borde. */
+    val dispersion: Float = 0.12f,
 ) {
     fun resolveTint(base: Color): Color = when (tintMode) {
         TintMode.Theme -> base.copy(alpha = (base.alpha * tintAlpha).coerceIn(0f, 1f))
@@ -90,7 +96,11 @@ val BlurStyles = listOf(
     BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f, 16f), // 4 Escarcha
     BlurStyle(R.string.blur_vivid, 20f, 2.30f, 1.00f, TintMode.Theme, 0.55f),   // 5 Vibrante
     BlurStyle(R.string.blur_smoke, 28f, 0.70f, 0.85f, TintMode.Dark, 0.55f),    // 6 Humo
-    BlurStyle(R.string.blur_acrylic, 14f, 1.30f, 1.15f, TintMode.Light, 0.30f, 34f), // 7 Acrílico: cristal esmerilado claro
+    // 7 Acrílico: cristal esmerilado claro con la refracción al máximo (lente gruesa y dispersión cromática fuerte).
+    BlurStyle(
+        R.string.blur_acrylic, 14f, 1.30f, 1.15f, TintMode.Light, 0.30f, 34f,
+        refraction = 2.6f, forceRefraction = true, dispersion = 0.34f,
+    ),
 )
 
 /** Índice (en [BlurStyles] + 1) del tipo oscuro que usa la barra estilo TikTok. */
@@ -106,7 +116,8 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
     state.level = level
     state.liquid = settings.liquidGlass
     // Con refracción real el fondo debe verse casi nítido: si está muy borroso no se nota la lente.
-    val refractive = settings.liquidGlass && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    val refractive = (settings.liquidGlass || BlurStyles.getOrNull(level - 1)?.forceRefraction == true) &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val baseRadius = (BlurStyles.getOrNull(level - 1)?.radiusDp ?: 14f).dp
     state.radius = with(density) { (if (refractive) baseRadius * 0.45f else baseRadius).toPx() }
     return state
@@ -173,6 +184,7 @@ uniform float2 size;
 uniform float radius;
 uniform float depth;
 uniform float rim;
+uniform float disp;
 
 float sdRoundRect(float2 p, float2 halfSize, float r) {
     float2 q = abs(p) - halfSize + float2(r);
@@ -199,8 +211,8 @@ half4 main(float2 coord) {
     float2 lo = float2(0.5);
     float2 hi = size - float2(0.5);
     half4 g = content.eval(clamp(coord + shift, lo, hi));
-    half red = content.eval(clamp(coord + shift * 1.12, lo, hi)).r;
-    half blue = content.eval(clamp(coord + shift * 0.88, lo, hi)).b;
+    half red = content.eval(clamp(coord + shift * (1.0 + disp), lo, hi)).r;
+    half blue = content.eval(clamp(coord + shift * (1.0 - disp), lo, hi)).b;
     return half4(red, g.g, blue, g.a);
 }
 """
@@ -212,22 +224,37 @@ class RefractionEffect {
     private var h = -1f
     private var r = -1f
     private var mr = -1f
+    private var appliedStrength = -1f
+    private var appliedDisp = -1f
     private var applied = false
 
     /** Aplica (o actualiza si cambió el tamaño) la lente a la capa del cristal. */
-    fun apply(layer: GraphicsLayer, width: Float, height: Float, radius: Float, maxRim: Float) {
-        if (applied && w == width && h == height && r == radius && mr == maxRim) return
+    fun apply(
+        layer: GraphicsLayer,
+        width: Float,
+        height: Float,
+        radius: Float,
+        maxRim: Float,
+        strength: Float = 1f,
+        dispersion: Float = 0.12f,
+    ) {
+        if (applied && w == width && h == height && r == radius && mr == maxRim && appliedStrength == strength && appliedDisp == dispersion) return
         // El grosor del borde que refracta tiene tope: una barra y un panel alto se ven igual.
-        val rim = minOf(minOf(width, height) * 0.42f, maxRim)
+        // Con fuerza > 1 la lente crece hasta ocupar la mitad del lado corto (refracción máxima).
+        val share = 0.42f + 0.08f * (strength - 1f).coerceIn(0f, 1f)
+        val rim = minOf(minOf(width, height) * share, maxRim * strength)
         shader.setFloatUniform("size", width, height)
         shader.setFloatUniform("radius", radius)
         shader.setFloatUniform("rim", rim)
-        shader.setFloatUniform("depth", rim * 0.85f)
+        shader.setFloatUniform("depth", rim * (0.85f * strength).coerceAtMost(2.4f))
+        shader.setFloatUniform("disp", dispersion)
         layer.renderEffect = RenderEffect.createRuntimeShaderEffect(shader, "content").asComposeRenderEffect()
         w = width
         h = height
         r = radius
         mr = maxRim
+        appliedStrength = strength
+        appliedDisp = dispersion
         applied = true
     }
 }
@@ -266,6 +293,10 @@ fun Modifier.glassSurface(
     corner: Dp,
     border: Boolean = true,
     extendBottom: Boolean = false,
+    /** Sin velo de color: solo desenfoque, refracción y brillos de borde (el fondo "desaparece"). */
+    clear: Boolean = false,
+    /** Fuerza la refracción aunque Liquid Glass esté apagado (Android 13+). */
+    refract: Boolean = false,
 ): Modifier {
     val blurOn = state != null && state.enabled
     var pos by remember { mutableStateOf(Offset.Zero) }
@@ -278,6 +309,8 @@ fun Modifier.glassSurface(
         .onGloballyPositioned { pos = it.positionInRoot() }
         .drawBehind {
             val liquid = state?.liquid == true
+            val style = state?.style
+            val strength = if (liquid || refract || style?.forceRefraction == true) (style?.refraction ?: 1f) else 0f
             val r = corner.toPx()
             val h = if (extendBottom) size.height + 48.dp.toPx() else size.height
             val path = Path().apply {
@@ -285,7 +318,7 @@ fun Modifier.glassSurface(
             }
             if (blurOn && state != null) {
                 clipPath(path) {
-                    if (liquid && refractor != null && !extendBottom && size.width > 1f && h > 1f) {
+                    if (strength > 0f && refractor != null && !extendBottom && size.width > 1f && h > 1f) {
                         refractLayer.record {
                             clipPath(path) {
                                 translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
@@ -293,7 +326,7 @@ fun Modifier.glassSurface(
                                 }
                             }
                         }
-                        refractor.apply(refractLayer, size.width, h, r, 24.dp.toPx())
+                        refractor.apply(refractLayer, size.width, h, r, 24.dp.toPx(), strength, style?.dispersion ?: 0.12f)
                         drawLayer(refractLayer)
                     } else {
                         translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
@@ -301,11 +334,13 @@ fun Modifier.glassSurface(
                         }
                     }
                     // Liquid Glass: el velo de color es la mitad de opaco, así se ve el fondo a través.
-                    val base = state?.style?.resolveTint(tint) ?: tint
-                    drawRect(
-                        if (liquid) base.copy(alpha = base.alpha * 0.5f) else base,
-                        size = androidx.compose.ui.geometry.Size(size.width, h),
-                    )
+                    if (!clear) {
+                        val base = state?.style?.resolveTint(tint) ?: tint
+                        drawRect(
+                            if (liquid) base.copy(alpha = base.alpha * 0.5f) else base,
+                            size = androidx.compose.ui.geometry.Size(size.width, h),
+                        )
+                    }
                 }
             } else {
                 drawPath(path, fallback)
@@ -314,13 +349,13 @@ fun Modifier.glassSurface(
             clipPath(path) {
                 drawRect(
                     brush = Brush.verticalGradient(
-                        listOf(Color.White.copy(alpha = if (liquid) 0.26f else 0.16f), Color.Transparent),
+                        listOf(Color.White.copy(alpha = if (clear) 0.07f else if (liquid) 0.26f else 0.16f), Color.Transparent),
                         startY = 0f,
                         endY = h * 0.55f,
                     ),
                     size = androidx.compose.ui.geometry.Size(size.width, h),
                 )
-                if (liquid) {
+                if (liquid && !clear) {
                     // Luz que sube desde el borde inferior, como en el cristal líquido.
                     drawRect(
                         brush = Brush.verticalGradient(

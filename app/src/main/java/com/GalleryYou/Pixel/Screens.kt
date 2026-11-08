@@ -1,5 +1,9 @@
 package com.GalleryYou.Pixel
 
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.animation.animateColorAsState
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -207,6 +211,98 @@ fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
                 },
             )
         }
+    }
+}
+
+/**
+ * Encabezado flotante de Fotos y Álbumes: una cápsula de cristal separada de los bordes que lleva el
+ * título y, en Fotos, los filtros como píldoras redondeadas con icono circular. El contenido pasa por
+ * detrás (desenfocado y refractado) en lugar de quedar cortado bajo una barra sólida.
+ */
+@Composable
+fun FloatingHeader(
+    title: String,
+    filter: Int?,
+    onFilter: (Int) -> Unit,
+    backdrop: BackdropState?,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val labels = listOf(
+        stringResource(R.string.filter_all),
+        stringResource(R.string.filter_photos),
+        stringResource(R.string.filter_videos),
+    )
+    val icons = listOf(AppIcons.Apps, AppIcons.Image, AppIcons.Video)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 6.dp),
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .glassSurface(
+                    state = backdrop,
+                    tint = scheme.surfaceContainerHigh.copy(alpha = 0.42f),
+                    fallback = scheme.surfaceContainerHigh.copy(alpha = 0.95f),
+                    corner = 30.dp,
+                )
+                .padding(start = 20.dp, end = 12.dp, top = 12.dp, bottom = if (filter != null) 12.dp else 14.dp),
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                color = scheme.onSurface,
+            )
+            if (filter != null) {
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    labels.forEachIndexed { index, label ->
+                        RoundFilterChip(label, icons[index], filter == index) { onFilter(index) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Filtro en píldora totalmente redonda; el icono vive dentro de un círculo (check si está activo). */
+@Composable
+private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean, onClick: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val bg by animateColorAsState(
+        if (selected) scheme.primaryContainer else Color.Transparent,
+        label = "chipBg",
+    )
+    val fg = if (selected) scheme.onPrimaryContainer else scheme.onSurfaceVariant
+    val source = remember { MutableInteractionSource() }
+    Row(
+        modifier = Modifier
+            .height(40.dp)
+            .clip(CircleShape)
+            .background(bg)
+            .border(1.dp, if (selected) Color.Transparent else scheme.outline.copy(alpha = 0.55f), CircleShape)
+            .clickable(interactionSource = source, indication = null, onClick = onClick)
+            .padding(start = 5.dp, end = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(30.dp)
+                .background(if (selected) scheme.primary else scheme.onSurface.copy(alpha = 0.08f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                if (selected) AppIcons.Check else icon,
+                contentDescription = null,
+                modifier = Modifier.size(17.dp),
+                tint = if (selected) scheme.onPrimary else fg,
+            )
+        }
+        Spacer(Modifier.width(7.dp))
+        Text(label, color = fg, style = MaterialTheme.typography.labelLarge, maxLines = 1)
     }
 }
 
