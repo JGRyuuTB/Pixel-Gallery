@@ -1,5 +1,11 @@
 # Registro de cambios
 
+## 1.3.0
+
+- Barra de navegación: dos estilos que se eligen en Ajustes > Apariencia, la clásica (icono y nombre en la píldora activa) y la apilada (icono sobre el nombre). Las dos son más compactas, muestran una insignia con los elementos de la papelera y se pueden recorrer arrastrando el dedo.
+- Liquid Glass: interruptor en Ajustes para activar o desactivar el cristal transparente, con el fondo más vivo y reflejos de luz en los bordes. En Android 13 o superior las barras refractan la luz de verdad (shader AGSL con dispersión cromática en el borde). Apagado vuelve al desenfoque clásico.
+- Interfaz más compacta: barras de navegación, filtros, encabezados de día y filas de Ajustes ocupan menos espacio.
+
 ## 1.2.0
 
 - Idiomas: la app está disponible en español, inglés, portugués, francés, alemán, italiano, ruso, japonés y chino simplificado.

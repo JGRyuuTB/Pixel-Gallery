@@ -192,7 +192,7 @@ fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
         stringResource(R.string.filter_videos),
     )
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         labels.forEachIndexed { index, label ->
@@ -342,7 +342,7 @@ fun MediaGrid(
                 Text(
                     dayLabel(first.value.dateMillis, todayText, yesterdayText),
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
                 )
             }
             items(group, key = { it.index }, contentType = { "thumb" }) { indexed ->

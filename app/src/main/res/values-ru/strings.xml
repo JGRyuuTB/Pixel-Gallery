@@ -201,4 +201,9 @@
         <item quantity="many">%d элементов в корзине</item>
         <item quantity="other">%d элемента в корзине</item>
     </plurals>
+    <string name="nav_style_title">Панель навигации</string>
+    <string name="nav_style_classic">Классическая</string>
+    <string name="nav_style_stacked">Вертикальная</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Прозрачное стекло с настоящим преломлением на Android 13+ и бликами по краям</string>
 </resources>

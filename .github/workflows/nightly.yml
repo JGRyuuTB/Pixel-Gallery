@@ -1,0 +1,83 @@
+name: Nightly
+
+# Compila la rama "nightly" cada noche (solo si hay cambios nuevos), en cada push a esa rama
+# o a mano. Publica el APK como pre-release con la etiqueta "nightly-latest".
+# Nota: las ejecuciones programadas usan el archivo que está en la rama principal,
+# por eso este workflow debe existir también en main y descarga la rama nightly.
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  push:
+    branches: [nightly]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+jobs:
+  nightly:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout (rama nightly)
+        uses: actions/checkout@v4
+        with:
+          ref: nightly
+          fetch-depth: 0
+
+      - name: Buscar cambios nuevos
+        id: changes
+        run: |
+          LAST=$(git rev-parse -q --verify "refs/tags/nightly-latest^{commit}" || true)
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$LAST" = "$(git rev-parse HEAD)" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Sin cambios desde la última nightly."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up JDK 17
+        if: steps.changes.outputs.skip != 'true'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        if: steps.changes.outputs.skip != 'true'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build nightly APK
+        if: steps.changes.outputs.skip != 'true'
+        run: gradle assembleNightly -PnightlyBuild=${{ github.run_number }} --no-daemon --stacktrace
+
+      - name: Rename APK
+        if: steps.changes.outputs.skip != 'true'
+        run: cp app/build/outputs/apk/nightly/app-nightly.apk Pixel-Gallery-You-Nightly.apk
+
+      - name: Upload APK artifact
+        if: steps.changes.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pixel-Gallery-You-Nightly-apk
+          path: Pixel-Gallery-You-Nightly.apk
+
+      - name: Publish pre-release nightly-latest
+        if: steps.changes.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -m1 'versionName = ' app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          NAME="${VERSION}-nightly.${{ github.run_number }}"
+          git log --pretty='- %s' -n 20 > notes.md
+          gh release delete nightly-latest --cleanup-tag -y || true
+          gh release create nightly-latest Pixel-Gallery-You-Nightly.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "$NAME" \
+            --notes-file notes.md

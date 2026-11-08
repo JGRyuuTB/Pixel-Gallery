@@ -58,6 +58,24 @@ class AppSettings(context: Context) {
         prefs.edit().putInt("blur", value).apply()
     }
 
+    /** 0 = clásica (icono y nombre dentro de la píldora activa), 1 = apilada (icono sobre el nombre). */
+    var navStyle by mutableIntStateOf(prefs.getInt("navStyle", 1).coerceIn(0, 1))
+        private set
+
+    fun updateNavStyle(value: Int) {
+        navStyle = value.coerceIn(0, 1)
+        prefs.edit().putInt("navStyle", navStyle).apply()
+    }
+
+    /** Liquid Glass: cristal transparente con reflejos en los bordes. Apagado = desenfoque clásico. */
+    var liquidGlass by mutableStateOf(prefs.getBoolean("liquidGlass", true))
+        private set
+
+    fun updateLiquidGlass(value: Boolean) {
+        liquidGlass = value
+        prefs.edit().putBoolean("liquidGlass", value).apply()
+    }
+
     var autoUpdate by mutableStateOf(prefs.getBoolean("autoUpdate", true))
         private set
 

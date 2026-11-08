@@ -169,6 +169,21 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     onSelect = { if (canBlur) settings.updateBlur(it) },
                 )
                 SwitchRow(
+                    title = stringResource(R.string.settings_liquid_glass),
+                    subtitle = stringResource(R.string.settings_liquid_glass_desc),
+                    checked = settings.liquidGlass,
+                    onChange = { settings.updateLiquidGlass(it) },
+                )
+                ChoiceRow(
+                    title = stringResource(R.string.nav_style_title),
+                    options = listOf(
+                        stringResource(R.string.nav_style_classic),
+                        stringResource(R.string.nav_style_stacked),
+                    ),
+                    selected = settings.navStyle,
+                    onSelect = { settings.updateNavStyle(it) },
+                )
+                SwitchRow(
                     title = stringResource(R.string.settings_animations),
                     subtitle = stringResource(R.string.settings_animations_desc),
                     checked = settings.animations,
@@ -313,7 +328,7 @@ private fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> 
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
         ) {
-            Column(modifier = Modifier.padding(vertical = 8.dp), content = content)
+            Column(modifier = Modifier.padding(vertical = 4.dp), content = content)
         }
     }
 }
@@ -346,7 +361,7 @@ private fun ChoiceRow(
     subtitle: String? = null,
     onSelect: (Int) -> Unit,
 ) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
         Text(title, style = MaterialTheme.typography.bodyLarge)
         if (subtitle != null) {
             Text(
@@ -355,7 +370,7 @@ private fun ChoiceRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(

@@ -193,4 +193,9 @@
         <item quantity="one">Movido para a lixeira</item>
         <item quantity="other">%d itens na lixeira</item>
     </plurals>
+    <string name="nav_style_title">Barra de navegação</string>
+    <string name="nav_style_classic">Clássica</string>
+    <string name="nav_style_stacked">Empilhada</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Vidro transparente com refração real no Android 13+ e reflexos nas bordas</string>
 </resources>

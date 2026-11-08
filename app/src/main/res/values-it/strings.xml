@@ -193,4 +193,9 @@
         <item quantity="one">Spostato nel cestino</item>
         <item quantity="other">%d elementi nel cestino</item>
     </plurals>
+    <string name="nav_style_title">Barra di navigazione</string>
+    <string name="nav_style_classic">Classica</string>
+    <string name="nav_style_stacked">Impilata</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Vetro trasparente con rifrazione reale su Android 13+ e riflessi sui bordi</string>
 </resources>

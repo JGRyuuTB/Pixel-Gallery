@@ -193,4 +193,9 @@
         <item quantity="one">Moved to trash</item>
         <item quantity="other">%d items in the trash</item>
     </plurals>
+    <string name="nav_style_title">Navigation bar</string>
+    <string name="nav_style_classic">Classic</string>
+    <string name="nav_style_stacked">Stacked</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Clear glass with real refraction on Android 13+ and edge highlights</string>
 </resources>

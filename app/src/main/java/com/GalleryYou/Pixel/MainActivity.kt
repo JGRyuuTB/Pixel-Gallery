@@ -498,13 +498,15 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                             Modifier
                                 .fillMaxWidth()
                                 .navigationBarsPadding()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
                         ) {
                             GlassNavBar(
                                 items = GalleryNavItems,
                                 selected = tab,
                                 animations = settings.animations,
                                 backdrop = backdrop,
+                                style = settings.navStyle,
+                                badges = if (trash.isNotEmpty()) mapOf(2 to trash.size) else emptyMap(),
                                 onSelect = {
                                     selected = emptySet()
                                     tab = it

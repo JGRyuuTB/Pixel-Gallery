@@ -189,4 +189,9 @@
     <plurals name="toast_trashed">
         <item quantity="other">%d 件をゴミ箱に移動しました</item>
     </plurals>
+    <string name="nav_style_title">ナビゲーションバー</string>
+    <string name="nav_style_classic">クラシック</string>
+    <string name="nav_style_stacked">縦並び</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Android 13以降で本物の屈折、縁にハイライトが入る透明ガラス</string>
 </resources>

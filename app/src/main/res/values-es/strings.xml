@@ -193,4 +193,9 @@
         <item quantity="one">Movido a la papelera</item>
         <item quantity="other">%d elementos en la papelera</item>
     </plurals>
+    <string name="nav_style_title">Barra de navegación</string>
+    <string name="nav_style_classic">Clásica</string>
+    <string name="nav_style_stacked">Apilada</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Cristal transparente con refracción real en Android 13+ y reflejos en los bordes</string>
 </resources>

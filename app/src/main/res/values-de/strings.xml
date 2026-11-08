@@ -193,4 +193,9 @@
         <item quantity="one">In den Papierkorb verschoben</item>
         <item quantity="other">%d Elemente im Papierkorb</item>
     </plurals>
+    <string name="nav_style_title">Navigationsleiste</string>
+    <string name="nav_style_classic">Klassisch</string>
+    <string name="nav_style_stacked">Gestapelt</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Klares Glas mit echter Lichtbrechung ab Android 13 und Lichtkanten</string>
 </resources>

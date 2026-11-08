@@ -189,4 +189,9 @@
     <plurals name="toast_trashed">
         <item quantity="other">已将 %d 项移到回收站</item>
     </plurals>
+    <string name="nav_style_title">导航栏</string>
+    <string name="nav_style_classic">经典</string>
+    <string name="nav_style_stacked">上下排列</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Android 13+ 上带真实折射和边缘高光的通透玻璃</string>
 </resources>

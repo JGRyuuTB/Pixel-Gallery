@@ -193,4 +193,9 @@
         <item quantity="one">Mis à la corbeille</item>
         <item quantity="other">%d éléments dans la corbeille</item>
     </plurals>
+    <string name="nav_style_title">Barre de navigation</string>
+    <string name="nav_style_classic">Classique</string>
+    <string name="nav_style_stacked">Empilée</string>
+    <string name="settings_liquid_glass">Liquid Glass</string>
+    <string name="settings_liquid_glass_desc">Verre transparent avec réfraction réelle sur Android 13+ et reflets sur les bords</string>
 </resources>
