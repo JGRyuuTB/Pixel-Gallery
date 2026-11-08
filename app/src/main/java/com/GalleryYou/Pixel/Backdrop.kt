@@ -72,6 +72,8 @@ class BlurStyle(
     val brightness: Float,
     val tintMode: TintMode,
     val tintAlpha: Float,
+    /** Sube el negro del fondo borroso (0 a 255): da aspecto de cristal esmerilado aunque detrás todo sea oscuro. */
+    val lift: Float = 0f,
 ) {
     fun resolveTint(base: Color): Color = when (tintMode) {
         TintMode.Theme -> base.copy(alpha = (base.alpha * tintAlpha).coerceIn(0f, 1f))
@@ -85,10 +87,10 @@ val BlurStyles = listOf(
     BlurStyle(R.string.blur_soft, 14f, 1.45f, 1.00f, TintMode.Theme, 1.0f),     // 1 Suave
     BlurStyle(R.string.blur_strong, 30f, 1.45f, 1.00f, TintMode.Theme, 1.0f),   // 2 Fuerte
     BlurStyle(R.string.blur_dark, 22f, 1.75f, 1.05f, TintMode.Dark, 0.46f),     // 3 Oscuro (como la barra de TikTok)
-    BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f), // 4 Escarcha
+    BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f, 16f), // 4 Escarcha
     BlurStyle(R.string.blur_vivid, 20f, 2.30f, 1.00f, TintMode.Theme, 0.55f),   // 5 Vibrante
     BlurStyle(R.string.blur_smoke, 28f, 0.70f, 0.85f, TintMode.Dark, 0.55f),    // 6 Humo
-    BlurStyle(R.string.blur_acrylic, 10f, 1.20f, 1.15f, TintMode.Theme, 0.80f), // 7 Acrílico
+    BlurStyle(R.string.blur_acrylic, 14f, 1.30f, 1.15f, TintMode.Light, 0.30f, 34f), // 7 Acrílico: cristal esmerilado claro
 )
 
 /** Índice (en [BlurStyles] + 1) del tipo oscuro que usa la barra estilo TikTok. */
@@ -142,8 +144,13 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
                 val st = state.style
                 val sat = st?.saturation ?: 1.45f
                 val gain = st?.brightness ?: 1f
+                val lift = st?.lift ?: 0f
                 state.blurred.colorFilter = ColorFilter.colorMatrix(
-                    if (state.liquid) saturationLift(sat * 1.24f, gain * 1.07f, 8f) else saturationLift(sat, gain, 0f),
+                    if (state.liquid) {
+                        saturationLift(sat * 1.24f, gain * 1.07f, 8f + lift)
+                    } else {
+                        saturationLift(sat, gain, lift)
+                    },
                 )
                 state.appliedRadius = state.radius
                 state.appliedLiquid = state.liquid

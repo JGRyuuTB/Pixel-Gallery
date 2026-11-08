@@ -542,7 +542,7 @@ private fun VideoStage(
         label = "stageTop",
     )
     val bottomPad by animateDpAsState(
-        targetValue = if (chrome) navBottom + (if (settings.playerFloating) 132.dp else 116.dp) else 24.dp,
+        targetValue = if (chrome) navBottom + (if (settings.playerFloating) 138.dp else 122.dp) else 24.dp,
         animationSpec = motion(settings.animations),
         label = "stageBottom",
     )
@@ -841,7 +841,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                 Column(
                     Modifier
                         .then(if (floating) Modifier else Modifier.navigationBarsPadding())
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                        .padding(horizontal = 14.dp, vertical = 6.dp),
                 ) {
                     // Tiempo, barra y duración en una sola fila: ocupa menos alto.
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

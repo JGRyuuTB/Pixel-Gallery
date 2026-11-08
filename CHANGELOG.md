@@ -1,5 +1,10 @@
 # Registro de cambios
 
+## 1.4.3
+
+- Desenfoque Acrílico: ahora es un cristal esmerilado claro que se ve también sobre fondos oscuros (Ajustes, reproductor), no solo sobre fotos. Escarcha recibe un toque más suave del mismo efecto.
+- El panel del reproductor usa el mismo cristal acrílico que la barra de navegación y tiene un poco más de aire entre filas.
+
 ## 1.4.2
 
 - Barras de navegación más compactas, y todas se pueden arrastrar con el dedo para cambiar de pestaña.

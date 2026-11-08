@@ -107,7 +107,7 @@ You can also follow new versions on the Telegram channel: [Dragon's Bastion](htt
 The project is built automatically with GitHub Actions (`.github/workflows/build-apk.yml`):
 
 1. Push to `main` and download the `Pixel-Gallery-You-apk` artifact from the **Actions** tab.
-2. To publish a release, create a `v1.4.2` tag and push it: the APK is attached to the Release (with the notes from `CHANGELOG.md`), and installed apps will offer it as an update.
+2. To publish a release, create a `v1.4.3` tag and push it: the APK is attached to the Release (with the notes from `CHANGELOG.md`), and installed apps will offer it as an update.
 
 Locally:
 
