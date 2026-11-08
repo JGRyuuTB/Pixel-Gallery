@@ -96,10 +96,11 @@ val BlurStyles = listOf(
     BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f, 16f), // 4 Escarcha
     BlurStyle(R.string.blur_vivid, 20f, 2.30f, 1.00f, TintMode.Theme, 0.55f),   // 5 Vibrante
     BlurStyle(R.string.blur_smoke, 28f, 0.70f, 0.85f, TintMode.Dark, 0.55f),    // 6 Humo
-    // 7 Acrílico: cristal esmerilado claro con la refracción al máximo (lente gruesa y dispersión cromática fuerte).
+    // 7 Acrílico: cristal esmerilado claro. Refracta con una lente moderada y casi sin dispersión cromática
+    // (sin arcoíris), con poco desenfoque y poco velo para que se siga viendo lo que hay detrás.
     BlurStyle(
-        R.string.blur_acrylic, 14f, 1.30f, 1.15f, TintMode.Light, 0.30f, 34f,
-        refraction = 2.6f, forceRefraction = true, dispersion = 0.34f,
+        R.string.blur_acrylic, 10f, 1.20f, 1.08f, TintMode.Light, 0.22f, 18f,
+        refraction = 1.5f, forceRefraction = true, dispersion = 0.04f,
     ),
 )
 
@@ -241,12 +242,12 @@ class RefractionEffect {
         if (applied && w == width && h == height && r == radius && mr == maxRim && appliedStrength == strength && appliedDisp == dispersion) return
         // El grosor del borde que refracta tiene tope: una barra y un panel alto se ven igual.
         // Con fuerza > 1 la lente crece hasta ocupar la mitad del lado corto (refracción máxima).
-        val share = 0.42f + 0.08f * (strength - 1f).coerceIn(0f, 1f)
+        val share = 0.42f + 0.04f * (strength - 1f).coerceIn(0f, 1f)
         val rim = minOf(minOf(width, height) * share, maxRim * strength)
         shader.setFloatUniform("size", width, height)
         shader.setFloatUniform("radius", radius)
         shader.setFloatUniform("rim", rim)
-        shader.setFloatUniform("depth", rim * (0.85f * strength).coerceAtMost(2.4f))
+        shader.setFloatUniform("depth", rim * (0.85f * strength).coerceAtMost(1.4f))
         shader.setFloatUniform("disp", dispersion)
         layer.renderEffect = RenderEffect.createRuntimeShaderEffect(shader, "content").asComposeRenderEffect()
         w = width
@@ -297,6 +298,8 @@ fun Modifier.glassSurface(
     clear: Boolean = false,
     /** Fuerza la refracción aunque Liquid Glass esté apagado (Android 13+). */
     refract: Boolean = false,
+    /** Velo blanco extra (0..1) para dar aspecto esmerilado sobre fondos oscuros. */
+    frost: Float = 0f,
 ): Modifier {
     val blurOn = state != null && state.enabled
     var pos by remember { mutableStateOf(Offset.Zero) }
@@ -334,6 +337,9 @@ fun Modifier.glassSurface(
                         }
                     }
                     // Liquid Glass: el velo de color es la mitad de opaco, así se ve el fondo a través.
+                    if (frost > 0f) {
+                        drawRect(Color.White.copy(alpha = frost), size = androidx.compose.ui.geometry.Size(size.width, h))
+                    }
                     if (!clear) {
                         val base = state?.style?.resolveTint(tint) ?: tint
                         drawRect(

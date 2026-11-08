@@ -262,10 +262,10 @@ fun ViewerScreen(
                                         scaleX = 1.35f
                                         scaleY = 1.35f
                                     }
-                                    .blur(44.dp, BlurredEdgeTreatment.Unbounded),
+                                    .blur(if (backdrop.style?.forceRefraction == true) 26.dp else 44.dp, BlurredEdgeTreatment.Unbounded),
                             )
                         }
-                        Box(Modifier.fillMaxSize().background(colors.surface.copy(alpha = 0.50f)))
+                        Box(Modifier.fillMaxSize().background(colors.surface.copy(alpha = if (backdrop.style?.forceRefraction == true) 0.18f else 0.50f)))
                     }
                 }
                 HorizontalPager(
@@ -475,6 +475,7 @@ private fun PlayerFrame(
     width: Dp,
     height: Dp,
     scale: Float,
+    corner: Dp,
     content: @Composable () -> Unit,
 ) {
     Box(
@@ -485,7 +486,7 @@ private fun PlayerFrame(
                 alpha = ((scale - 0.85f) / 0.15f).coerceIn(0f, 1f)
             }
             .size(width, height)
-            .clip(RectangleShape),
+            .clip(RoundedCornerShape(corner)),
     ) {
         content()
     }
@@ -558,16 +559,18 @@ private fun VideoStage(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        if (maxWidth.value > 0f && maxHeight.value > 0f && aspect > 0f) {
-            val boxAspect = maxWidth.value / maxHeight.value
+        // Al ajustar, un pequeño margen lateral deja ver las esquinas redondeadas del video.
+        val availW = if (fill) maxWidth else maxWidth - 24.dp
+        if (availW.value > 0f && maxHeight.value > 0f && aspect > 0f) {
+            val boxAspect = availW.value / maxHeight.value
             val w: Dp
             val h: Dp
             if (fill) {
                 w = maxWidth
                 h = maxHeight
             } else if (aspect >= boxAspect) {
-                w = maxWidth
-                h = maxWidth / aspect
+                w = availW
+                h = availW / aspect
             } else {
                 h = maxHeight
                 w = maxHeight * aspect
@@ -576,6 +579,7 @@ private fun VideoStage(
                 width = w,
                 height = h,
                 scale = appear,
+                corner = if (fill) 0.dp else 28.dp,
                 content = content,
             )
         }
@@ -843,6 +847,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         corner = 28.dp,
                         border = floating && settings.playerBorder == 0,
                         extendBottom = !floating,
+                        frost = if (ambientGlass?.style?.forceRefraction == true) 0.16f else 0f,
                     )
                     .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, 28.dp, floating),
             ) {
