@@ -193,4 +193,9 @@
         <item quantity="one">Mis à la corbeille</item>
         <item quantity="other">%d éléments dans la corbeille</item>
     </plurals>
+    <string name="blur_medium">Moyen</string>
+    <string name="blur_crystal">Cristal</string>
+    <string name="blur_frost">Givre</string>
+    <string name="cd_loop">Boucle</string>
+    <string name="player_hold_speed">Maintenez pour 2x</string>
 </resources>

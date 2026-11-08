@@ -189,4 +189,9 @@
     <plurals name="toast_trashed">
         <item quantity="other">%d 件をゴミ箱に移動しました</item>
     </plurals>
+    <string name="blur_medium">中</string>
+    <string name="blur_crystal">クリスタル</string>
+    <string name="blur_frost">フロスト</string>
+    <string name="cd_loop">リピート</string>
+    <string name="player_hold_speed">長押しで2倍速</string>
 </resources>

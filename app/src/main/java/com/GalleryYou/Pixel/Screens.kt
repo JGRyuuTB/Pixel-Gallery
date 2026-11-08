@@ -1,6 +1,8 @@
 package com.GalleryYou.Pixel
 
 import android.net.Uri
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import android.os.Build
 import android.provider.MediaStore
 import androidx.compose.animation.AnimatedVisibility
@@ -184,8 +186,14 @@ fun EmptyState(padding: PaddingValues, text: String? = null) {
 
 // ------------------------------------------------------------------ Filtros y barra de selección
 
+/**
+ * Filtros Todo / Fotos / Videos como grupo de botones: el seleccionado se vuelve una píldora
+ * y los demás quedan con esquinas suaves (la forma cambia con un resorte, como en Material 3 Expressive).
+ */
 @Composable
 fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val haptic = LocalHapticFeedback.current
     val labels = listOf(
         stringResource(R.string.filter_all),
         stringResource(R.string.filter_photos),
@@ -193,19 +201,46 @@ fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
     )
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         labels.forEachIndexed { index, label ->
-            FilterChip(
-                selected = selected == index,
-                onClick = { onSelect(index) },
-                label = { Text(label) },
-                leadingIcon = if (selected == index) {
-                    { Icon(AppIcons.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                } else {
-                    null
-                },
+            val isSelected = selected == index
+            val corner by animateDpAsState(
+                targetValue = if (isSelected) 20.dp else 8.dp,
+                animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium),
+                label = "filterCorner",
             )
+            val bg by animateColorAsState(
+                targetValue = if (isSelected) scheme.secondaryContainer else scheme.surfaceContainerHigh,
+                label = "filterBg",
+            )
+            Row(
+                modifier = Modifier
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(corner))
+                    .background(bg)
+                    .clickable {
+                        if (!isSelected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onSelect(index)
+                    }
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AnimatedVisibility(visible = isSelected) {
+                    Icon(
+                        AppIcons.Check,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp).size(18.dp),
+                        tint = scheme.onSecondaryContainer,
+                    )
+                }
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isSelected) scheme.onSecondaryContainer else scheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -290,6 +325,7 @@ fun MediaGrid(
     header: (@Composable () -> Unit)?,
     onClick: (MediaFile, Int) -> Unit,
     onLongClick: (MediaFile) -> Unit,
+    onToggleGroup: ((List<MediaFile>) -> Unit)? = null,
 ) {
     val groups = remember(items) {
         items.withIndex().groupBy { dayKey(it.value.dateMillis) }.values.toList()
@@ -339,11 +375,43 @@ fun MediaGrid(
         groups.forEach { group ->
             val first = group.first()
             item(span = { GridItemSpan(maxLineSpan) }, key = "day-${first.index}", contentType = "day") {
-                Text(
-                    dayLabel(first.value.dateMillis, todayText, yesterdayText),
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
-                )
+                val groupItems = group.map { it.value }
+                val allSelected = selectionMode && groupItems.all { it.uri in selected }
+                val scheme = MaterialTheme.colorScheme
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 14.dp, top = 16.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        dayLabel(first.value.dateMillis, todayText, yesterdayText),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (selectionMode && onToggleGroup != null) {
+                        // Círculo para marcar o desmarcar todo el día de una vez.
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(if (allSelected) scheme.primary else Color.Transparent)
+                                .border(2.dp, if (allSelected) scheme.primary else scheme.outline, CircleShape)
+                                .clickable { onToggleGroup(groupItems) },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (allSelected) {
+                                Icon(AppIcons.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = scheme.onPrimary)
+                            }
+                        }
+                    } else {
+                        Text(
+                            group.size.toString(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = scheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
             items(group, key = { it.index }, contentType = { "thumb" }) { indexed ->
                 Thumb(

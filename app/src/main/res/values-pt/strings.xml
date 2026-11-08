@@ -193,4 +193,9 @@
         <item quantity="one">Movido para a lixeira</item>
         <item quantity="other">%d itens na lixeira</item>
     </plurals>
+    <string name="blur_medium">Média</string>
+    <string name="blur_crystal">Cristal</string>
+    <string name="blur_frost">Gelo</string>
+    <string name="cd_loop">Repetir</string>
+    <string name="player_hold_speed">Segure para 2x</string>
 </resources>

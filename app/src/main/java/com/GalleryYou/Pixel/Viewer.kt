@@ -1,6 +1,14 @@
 package com.GalleryYou.Pixel
 
 import android.content.Context
+import android.media.AudioManager
+import android.provider.Settings
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.material3.LinearProgressIndicator
 import android.content.Intent
 import android.view.LayoutInflater
 import androidx.compose.animation.AnimatedContent
@@ -656,6 +664,68 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
     var flashDir by remember { mutableIntStateOf(0) }
     var lastDir by remember { mutableIntStateOf(1) }
     var flashTick by remember { mutableIntStateOf(0) }
+    var loop by remember { mutableStateOf(false) }
+    var holdBoost by remember { mutableStateOf(false) }
+    // Indicador de brillo/volumen: 0 = ninguno, 1 = brillo, 2 = volumen.
+    var hudKind by remember { mutableIntStateOf(0) }
+    var hudValue by remember { mutableFloatStateOf(0f) }
+    var hudTick by remember { mutableIntStateOf(0) }
+    val haptic = LocalHapticFeedback.current
+    val activity = remember { context.findActivity() }
+    val audio = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+    val maxVolume = remember { audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1) }
+    val originalBrightness = remember { activity?.window?.attributes?.screenBrightness ?: -1f }
+    var brightness by remember {
+        mutableFloatStateOf(
+            if (originalBrightness >= 0f) {
+                originalBrightness
+            } else {
+                try {
+                    Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS) / 255f
+                } catch (e: Exception) {
+                    0.5f
+                }
+            },
+        )
+    }
+
+    fun adjustSide(side: Int, delta: Float) {
+        if (side < 0) {
+            brightness = (brightness + delta).coerceIn(0.02f, 1f)
+            activity?.window?.let { w ->
+                val lp = w.attributes
+                lp.screenBrightness = brightness
+                w.attributes = lp
+            }
+            hudKind = 1
+            hudValue = brightness
+        } else {
+            val cur = audio.getStreamVolume(AudioManager.STREAM_MUSIC) / maxVolume.toFloat()
+            val target = (cur + delta).coerceIn(0f, 1f)
+            audio.setStreamVolume(AudioManager.STREAM_MUSIC, (target * maxVolume).roundToInt(), 0)
+            hudKind = 2
+            hudValue = target
+        }
+        hudTick++
+    }
+
+    // El brillo vuelve al del sistema al salir del video.
+    DisposableEffect(activity) {
+        onDispose {
+            activity?.window?.let { w ->
+                val lp = w.attributes
+                lp.screenBrightness = originalBrightness
+                w.attributes = lp
+            }
+        }
+    }
+
+    LaunchedEffect(hudTick) {
+        if (hudKind != 0) {
+            delay(900)
+            hudKind = 0
+        }
+    }
 
     DisposableEffect(exo) {
         val listener = object : Player.Listener {
@@ -742,12 +812,26 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
         }
 
         // Toque simple: mostrar/ocultar controles. Doble toque: ±10 s en los lados, pausa en el centro.
+        // Mantener pulsado: velocidad 2x mientras no se suelta. Deslizar en vertical por el borde
+        // izquierdo ajusta el brillo y por el derecho el volumen (el centro sigue cerrando el visor).
         Box(
             Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { onTap() },
+                        onLongPress = {
+                            holdBoost = true
+                            exo.setPlaybackSpeed(2f)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        onPress = {
+                            tryAwaitRelease()
+                            if (holdBoost) {
+                                holdBoost = false
+                                exo.setPlaybackSpeed(speed)
+                            }
+                        },
                         onDoubleTap = { pos ->
                             val w = size.width
                             when {
@@ -769,8 +853,88 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                             }
                         },
                     )
+                }
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val side = when {
+                            down.position.x < size.width * 0.22f -> -1
+                            down.position.x > size.width * 0.78f -> 1
+                            else -> 0
+                        }
+                        if (side == 0) return@awaitEachGesture
+                        var totalY = 0f
+                        var totalX = 0f
+                        var accepted = false
+                        val slop = viewConfiguration.touchSlop
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if (!change.pressed) break
+                            val move = change.positionChange()
+                            if (!accepted) {
+                                totalY += move.y
+                                totalX += move.x
+                                if (abs(totalY) > slop && abs(totalY) > abs(totalX)) accepted = true
+                            } else {
+                                change.consume()
+                                // Un deslizamiento por toda la altura cambia el 100 %.
+                                adjustSide(side, -move.y / size.height * 1.2f)
+                            }
+                        }
+                    }
                 },
         )
+
+        // Indicador de brillo / volumen.
+        AnimatedVisibility(
+            visible = hudKind != 0,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 96.dp),
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut(),
+        ) {
+            Row(
+                Modifier
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    if (hudKind == 1) AppIcons.Brightness else if (hudValue <= 0f) AppIcons.VolumeOff else AppIcons.VolumeUp,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = Color.White,
+                )
+                Spacer(Modifier.width(10.dp))
+                LinearProgressIndicator(
+                    progress = { hudValue },
+                    modifier = Modifier.width(110.dp),
+                    color = Color.White,
+                    trackColor = Color.White.copy(alpha = 0.3f),
+                )
+                Spacer(Modifier.width(10.dp))
+                Text("${(hudValue * 100).roundToInt()}%", color = Color.White, style = MaterialTheme.typography.labelLarge)
+            }
+        }
+
+        // Indicador de velocidad 2x mientras se mantiene pulsado.
+        AnimatedVisibility(
+            visible = holdBoost,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 96.dp),
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut(),
+        ) {
+            Row(
+                Modifier
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(22.dp), tint = Color.White)
+                Spacer(Modifier.width(8.dp))
+                Text("2x", color = Color.White, style = MaterialTheme.typography.labelLarge)
+            }
+        }
 
         AnimatedVisibility(
             visible = flashDir != 0,
@@ -863,7 +1027,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                                 Text(speedLabel(speed))
                             }
                             DropdownMenu(expanded = speedMenu, onDismissRequest = { speedMenu = false }) {
-                                listOf(0.5f, 1f, 1.5f, 2f).forEach { s ->
+                                listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f, 3f).forEach { s ->
                                     DropdownMenuItem(
                                         text = { Text(speedLabel(s)) },
                                         onClick = {
@@ -891,17 +1055,33 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                             }
                         }
 
-                        IconButton(
+                        Row(
                             modifier = Modifier.align(Alignment.CenterEnd),
-                            onClick = {
-                                muted = !muted
-                                exo.volume = if (muted) 0f else 1f
-                            },
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
-                                contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
-                            )
+                            IconButton(
+                                onClick = {
+                                    loop = !loop
+                                    exo.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+                                },
+                            ) {
+                                Icon(
+                                    AppIcons.Loop,
+                                    contentDescription = stringResource(R.string.cd_loop),
+                                    tint = if (loop) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    muted = !muted
+                                    exo.volume = if (muted) 0f else 1f
+                                },
+                            ) {
+                                Icon(
+                                    if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
+                                    contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
+                                )
+                            }
                         }
                     }
                 }

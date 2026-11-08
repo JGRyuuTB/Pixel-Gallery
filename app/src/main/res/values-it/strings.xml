@@ -193,4 +193,9 @@
         <item quantity="one">Spostato nel cestino</item>
         <item quantity="other">%d elementi nel cestino</item>
     </plurals>
+    <string name="blur_medium">Media</string>
+    <string name="blur_crystal">Cristallo</string>
+    <string name="blur_frost">Brina</string>
+    <string name="cd_loop">Ripeti</string>
+    <string name="player_hold_speed">Tieni premuto per 2x</string>
 </resources>

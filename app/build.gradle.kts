@@ -12,8 +12,11 @@ android {
         applicationId = "com.GalleryYou.Pixel"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.2.0"
+        versionCode = 12
+        versionName = "1.3.0"
+        buildConfigField("boolean", "NIGHTLY", "false")
+        // Nombre visible de la app; la variante nightly lo cambia para poder distinguirla.
+        manifestPlaceholders["appLabel"] = "@string/app_name"
     }
 
     // Clave fija incluida en el repo: así cada versión nueva se instala encima de la anterior
@@ -32,6 +35,17 @@ android {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("galeria")
         }
+        // Variante Nightly: se instala junto a la estable (otro applicationId), con otro nombre,
+        // y se compila cada noche desde la rama "nightly".
+        create("nightly") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".nightly"
+            versionNameSuffix = "-nightly.${project.findProperty("nightlyBuild") ?: "0"}"
+            signingConfig = signingConfigs.getByName("galeria")
+            matchingFallbacks += listOf("release")
+            buildConfigField("boolean", "NIGHTLY", "true")
+            manifestPlaceholders["appLabel"] = "Pixel Gallery Nightly"
+        }
     }
 
     compileOptions {
@@ -43,10 +57,20 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     lint {
         abortOnError = false
         checkReleaseBuilds = false
+    }
+}
+
+// Cada compilación nightly sube el versionCode (1_000_000 + número de ejecución del workflow),
+// así se instala encima de la anterior sin desinstalar.
+androidComponents {
+    onVariants(selector().withBuildType("nightly")) { variant ->
+        val build = (project.findProperty("nightlyBuild") as String?)?.toIntOrNull() ?: 0
+        variant.outputs.forEach { it.versionCode.set(1_000_000 + build) }
     }
 }
 

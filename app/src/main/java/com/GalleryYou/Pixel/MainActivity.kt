@@ -505,6 +505,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                 selected = tab,
                                 animations = settings.animations,
                                 backdrop = backdrop,
+                                badges = if (trash.isNotEmpty()) mapOf(2 to trash.size) else emptyMap(),
                                 onSelect = {
                                     selected = emptySet()
                                     tab = it
@@ -550,6 +551,10 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                         if (selected.isNotEmpty()) toggle(m) else open(filtered, index)
                                     },
                                     onLongClick = { m -> toggle(m) },
+                                    onToggleGroup = { list ->
+                                        val uris = list.map { it.uri }
+                                        selected = if (uris.all { it in selected }) selected - uris.toSet() else selected + uris
+                                    },
                                 )
                             }
 

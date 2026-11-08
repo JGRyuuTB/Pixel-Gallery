@@ -162,6 +162,12 @@ Contributions are welcome!
 
 ---
 
+## 🌙 Nightly builds
+
+Want the newest features before the stable release? The `nightly` branch builds a separate app, **Pixel Gallery Nightly**, that installs alongside the stable one. Download it from the `nightly-latest` pre-release in [Releases](../../releases). See [NIGHTLY.md](NIGHTLY.md).
+
+---
+
 ## 📝 Changelog
 
 See the [CHANGELOG](CHANGELOG.md) for what's new in each version.

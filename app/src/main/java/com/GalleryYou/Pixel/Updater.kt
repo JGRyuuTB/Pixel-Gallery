@@ -114,7 +114,9 @@ class Updater(context: Context) {
         if (manual) dialogVisible = true
         withContext(Dispatchers.IO) {
             try {
-                val url = "https://api.github.com/repos/${UpdateConfig.OWNER}/${UpdateConfig.REPO}/releases/latest"
+                // Nightly: busca la pre-release "nightly-latest"; la estable, la última release.
+                val releasePath = if (BuildConfig.NIGHTLY) "tags/nightly-latest" else "latest"
+                val url = "https://api.github.com/repos/${UpdateConfig.OWNER}/${UpdateConfig.REPO}/releases/$releasePath"
                 val conn = openConnection(url).apply {
                     connectTimeout = 10_000
                     readTimeout = 10_000
@@ -128,8 +130,17 @@ class Updater(context: Context) {
                 }
                 if (conn.responseCode != 200) throw IllegalStateException("HTTP ${conn.responseCode}")
                 val json = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
-                val remote = json.getString("tag_name").trim().trimStart('v', 'V')
-                if (!isNewer(remote, currentVersion)) {
+                val remote = if (BuildConfig.NIGHTLY) {
+                    json.optString("name", "").trim()
+                } else {
+                    json.getString("tag_name").trim().trimStart('v', 'V')
+                }
+                val newer = if (BuildConfig.NIGHTLY) {
+                    nightlyBuild(remote) > nightlyBuild(currentVersion)
+                } else {
+                    isNewer(remote, currentVersion)
+                }
+                if (!newer) {
                     state = UpdateState.UpToDate
                     return@withContext
                 }
@@ -244,6 +255,10 @@ class Updater(context: Context) {
     }
 
     companion object {
+        /** Número de compilación de una versión nightly, por ejemplo "1.3.0-nightly.57" -> 57. */
+        fun nightlyBuild(version: String): Int =
+            Regex("""nightly\.(\d+)""").find(version)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
         fun isNewer(remote: String, local: String): Boolean {
             fun parts(v: String) = v.trim().trimStart('v', 'V').split('.', '-').mapNotNull { it.toIntOrNull() }
             val r = parts(remote)

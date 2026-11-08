@@ -193,4 +193,9 @@
         <item quantity="one">In den Papierkorb verschoben</item>
         <item quantity="other">%d Elemente im Papierkorb</item>
     </plurals>
+    <string name="blur_medium">Mittel</string>
+    <string name="blur_crystal">Kristall</string>
+    <string name="blur_frost">Frost</string>
+    <string name="cd_loop">Wiederholen</string>
+    <string name="player_hold_speed">Gedrückt halten für 2x</string>
 </resources>

@@ -1,6 +1,10 @@
 package com.GalleryYou.Pixel
 
 import android.net.Uri
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.FilterChip
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.launch
@@ -153,7 +157,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     onChange = { settings.updateDynamicColor(it) },
                 )
                 val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                ChoiceRow(
+                BlurStylePicker(
                     title = stringResource(R.string.settings_blur),
                     subtitle = if (canBlur) {
                         stringResource(R.string.settings_blur_desc)
@@ -163,9 +167,13 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     options = listOf(
                         stringResource(R.string.option_none),
                         stringResource(R.string.blur_soft),
+                        stringResource(R.string.blur_medium),
                         stringResource(R.string.blur_strong),
+                        stringResource(R.string.blur_crystal),
+                        stringResource(R.string.blur_frost),
                     ),
-                    selected = if (canBlur) settings.blur else 0,
+                    selected = if (canBlur) settings.blur.coerceIn(0, BlurStyles.size) else 0,
+                    enabled = canBlur,
                     onSelect = { if (canBlur) settings.updateBlur(it) },
                 )
                 SwitchRow(
@@ -364,6 +372,50 @@ private fun ChoiceRow(
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     icon = {},
                     label = { Text(label) },
+                )
+            }
+        }
+    }
+}
+
+/** Selector de los 5 tipos de blur (más "Ninguno"): fichas que se desplazan en horizontal. */
+@Composable
+private fun BlurStylePicker(
+    title: String,
+    subtitle: String,
+    options: List<String>,
+    selected: Int,
+    enabled: Boolean,
+    onSelect: (Int) -> Unit,
+) {
+    Column(modifier = Modifier.padding(vertical = 10.dp)) {
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            options.forEachIndexed { index, label ->
+                FilterChip(
+                    selected = index == selected,
+                    enabled = enabled,
+                    onClick = { onSelect(index) },
+                    label = { Text(label) },
+                    leadingIcon = if (index == selected) {
+                        { Icon(AppIcons.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    } else {
+                        null
+                    },
                 )
             }
         }

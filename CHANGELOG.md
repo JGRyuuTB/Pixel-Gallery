@@ -1,5 +1,13 @@
 # Registro de cambios
 
+## 1.3.0 — Nightly
+
+- Barra de navegación rediseñada al estilo de Telegram: icono sobre el nombre, píldora activa, insignia con los elementos de la papelera y arrastre del dedo para cambiar de pestaña.
+- 5 tipos de blur (Suave, Media, Fuerte, Cristal y Escarcha) además de "Ninguno", en Ajustes > Apariencia.
+- Fotos: filtros Todo / Fotos / Videos como grupo de botones que cambian de forma, número de elementos por día y círculo para seleccionar un día entero.
+- Reproductor: mantener pulsado para 2x, deslizar por el borde izquierdo (brillo) o derecho (volumen), repetir en bucle y más velocidades (0.25x a 3x).
+- Nueva variante Nightly (rama `nightly`, workflow nocturno, instalación junto a la estable). Ver NIGHTLY.md.
+
 ## 1.2.0
 
 - Idiomas: la app está disponible en español, inglés, portugués, francés, alemán, italiano, ruso, japonés y chino simplificado.

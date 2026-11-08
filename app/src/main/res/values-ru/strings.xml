@@ -201,4 +201,9 @@
         <item quantity="many">%d элементов в корзине</item>
         <item quantity="other">%d элемента в корзине</item>
     </plurals>
+    <string name="blur_medium">Средний</string>
+    <string name="blur_crystal">Кристалл</string>
+    <string name="blur_frost">Иней</string>
+    <string name="cd_loop">Повтор</string>
+    <string name="player_hold_speed">Удерживайте для 2x</string>
 </resources>

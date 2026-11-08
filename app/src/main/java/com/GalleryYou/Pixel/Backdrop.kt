@@ -41,10 +41,33 @@ import androidx.compose.ui.unit.dp
 class BackdropState(val source: GraphicsLayer, val blurred: GraphicsLayer) {
     var level by mutableIntStateOf(0)
     var radius by mutableFloatStateOf(0f)
+    var saturation by mutableFloatStateOf(1.45f)
+    var tintScale by mutableFloatStateOf(1f)
+    var shine by mutableFloatStateOf(1f)
     var origin by mutableStateOf(Offset.Zero)
     var appliedRadius: Float = -1f
+    var appliedSaturation: Float = -1f
     val enabled: Boolean get() = level > 0
+
+    /** Aplica el factor de velo del estilo de blur activo al color de cada superficie. */
+    fun scaleTint(c: Color): Color = c.copy(alpha = (c.alpha * tintScale).coerceIn(0f, 0.95f))
 }
+
+/**
+ * Los 5 tipos de blur (nivel 1 a 5; 0 = desactivado):
+ * radio del desenfoque, saturación del fondo, intensidad del velo de color y del brillo del borde.
+ */
+class BlurStyle(val radiusDp: Float, val saturation: Float, val tintScale: Float, val shine: Float)
+
+val BlurStyles = listOf(
+    BlurStyle(radiusDp = 14f, saturation = 1.25f, tintScale = 1.0f, shine = 1.0f), // 1 Suave
+    BlurStyle(radiusDp = 24f, saturation = 1.45f, tintScale = 1.0f, shine = 1.0f), // 2 Media
+    BlurStyle(radiusDp = 40f, saturation = 1.45f, tintScale = 1.0f, shine = 0.9f), // 3 Fuerte
+    BlurStyle(radiusDp = 20f, saturation = 1.90f, tintScale = 0.55f, shine = 1.7f), // 4 Cristal: vivo y transparente
+    BlurStyle(radiusDp = 32f, saturation = 0.70f, tintScale = 1.6f, shine = 0.5f), // 5 Escarcha: mate y lechoso
+)
+
+fun blurStyleFor(level: Int): BlurStyle = BlurStyles[(level - 1).coerceIn(0, BlurStyles.lastIndex)]
 
 @Composable
 fun rememberBackdropState(settings: AppSettings): BackdropState {
@@ -52,9 +75,13 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
     val blurred = rememberGraphicsLayer()
     val density = LocalDensity.current
     val state = remember(source, blurred) { BackdropState(source, blurred) }
-    val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) settings.blur else 0
+    val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) settings.blur.coerceIn(0, BlurStyles.size) else 0
+    val style = blurStyleFor(level)
     state.level = level
-    state.radius = with(density) { (if (level >= 2) 30.dp else 14.dp).toPx() }
+    state.radius = with(density) { style.radiusDp.dp.toPx() }
+    state.saturation = style.saturation
+    state.tintScale = style.tintScale
+    state.shine = style.shine
     return state
 }
 
@@ -65,11 +92,12 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
         if (state.enabled) {
             state.source.record { this@drawWithContent.drawContent() }
             drawLayer(state.source)
-            if (state.appliedRadius != state.radius) {
+            if (state.appliedRadius != state.radius || state.appliedSaturation != state.saturation) {
                 state.blurred.renderEffect = BlurEffect(state.radius, state.radius, TileMode.Clamp)
-                // Un poco más de saturación: el fondo detrás del cristal se ve más vivo.
-                state.blurred.colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(1.45f) })
+                // La saturación depende del estilo: Cristal vivo, Escarcha casi apagada.
+                state.blurred.colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(state.saturation) })
                 state.appliedRadius = state.radius
+                state.appliedSaturation = state.saturation
             }
             state.blurred.record { drawLayer(state.source) }
         } else {
@@ -92,7 +120,7 @@ fun Modifier.backdropBlur(state: BackdropState?, tint: Color, corner: Dp = 0.dp)
                 translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
                     drawLayer(state.blurred)
                 }
-                drawRect(tint)
+                drawRect(state.scaleTint(tint))
             }
         }
 }
@@ -116,6 +144,7 @@ fun Modifier.glassSurface(
     return this
         .onGloballyPositioned { pos = it.positionInRoot() }
         .drawBehind {
+            val shine = if (blurOn && state != null) state.shine else 1f
             val r = corner.toPx()
             val h = if (extendBottom) size.height + 48.dp.toPx() else size.height
             val path = Path().apply {
@@ -126,7 +155,7 @@ fun Modifier.glassSurface(
                     translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
                         drawLayer(state.blurred)
                     }
-                    drawRect(tint, size = androidx.compose.ui.geometry.Size(size.width, h))
+                    drawRect(state.scaleTint(tint), size = androidx.compose.ui.geometry.Size(size.width, h))
                 }
             } else {
                 drawPath(path, fallback)
@@ -135,7 +164,7 @@ fun Modifier.glassSurface(
             clipPath(path) {
                 drawRect(
                     brush = Brush.verticalGradient(
-                        listOf(Color.White.copy(alpha = 0.16f), Color.Transparent),
+                        listOf(Color.White.copy(alpha = (0.16f * shine).coerceAtMost(0.5f)), Color.Transparent),
                         startY = 0f,
                         endY = h * 0.55f,
                     ),
@@ -147,9 +176,9 @@ fun Modifier.glassSurface(
                 drawRoundRect(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.60f),
+                            Color.White.copy(alpha = (0.60f * shine).coerceAtMost(0.95f)),
                             Color.White.copy(alpha = 0.06f),
-                            Color.White.copy(alpha = 0.32f),
+                            Color.White.copy(alpha = (0.32f * shine).coerceAtMost(0.8f)),
                         ),
                         start = Offset.Zero,
                         end = Offset(size.width, h),

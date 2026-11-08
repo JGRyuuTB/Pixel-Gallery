@@ -189,4 +189,9 @@
     <plurals name="toast_trashed">
         <item quantity="other">已将 %d 项移到回收站</item>
     </plurals>
+    <string name="blur_medium">中等</string>
+    <string name="blur_crystal">水晶</string>
+    <string name="blur_frost">磨砂</string>
+    <string name="cd_loop">循环</string>
+    <string name="player_hold_speed">长按2倍速</string>
 </resources>

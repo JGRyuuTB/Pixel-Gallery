@@ -193,4 +193,9 @@
         <item quantity="one">Movido a la papelera</item>
         <item quantity="other">%d elementos en la papelera</item>
     </plurals>
+    <string name="blur_medium">Media</string>
+    <string name="blur_crystal">Cristal</string>
+    <string name="blur_frost">Escarcha</string>
+    <string name="cd_loop">Repetir</string>
+    <string name="player_hold_speed">Mantén pulsado para ir a 2x</string>
 </resources>

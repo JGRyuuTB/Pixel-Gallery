@@ -176,6 +176,23 @@ object AppIcons {
             line("M16,9.6 L20.6,14.4 M20.6,9.6 L16,14.4"),
         )
     }
+    val Loop: ImageVector by lazy {
+        build("Loop",
+            line("M4,11 L4,10 A4,4 0 0 1 8,6 L20,6"),
+            line("M17,3 L20,6 L17,9"),
+            line("M20,13 L20,14 A4,4 0 0 1 16,18 L4,18"),
+            line("M7,15 L4,18 L7,21"),
+        )
+    }
+    val Brightness: ImageVector by lazy {
+        build("Brightness",
+            line("M8,12 A4,4 0 1 0 16,12 A4,4 0 1 0 8,12 Z"),
+            line("M12,2.5 L12,4.5"), line("M12,19.5 L12,21.5"),
+            line("M2.5,12 L4.5,12"), line("M19.5,12 L21.5,12"),
+            line("M5.3,5.3 L6.7,6.7"), line("M17.3,17.3 L18.7,18.7"),
+            line("M5.3,18.7 L6.7,17.3"), line("M17.3,6.7 L18.7,5.3"),
+        )
+    }
     val Speed: ImageVector by lazy {
         build("Speed",
             line("M3.8,16.5 A8.5,8.5 0 1 1 20.2,16.5"),

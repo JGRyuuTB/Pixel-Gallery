@@ -193,4 +193,9 @@
         <item quantity="one">Moved to trash</item>
         <item quantity="other">%d items in the trash</item>
     </plurals>
+    <string name="blur_medium">Medium</string>
+    <string name="blur_crystal">Crystal</string>
+    <string name="blur_frost">Frost</string>
+    <string name="cd_loop">Loop</string>
+    <string name="player_hold_speed">Hold to play at 2x</string>
 </resources>
