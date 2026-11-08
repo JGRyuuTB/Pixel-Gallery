@@ -1,6 +1,14 @@
 package com.GalleryYou.Pixel
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.composed
+import androidx.compose.ui.unit.sp
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
@@ -290,5 +298,448 @@ private fun StackedNavItem(
             overflow = TextOverflow.Clip,
             modifier = Modifier.padding(top = 1.dp),
         )
+    }
+}
+
+// ------------------------------------------------------------------ Estilos de barra
+
+/** Nombres de los estilos, en el orden de [AppSettings.navStyle]. 0 y 1 usan [GlassNavBar]. */
+val NavStyleNames = listOf(
+    R.string.nav_style_classic,
+    R.string.nav_style_stacked,
+    R.string.navstyle_tiktok,
+    R.string.navstyle_full,
+    R.string.navstyle_island,
+    R.string.navstyle_indicator,
+    R.string.navstyle_bubble,
+)
+
+/**
+ * Punto de entrada: dibuja la barra de navegación según [style] (ver [AppSettings.navStyle]) con su
+ * propio margen. [badges] asocia el índice de un destino con un contador (se muestra como globito rojo).
+ */
+@Composable
+fun GalleryNavBar(
+    style: Int,
+    items: List<NavDest>,
+    selected: Int,
+    animations: Boolean,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    backdrop: BackdropState? = null,
+    badges: Map<Int, Int> = emptyMap(),
+) {
+    when (style) {
+        2 -> Box(modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 12.dp, vertical = 6.dp)) {
+            TikTokNavBar(items, selected, animations, onSelect, backdrop, badges)
+        }
+
+        3 -> FullNavBar(items, selected, animations, onSelect, modifier, backdrop, badges)
+
+        4 -> Box(
+            modifier.fillMaxWidth().navigationBarsPadding().padding(vertical = 6.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            IslandNavBar(items, selected, animations, onSelect, backdrop, badges)
+        }
+
+        5 -> Box(modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 14.dp, vertical = 6.dp)) {
+            IndicatorNavBar(items, selected, animations, onSelect, backdrop, badges)
+        }
+
+        6 -> Box(modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp, vertical = 8.dp)) {
+            BubbleNavBar(items, selected, animations, onSelect, backdrop, badges)
+        }
+
+        else -> Box(modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 14.dp, vertical = 6.dp)) {
+            GlassNavBar(items, selected, animations, onSelect, backdrop = backdrop, style = style, badges = badges)
+        }
+    }
+}
+
+/** Globito con los colores del tema (el mismo de las barras Clásica y Apilada). */
+@Composable
+private fun ThemedBadge(count: Int, modifier: Modifier = Modifier) {
+    if (count > 0) NavBadge(count, modifier)
+}
+
+private val BadgeRed = Color(0xFFFE2C55)
+
+/** Globito rojo con el número (99+ si es mayor), como el de la barra de TikTok. */
+@Composable
+private fun RedBadge(count: Int, modifier: Modifier = Modifier) {
+    if (count <= 0) return
+    Box(
+        modifier
+            .height(18.dp)
+            .widthIn(min = 18.dp)
+            .background(BadgeRed, CircleShape)
+            .padding(horizontal = 5.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            if (count > 99) "99+" else count.toString(),
+            color = Color.White,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
+        )
+    }
+}
+
+private fun Modifier.absorbTaps(): Modifier = this.pointerInput(Unit) { detectTapGestures { } }
+
+private fun Modifier.plainClick(onClick: () -> Unit): Modifier = composed {
+    clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)
+}
+
+@Composable
+private fun colorSpec(animations: Boolean): AnimationSpec<Color> =
+    if (animations) spring(stiffness = Spring.StiffnessMediumLow) else snap()
+
+@Composable
+private fun floatSpec(animations: Boolean): AnimationSpec<Float> =
+    if (animations) spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow) else snap()
+
+// --- 1. Estilo TikTok: píldora oscura de cristal líquido, icono + nombre siempre visibles ---
+
+@Composable
+private fun TikTokNavBar(
+    items: List<NavDest>,
+    selected: Int,
+    animations: Boolean,
+    onSelect: (Int) -> Unit,
+    backdrop: BackdropState?,
+    badges: Map<Int, Int>,
+) {
+    val capsule = RoundedCornerShape(26.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(62.dp)
+            .glassSurface(
+                state = backdrop,
+                tint = Color.Black.copy(alpha = 0.38f),
+                fallback = Color(0xFF17151B).copy(alpha = 0.94f),
+                corner = 31.dp,
+            )
+            .absorbTaps()
+            .padding(horizontal = 5.dp, vertical = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        items.forEachIndexed { i, dest ->
+            val on = i == selected
+            val fill by animateColorAsState(
+                if (on) Color.Black.copy(alpha = 0.42f) else Color.Transparent,
+                colorSpec(animations),
+                label = "ttFill",
+            )
+            val rim by animateColorAsState(
+                if (on) Color.White.copy(alpha = 0.30f) else Color.Transparent,
+                colorSpec(animations),
+                label = "ttRim",
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(capsule)
+                    .background(fill)
+                    .border(1.dp, rim, capsule)
+                    .plainClick { onSelect(i) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box {
+                        Icon(
+                            imageVector = if (on) dest.iconSelected else dest.icon,
+                            contentDescription = stringResource(dest.labelRes),
+                            tint = Color.White,
+                            modifier = Modifier.size(26.dp),
+                        )
+                        RedBadge(badges[i] ?: 0, Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-6).dp))
+                    }
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        stringResource(dest.labelRes),
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                }
+            }
+        }
+    }
+}
+
+// --- 3. Completa: barra de Material pegada abajo, a todo el ancho ---
+
+@Composable
+private fun FullNavBar(
+    items: List<NavDest>,
+    selected: Int,
+    animations: Boolean,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier,
+    backdrop: BackdropState?,
+    badges: Map<Int, Int>,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Box(
+        modifier
+            .fillMaxWidth()
+            .glassSurface(
+                state = backdrop,
+                tint = scheme.surfaceContainer.copy(alpha = 0.55f),
+                fallback = scheme.surfaceContainer,
+                corner = 0.dp,
+                border = false,
+            )
+            .absorbTaps(),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().navigationBarsPadding().height(68.dp).padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            items.forEachIndexed { i, dest ->
+                val on = i == selected
+                val pill by animateColorAsState(
+                    if (on) scheme.secondaryContainer else Color.Transparent,
+                    colorSpec(animations),
+                    label = "clPill",
+                )
+                val fg by animateColorAsState(
+                    if (on) scheme.onSecondaryContainer else scheme.onSurfaceVariant,
+                    colorSpec(animations),
+                    label = "clFg",
+                )
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight().plainClick { onSelect(i) },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Box(
+                        Modifier.width(60.dp).height(32.dp).clip(CircleShape).background(pill),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Box {
+                            Icon(
+                                imageVector = if (on) dest.iconSelected else dest.icon,
+                                contentDescription = stringResource(dest.labelRes),
+                                tint = fg,
+                                modifier = Modifier.size(24.dp),
+                            )
+                            ThemedBadge(badges[i] ?: 0, Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-6).dp))
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        stringResource(dest.labelRes),
+                        color = fg,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+// --- 3. Isla: píldora compacta, solo iconos, centrada ---
+
+@Composable
+private fun IslandNavBar(
+    items: List<NavDest>,
+    selected: Int,
+    animations: Boolean,
+    onSelect: (Int) -> Unit,
+    backdrop: BackdropState?,
+    badges: Map<Int, Int>,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .height(54.dp)
+            .glassSurface(
+                state = backdrop,
+                tint = scheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                fallback = scheme.surfaceContainerHigh.copy(alpha = 0.96f),
+                corner = 27.dp,
+            )
+            .absorbTaps()
+            .padding(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        items.forEachIndexed { i, dest ->
+            val on = i == selected
+            val bg by animateColorAsState(
+                if (on) scheme.primary else Color.Transparent,
+                colorSpec(animations),
+                label = "isBg",
+            )
+            val fg by animateColorAsState(
+                if (on) scheme.onPrimary else scheme.onSurfaceVariant,
+                colorSpec(animations),
+                label = "isFg",
+            )
+            Box(
+                Modifier.size(44.dp).clip(CircleShape).background(bg).plainClick { onSelect(i) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Box {
+                    Icon(
+                        imageVector = if (on) dest.iconSelected else dest.icon,
+                        contentDescription = stringResource(dest.labelRes),
+                        tint = fg,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    ThemedBadge(badges[i] ?: 0, Modifier.align(Alignment.TopEnd).offset(x = 10.dp, y = (-6).dp))
+                }
+            }
+        }
+    }
+}
+
+// --- 4. Indicador: iconos con nombre y una rayita que se desliza bajo el activo ---
+
+@Composable
+private fun IndicatorNavBar(
+    items: List<NavDest>,
+    selected: Int,
+    animations: Boolean,
+    onSelect: (Int) -> Unit,
+    backdrop: BackdropState?,
+    badges: Map<Int, Int>,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(62.dp)
+            .glassSurface(
+                state = backdrop,
+                tint = scheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                fallback = scheme.surfaceContainerHigh.copy(alpha = 0.96f),
+                corner = 31.dp,
+            )
+            .absorbTaps(),
+    ) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
+            val itemW = maxWidth / items.size
+            val pos by animateFloatAsState(selected.toFloat(), floatSpec(animations), label = "indPos")
+            Box(
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .offset(x = itemW * pos + (itemW - 22.dp) / 2, y = (-7).dp)
+                    .size(width = 22.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(scheme.primary),
+            )
+            Row(Modifier.fillMaxSize()) {
+                items.forEachIndexed { i, dest ->
+                    val on = i == selected
+                    val fg by animateColorAsState(
+                        if (on) scheme.primary else scheme.onSurfaceVariant,
+                        colorSpec(animations),
+                        label = "indFg",
+                    )
+                    Column(
+                        modifier = Modifier.weight(1f).fillMaxHeight().plainClick { onSelect(i) },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Box {
+                            Icon(
+                                imageVector = if (on) dest.iconSelected else dest.icon,
+                                contentDescription = stringResource(dest.labelRes),
+                                tint = fg,
+                                modifier = Modifier.size(24.dp),
+                            )
+                            ThemedBadge(badges[i] ?: 0, Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-6).dp))
+                        }
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            stringResource(dest.labelRes),
+                            color = fg,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
+                            maxLines = 1,
+                        )
+                        // Hueco para la rayita que se desliza por encima.
+                        Spacer(Modifier.height(7.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+// --- 5. Burbuja: un círculo de color se desliza hasta el destino activo ---
+
+@Composable
+private fun BubbleNavBar(
+    items: List<NavDest>,
+    selected: Int,
+    animations: Boolean,
+    onSelect: (Int) -> Unit,
+    backdrop: BackdropState?,
+    badges: Map<Int, Int>,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(58.dp)
+            .glassSurface(
+                state = backdrop,
+                tint = scheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                fallback = scheme.surfaceContainerHigh.copy(alpha = 0.96f),
+                corner = 29.dp,
+            )
+            .absorbTaps(),
+    ) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(6.dp)) {
+            val itemW = maxWidth / items.size
+            val bubble = 46.dp
+            val pos by animateFloatAsState(selected.toFloat(), floatSpec(animations), label = "bubPos")
+            Box(
+                Modifier
+                    .align(Alignment.CenterStart)
+                    .offset(x = itemW * pos + (itemW - bubble) / 2)
+                    .size(bubble)
+                    .clip(CircleShape)
+                    .background(scheme.primary),
+            )
+            Row(Modifier.fillMaxSize()) {
+                items.forEachIndexed { i, dest ->
+                    val on = i == selected
+                    val fg by animateColorAsState(
+                        if (on) scheme.onPrimary else scheme.onSurfaceVariant,
+                        colorSpec(animations),
+                        label = "bubFg",
+                    )
+                    Box(
+                        Modifier.weight(1f).fillMaxHeight().plainClick { onSelect(i) },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Box {
+                            Icon(
+                                imageVector = if (on) dest.iconSelected else dest.icon,
+                                contentDescription = stringResource(dest.labelRes),
+                                tint = fg,
+                                modifier = Modifier.size(26.dp),
+                            )
+                            ThemedBadge(badges[i] ?: 0, Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-6).dp))
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -149,7 +149,7 @@ class Updater(context: Context) {
                     return@withContext
                 }
                 state = UpdateState.Available(
-                    UpdateInfo(remote, json.optString("body", "").trim(), apkUrl, size),
+                    UpdateInfo(remote, if (json.isNull("body")) "" else json.optString("body", "").trim(), apkUrl, size),
                 )
                 dialogVisible = true
             } catch (e: Exception) {

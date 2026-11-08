@@ -494,25 +494,18 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                         }
                     },
                     bottomBar = {
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .navigationBarsPadding()
-                                .padding(horizontal = 14.dp, vertical = 6.dp),
-                        ) {
-                            GlassNavBar(
-                                items = GalleryNavItems,
-                                selected = tab,
-                                animations = settings.animations,
-                                backdrop = backdrop,
-                                style = settings.navStyle,
-                                badges = if (trash.isNotEmpty()) mapOf(2 to trash.size) else emptyMap(),
-                                onSelect = {
-                                    selected = emptySet()
-                                    tab = it
-                                },
-                            )
-                        }
+                        GalleryNavBar(
+                            style = settings.navStyle,
+                            items = GalleryNavItems,
+                            selected = tab,
+                            animations = settings.animations,
+                            backdrop = backdrop,
+                            badges = if (trash.isNotEmpty()) mapOf(2 to trash.size) else emptyMap(),
+                            onSelect = {
+                                selected = emptySet()
+                                tab = it
+                            },
+                        )
                     },
                 ) { padding ->
                     val gridPadding = PaddingValues(

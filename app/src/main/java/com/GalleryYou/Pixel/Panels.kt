@@ -15,7 +15,10 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -153,18 +156,15 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     onChange = { settings.updateDynamicColor(it) },
                 )
                 val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                ChoiceRow(
+                ScrollChoiceRow(
                     title = stringResource(R.string.settings_blur),
                     subtitle = if (canBlur) {
                         stringResource(R.string.settings_blur_desc)
                     } else {
                         stringResource(R.string.requires_android12)
                     },
-                    options = listOf(
-                        stringResource(R.string.option_none),
-                        stringResource(R.string.blur_soft),
-                        stringResource(R.string.blur_strong),
-                    ),
+                    options = listOf(stringResource(R.string.option_none)) +
+                        BlurStyles.map { stringResource(it.nameRes) },
                     selected = if (canBlur) settings.blur else 0,
                     onSelect = { if (canBlur) settings.updateBlur(it) },
                 )
@@ -174,14 +174,15 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     checked = settings.liquidGlass,
                     onChange = { settings.updateLiquidGlass(it) },
                 )
-                ChoiceRow(
+                ScrollChoiceRow(
                     title = stringResource(R.string.nav_style_title),
-                    options = listOf(
-                        stringResource(R.string.nav_style_classic),
-                        stringResource(R.string.nav_style_stacked),
-                    ),
+                    options = NavStyleNames.map { stringResource(it) },
                     selected = settings.navStyle,
-                    onSelect = { settings.updateNavStyle(it) },
+                    onSelect = {
+                        settings.updateNavStyle(it)
+                        // La barra TikTok necesita un desenfoque para verse como debe: si estaba apagado, usa el oscuro.
+                        if (it == 2 && canBlur && settings.blur == 0) settings.updateBlur(BLUR_DARK)
+                    },
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_animations),
@@ -233,6 +234,16 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     ),
                     selected = settings.playerBorder,
                     onSelect = { settings.updatePlayerBorder(it) },
+                )
+                ChoiceRow(
+                    title = stringResource(R.string.settings_player_panel),
+                    subtitle = stringResource(R.string.settings_player_panel_desc),
+                    options = listOf(
+                        stringResource(R.string.player_panel_default),
+                        stringResource(R.string.player_panel_floating),
+                    ),
+                    selected = if (settings.playerFloating) 1 else 0,
+                    onSelect = { settings.updatePlayerFloating(it == 1) },
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_autoplay),
@@ -378,6 +389,42 @@ private fun ChoiceRow(
                     onClick = { onSelect(index) },
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     icon = {},
+                    label = { Text(label) },
+                )
+            }
+        }
+    }
+}
+
+/** Como [ChoiceRow] pero con chips en una fila desplazable: para listas largas de opciones. */
+@Composable
+private fun ScrollChoiceRow(
+    title: String,
+    options: List<String>,
+    selected: Int,
+    subtitle: String? = null,
+    onSelect: (Int) -> Unit,
+) {
+    Column(modifier = Modifier.padding(vertical = 6.dp)) {
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            options.forEachIndexed { index, label ->
+                FilterChip(
+                    selected = index == selected,
+                    onClick = { onSelect(index) },
                     label = { Text(label) },
                 )
             }

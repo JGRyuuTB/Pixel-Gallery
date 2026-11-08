@@ -502,6 +502,7 @@ private fun Modifier.panelBorder(
     primary: Color,
     tertiary: Color,
     corner: Dp,
+    floating: Boolean = false,
 ): Modifier =
     if (mode == 0) {
         this
@@ -518,7 +519,7 @@ private fun Modifier.panelBorder(
                 brush = brush,
                 topLeft = Offset(stroke / 2f, stroke / 2f),
                 // Se extiende por debajo del borde de la pantalla: solo se ven arriba y a los lados.
-                size = Size(size.width - stroke, size.height + 80.dp.toPx()),
+                size = Size(size.width - stroke, if (floating) size.height - stroke else size.height + 80.dp.toPx()),
                 cornerRadius = CornerRadius(corner.toPx() - stroke / 2f),
                 style = Stroke(width = stroke),
             )
@@ -541,7 +542,7 @@ private fun VideoStage(
         label = "stageTop",
     )
     val bottomPad by animateDpAsState(
-        targetValue = if (chrome) navBottom + 184.dp else 24.dp,
+        targetValue = if (chrome) navBottom + (if (settings.playerFloating) 200.dp else 184.dp) else 24.dp,
         animationSpec = motion(settings.animations),
         label = "stageBottom",
     )
@@ -812,25 +813,35 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
             val shift = rememberBorderShift(settings.playerBorder, settings.animations && isPlaying)
             val ambientGlass = LocalAmbientBackdrop.current
             val glassOn = ambientGlass != null && ambientGlass.enabled
+            // Panel flotante: separado de los bordes de la pantalla y redondeado por los cuatro lados.
+            val floating = settings.playerFloating
             Surface(
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                shape = if (floating) RoundedCornerShape(32.dp) else RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
                 color = if (glassOn) Color.Transparent else scheme.surfaceContainer,
                 tonalElevation = if (glassOn) 0.dp else 3.dp,
+                shadowElevation = if (floating) 8.dp else 0.dp,
                 modifier = Modifier
+                    .then(
+                        if (floating) {
+                            Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                        } else {
+                            Modifier
+                        },
+                    )
                     .fillMaxWidth()
                     .glassSurface(
                         state = ambientGlass,
                         tint = scheme.surfaceContainer.copy(alpha = 0.50f),
                         fallback = scheme.surfaceContainer,
                         corner = 32.dp,
-                        border = false,
-                        extendBottom = true,
+                        border = floating && settings.playerBorder == 0,
+                        extendBottom = !floating,
                     )
-                    .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, 32.dp),
+                    .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, 32.dp, floating),
             ) {
                 Column(
                     Modifier
-                        .navigationBarsPadding()
+                        .then(if (floating) Modifier else Modifier.navigationBarsPadding())
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                 ) {
                     SeekBar(

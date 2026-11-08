@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 1.4.1
+
+- Barra de navegación: 5 estilos nuevos (TikTok, Completa, Isla, Indicador y Burbuja) además de Clásica y Apilada. La barra TikTok es una píldora oscura de cristal con globito rojo en la papelera; si el desenfoque estaba apagado, al elegirla se activa el tipo Oscuro.
+- Desenfoque: 7 tipos a elegir (Suave, Fuerte, Oscuro, Escarcha, Vibrante, Humo y Acrílico), que se combinan con el interruptor de Liquid Glass.
+- Reproductor: nueva opción "Controles del reproductor" para elegir entre el panel pegado abajo (por defecto) y un panel flotante.
+- Actualizaciones: la ventana ya no muestra "null" cuando la versión publicada no trae notas; las notas de cada release se toman de este registro de cambios.
+
 ## 1.3.0
 
 - Barra de navegación: dos estilos que se eligen en Ajustes > Apariencia, la clásica (icono y nombre en la píldora activa) y la apilada (icono sobre el nombre). Las dos son más compactas, muestran una insignia con los elementos de la papelera y se pueden recorrer arrastrando el dedo.

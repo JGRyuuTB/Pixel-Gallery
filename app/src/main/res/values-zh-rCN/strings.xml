@@ -194,4 +194,18 @@
     <string name="nav_style_stacked">上下排列</string>
     <string name="settings_liquid_glass">Liquid Glass</string>
     <string name="settings_liquid_glass_desc">Android 13+ 上带真实折射和边缘高光的通透玻璃</string>
+    <string name="blur_dark">深色</string>
+    <string name="blur_frosted">磨砂</string>
+    <string name="blur_vivid">鲜艳</string>
+    <string name="blur_smoke">烟雾</string>
+    <string name="blur_acrylic">亚克力</string>
+    <string name="navstyle_tiktok">TikTok</string>
+    <string name="navstyle_full">通栏</string>
+    <string name="navstyle_island">岛屿</string>
+    <string name="navstyle_indicator">指示条</string>
+    <string name="navstyle_bubble">气泡</string>
+    <string name="settings_player_panel">播放器控制面板</string>
+    <string name="settings_player_panel_desc">固定在底部或悬浮</string>
+    <string name="player_panel_default">默认</string>
+    <string name="player_panel_floating">悬浮</string>
 </resources>

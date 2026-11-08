@@ -1,6 +1,7 @@
 package com.GalleryYou.Pixel
 
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.annotation.RequiresApi
 import android.graphics.RuntimeShader
@@ -49,9 +50,49 @@ class BackdropState(val source: GraphicsLayer, val blurred: GraphicsLayer) {
     /** Liquid Glass activado: velo más transparente, fondo más vivo y bordes con reflejos. */
     var liquid by mutableStateOf(false)
     var appliedLiquid: Boolean = false
+    var appliedLevel: Int = -1
     var appliedRadius: Float = -1f
     val enabled: Boolean get() = level > 0
+
+    /** Tipo de desenfoque elegido (null = desactivado). */
+    val style: BlurStyle? get() = BlurStyles.getOrNull(level - 1)
 }
+
+/** Cómo se tiñe el cristal: con el color del tema, oscuro o claro. */
+enum class TintMode { Theme, Dark, Light }
+
+/**
+ * Un tipo de desenfoque: radio, saturación y brillo del fondo borroso y el velo de color que lleva encima.
+ * [tintAlpha] es la opacidad del velo en los modos Dark/Light; en Theme multiplica la opacidad que pide la barra.
+ */
+class BlurStyle(
+    @StringRes val nameRes: Int,
+    val radiusDp: Float,
+    val saturation: Float,
+    val brightness: Float,
+    val tintMode: TintMode,
+    val tintAlpha: Float,
+) {
+    fun resolveTint(base: Color): Color = when (tintMode) {
+        TintMode.Theme -> base.copy(alpha = (base.alpha * tintAlpha).coerceIn(0f, 1f))
+        TintMode.Dark -> Color.Black.copy(alpha = tintAlpha)
+        TintMode.Light -> Color.White.copy(alpha = tintAlpha)
+    }
+}
+
+/** Los 7 tipos de desenfoque. El valor guardado en ajustes es el índice + 1 (0 = desactivado). */
+val BlurStyles = listOf(
+    BlurStyle(R.string.blur_soft, 14f, 1.45f, 1.00f, TintMode.Theme, 1.0f),     // 1 Suave
+    BlurStyle(R.string.blur_strong, 30f, 1.45f, 1.00f, TintMode.Theme, 1.0f),   // 2 Fuerte
+    BlurStyle(R.string.blur_dark, 22f, 1.75f, 1.05f, TintMode.Dark, 0.46f),     // 3 Oscuro (como la barra de TikTok)
+    BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f), // 4 Escarcha
+    BlurStyle(R.string.blur_vivid, 20f, 2.30f, 1.00f, TintMode.Theme, 0.55f),   // 5 Vibrante
+    BlurStyle(R.string.blur_smoke, 28f, 0.70f, 0.85f, TintMode.Dark, 0.55f),    // 6 Humo
+    BlurStyle(R.string.blur_acrylic, 10f, 1.20f, 1.15f, TintMode.Theme, 0.80f), // 7 Acrílico
+)
+
+/** Índice (en [BlurStyles] + 1) del tipo oscuro que usa la barra estilo TikTok. */
+const val BLUR_DARK = 3
 
 @Composable
 fun rememberBackdropState(settings: AppSettings): BackdropState {
@@ -64,7 +105,7 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
     state.liquid = settings.liquidGlass
     // Con refracción real el fondo debe verse casi nítido: si está muy borroso no se nota la lente.
     val refractive = settings.liquidGlass && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-    val baseRadius = if (level >= 2) 30.dp else 14.dp
+    val baseRadius = (BlurStyles.getOrNull(level - 1)?.radiusDp ?: 14f).dp
     state.radius = with(density) { (if (refractive) baseRadius * 0.45f else baseRadius).toPx() }
     return state
 }
@@ -92,15 +133,21 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
         if (state.enabled) {
             state.source.record { this@drawWithContent.drawContent() }
             drawLayer(state.source)
-            if (state.appliedRadius != state.radius || state.appliedLiquid != state.liquid) {
+            if (state.appliedRadius != state.radius || state.appliedLiquid != state.liquid ||
+                state.appliedLevel != state.level
+            ) {
                 state.blurred.renderEffect = BlurEffect(state.radius, state.radius, TileMode.Clamp)
-                // Más saturación: el fondo detrás del cristal se ve más vivo. Con Liquid Glass además
-                // se aclara un poco, como el vidrio que deja pasar la luz.
+                // Saturación y brillo según el tipo de desenfoque. Con Liquid Glass además se
+                // aclara un poco, como el vidrio que deja pasar la luz.
+                val st = state.style
+                val sat = st?.saturation ?: 1.45f
+                val gain = st?.brightness ?: 1f
                 state.blurred.colorFilter = ColorFilter.colorMatrix(
-                    if (state.liquid) saturationLift(1.8f, 1.07f, 8f) else saturationLift(1.45f, 1f, 0f),
+                    if (state.liquid) saturationLift(sat * 1.24f, gain * 1.07f, 8f) else saturationLift(sat, gain, 0f),
                 )
                 state.appliedRadius = state.radius
                 state.appliedLiquid = state.liquid
+                state.appliedLevel = state.level
             }
             state.blurred.record { drawLayer(state.source) }
         } else {
@@ -190,7 +237,8 @@ fun Modifier.backdropBlur(state: BackdropState?, tint: Color, corner: Dp = 0.dp)
                 translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
                     drawLayer(state.blurred)
                 }
-                drawRect(if (state.liquid) tint.copy(alpha = tint.alpha * 0.6f) else tint)
+                val base = state.style?.resolveTint(tint) ?: tint
+                drawRect(if (state.liquid) base.copy(alpha = base.alpha * 0.6f) else base)
             }
         }
 }
@@ -243,8 +291,9 @@ fun Modifier.glassSurface(
                         }
                     }
                     // Liquid Glass: el velo de color es la mitad de opaco, así se ve el fondo a través.
+                    val base = state?.style?.resolveTint(tint) ?: tint
                     drawRect(
-                        if (liquid) tint.copy(alpha = tint.alpha * 0.5f) else tint,
+                        if (liquid) base.copy(alpha = base.alpha * 0.5f) else base,
                         size = androidx.compose.ui.geometry.Size(size.width, h),
                     )
                 }

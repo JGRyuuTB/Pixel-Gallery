@@ -198,4 +198,18 @@
     <string name="nav_style_stacked">Impilata</string>
     <string name="settings_liquid_glass">Liquid Glass</string>
     <string name="settings_liquid_glass_desc">Vetro trasparente con rifrazione reale su Android 13+ e riflessi sui bordi</string>
+    <string name="blur_dark">Scuro</string>
+    <string name="blur_frosted">Satinato</string>
+    <string name="blur_vivid">Vivace</string>
+    <string name="blur_smoke">Fumo</string>
+    <string name="blur_acrylic">Acrilico</string>
+    <string name="navstyle_tiktok">TikTok</string>
+    <string name="navstyle_full">Completa</string>
+    <string name="navstyle_island">Isola</string>
+    <string name="navstyle_indicator">Indicatore</string>
+    <string name="navstyle_bubble">Bolla</string>
+    <string name="settings_player_panel">Controlli del lettore</string>
+    <string name="settings_player_panel_desc">Fissi in basso o fluttuanti</string>
+    <string name="player_panel_default">Predefinito</string>
+    <string name="player_panel_floating">Fluttuante</string>
 </resources>

@@ -50,20 +50,24 @@ class AppSettings(context: Context) {
         prefs.edit().putString("language", tag).apply()
     }
 
-    var blur by mutableIntStateOf(prefs.getInt("blur", 0))
+    /** 0 = sin desenfoque, 1..7 = tipos de [BlurStyles]. */
+    var blur by mutableIntStateOf(prefs.getInt("blur", 0).coerceIn(0, 7))
         private set
 
     fun updateBlur(value: Int) {
-        blur = value
-        prefs.edit().putInt("blur", value).apply()
+        blur = value.coerceIn(0, 7)
+        prefs.edit().putInt("blur", blur).apply()
     }
 
-    /** 0 = clásica (icono y nombre dentro de la píldora activa), 1 = apilada (icono sobre el nombre). */
-    var navStyle by mutableIntStateOf(prefs.getInt("navStyle", 1).coerceIn(0, 1))
+    /**
+     * Estilo de la barra: 0 = clásica (icono y nombre dentro de la píldora activa), 1 = apilada (icono
+     * sobre el nombre), 2 = TikTok, 3 = completa, 4 = isla, 5 = indicador, 6 = burbuja.
+     */
+    var navStyle by mutableIntStateOf(prefs.getInt("navStyle", 1).coerceIn(0, 6))
         private set
 
     fun updateNavStyle(value: Int) {
-        navStyle = value.coerceIn(0, 1)
+        navStyle = value.coerceIn(0, 6)
         prefs.edit().putInt("navStyle", navStyle).apply()
     }
 
@@ -74,6 +78,15 @@ class AppSettings(context: Context) {
     fun updateLiquidGlass(value: Boolean) {
         liquidGlass = value
         prefs.edit().putBoolean("liquidGlass", value).apply()
+    }
+
+    /** false = panel del reproductor pegado abajo (por defecto), true = panel flotante. */
+    var playerFloating by mutableStateOf(prefs.getBoolean("playerFloating", false))
+        private set
+
+    fun updatePlayerFloating(value: Boolean) {
+        playerFloating = value
+        prefs.edit().putBoolean("playerFloating", value).apply()
     }
 
     var autoUpdate by mutableStateOf(prefs.getBoolean("autoUpdate", true))

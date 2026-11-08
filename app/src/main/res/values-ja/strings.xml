@@ -194,4 +194,18 @@
     <string name="nav_style_stacked">縦並び</string>
     <string name="settings_liquid_glass">Liquid Glass</string>
     <string name="settings_liquid_glass_desc">Android 13以降で本物の屈折、縁にハイライトが入る透明ガラス</string>
+    <string name="blur_dark">ダーク</string>
+    <string name="blur_frosted">フロスト</string>
+    <string name="blur_vivid">ビビッド</string>
+    <string name="blur_smoke">スモーク</string>
+    <string name="blur_acrylic">アクリル</string>
+    <string name="navstyle_tiktok">TikTok</string>
+    <string name="navstyle_full">全幅</string>
+    <string name="navstyle_island">アイランド</string>
+    <string name="navstyle_indicator">インジケーター</string>
+    <string name="navstyle_bubble">バブル</string>
+    <string name="settings_player_panel">プレーヤーの操作パネル</string>
+    <string name="settings_player_panel_desc">下に固定またはフローティング</string>
+    <string name="player_panel_default">標準</string>
+    <string name="player_panel_floating">フローティング</string>
 </resources>

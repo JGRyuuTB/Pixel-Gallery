@@ -206,4 +206,18 @@
     <string name="nav_style_stacked">Вертикальная</string>
     <string name="settings_liquid_glass">Liquid Glass</string>
     <string name="settings_liquid_glass_desc">Прозрачное стекло с настоящим преломлением на Android 13+ и бликами по краям</string>
+    <string name="blur_dark">Тёмное</string>
+    <string name="blur_frosted">Матовое</string>
+    <string name="blur_vivid">Яркое</string>
+    <string name="blur_smoke">Дымка</string>
+    <string name="blur_acrylic">Акрил</string>
+    <string name="navstyle_tiktok">TikTok</string>
+    <string name="navstyle_full">Во всю ширину</string>
+    <string name="navstyle_island">Остров</string>
+    <string name="navstyle_indicator">Индикатор</string>
+    <string name="navstyle_bubble">Пузырь</string>
+    <string name="settings_player_panel">Управление плеером</string>
+    <string name="settings_player_panel_desc">Внизу или плавающее</string>
+    <string name="player_panel_default">По умолчанию</string>
+    <string name="player_panel_floating">Плавающее</string>
 </resources>
