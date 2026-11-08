@@ -220,4 +220,11 @@
     <string name="settings_player_panel_desc">Внизу или плавающее</string>
     <string name="player_panel_default">По умолчанию</string>
     <string name="player_panel_floating">Плавающее</string>
+    <string name="nav_tune_height">Высота</string>
+    <string name="nav_tune_width">Ширина</string>
+    <string name="nav_tune_width_note">Не влияет на «Остров» и «Во всю ширину»</string>
+    <string name="nav_tune_bottom">Отступ от нижнего края</string>
+    <string name="nav_tune_icon">Размер значков</string>
+    <string name="nav_tune_round">Скругление</string>
+    <string name="nav_tune_reset">Сбросить</string>
 </resources>

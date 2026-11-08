@@ -80,6 +80,51 @@ class AppSettings(context: Context) {
         prefs.edit().putBoolean("liquidGlass", value).apply()
     }
 
+    /** Calibración de la barra de navegación (ver [NavTuning]). */
+    var navHeight by mutableIntStateOf(prefs.getInt("navHeight", 100).coerceIn(70, 130))
+        private set
+    var navWidth by mutableIntStateOf(prefs.getInt("navWidth", 100).coerceIn(60, 100))
+        private set
+    var navBottom by mutableIntStateOf(prefs.getInt("navBottom", 6).coerceIn(0, 40))
+        private set
+    var navIcon by mutableIntStateOf(prefs.getInt("navIcon", 100).coerceIn(80, 130))
+        private set
+    var navRound by mutableIntStateOf(prefs.getInt("navRound", 100).coerceIn(0, 100))
+        private set
+
+    fun updateNavHeight(v: Int) {
+        navHeight = v.coerceIn(70, 130)
+        prefs.edit().putInt("navHeight", navHeight).apply()
+    }
+
+    fun updateNavWidth(v: Int) {
+        navWidth = v.coerceIn(60, 100)
+        prefs.edit().putInt("navWidth", navWidth).apply()
+    }
+
+    fun updateNavBottom(v: Int) {
+        navBottom = v.coerceIn(0, 40)
+        prefs.edit().putInt("navBottom", navBottom).apply()
+    }
+
+    fun updateNavIcon(v: Int) {
+        navIcon = v.coerceIn(80, 130)
+        prefs.edit().putInt("navIcon", navIcon).apply()
+    }
+
+    fun updateNavRound(v: Int) {
+        navRound = v.coerceIn(0, 100)
+        prefs.edit().putInt("navRound", navRound).apply()
+    }
+
+    fun resetNavTuning() {
+        updateNavHeight(100)
+        updateNavWidth(100)
+        updateNavBottom(6)
+        updateNavIcon(100)
+        updateNavRound(100)
+    }
+
     /** false = panel del reproductor pegado abajo (por defecto), true = panel flotante. */
     var playerFloating by mutableStateOf(prefs.getBoolean("playerFloating", false))
         private set

@@ -212,4 +212,11 @@
     <string name="settings_player_panel_desc">Unten fixiert oder schwebend</string>
     <string name="player_panel_default">Standard</string>
     <string name="player_panel_floating">Schwebend</string>
+    <string name="nav_tune_height">Höhe</string>
+    <string name="nav_tune_width">Breite</string>
+    <string name="nav_tune_width_note">Gilt nicht für Insel und Volle Breite</string>
+    <string name="nav_tune_bottom">Abstand zum unteren Rand</string>
+    <string name="nav_tune_icon">Symbolgröße</string>
+    <string name="nav_tune_round">Rundung</string>
+    <string name="nav_tune_reset">Zurücksetzen</string>
 </resources>

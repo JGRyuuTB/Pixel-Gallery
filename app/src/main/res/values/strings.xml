@@ -212,4 +212,11 @@
     <string name="settings_player_panel_desc">Attached to the bottom or floating</string>
     <string name="player_panel_default">Default</string>
     <string name="player_panel_floating">Floating</string>
+    <string name="nav_tune_height">Height</string>
+    <string name="nav_tune_width">Width</string>
+    <string name="nav_tune_width_note">Does not apply to Island or Full</string>
+    <string name="nav_tune_bottom">Distance from bottom</string>
+    <string name="nav_tune_icon">Icon size</string>
+    <string name="nav_tune_round">Roundness</string>
+    <string name="nav_tune_reset">Reset</string>
 </resources>

@@ -12,8 +12,8 @@ android {
         applicationId = "com.GalleryYou.Pixel"
         minSdk = 26
         targetSdk = 35
-        versionCode = 14
-        versionName = "1.4.1"
+        versionCode = 15
+        versionName = "1.4.2"
     }
 
     // Clave fija incluida en el repo: así cada versión nueva se instala encima de la anterior

@@ -501,6 +501,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                             animations = settings.animations,
                             backdrop = backdrop,
                             badges = if (trash.isNotEmpty()) mapOf(2 to trash.size) else emptyMap(),
+                            tuning = settings.navTuning(),
                             onSelect = {
                                 selected = emptySet()
                                 tab = it

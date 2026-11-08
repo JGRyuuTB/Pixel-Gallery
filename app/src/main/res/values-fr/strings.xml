@@ -212,4 +212,11 @@
     <string name="settings_player_panel_desc">Fixées en bas ou flottantes</string>
     <string name="player_panel_default">Par défaut</string>
     <string name="player_panel_floating">Flottant</string>
+    <string name="nav_tune_height">Hauteur</string>
+    <string name="nav_tune_width">Largeur</string>
+    <string name="nav_tune_width_note">Sans effet sur Îlot et Complète</string>
+    <string name="nav_tune_bottom">Distance du bord inférieur</string>
+    <string name="nav_tune_icon">Taille des icônes</string>
+    <string name="nav_tune_round">Arrondi</string>
+    <string name="nav_tune_reset">Réinitialiser</string>
 </resources>

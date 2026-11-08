@@ -208,4 +208,11 @@
     <string name="settings_player_panel_desc">固定在底部或悬浮</string>
     <string name="player_panel_default">默认</string>
     <string name="player_panel_floating">悬浮</string>
+    <string name="nav_tune_height">高度</string>
+    <string name="nav_tune_width">宽度</string>
+    <string name="nav_tune_width_note">不适用于“岛屿”和“通栏”</string>
+    <string name="nav_tune_bottom">距底部距离</string>
+    <string name="nav_tune_icon">图标大小</string>
+    <string name="nav_tune_round">圆角</string>
+    <string name="nav_tune_reset">重置</string>
 </resources>

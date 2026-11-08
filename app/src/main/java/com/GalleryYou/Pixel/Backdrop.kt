@@ -204,12 +204,14 @@ class RefractionEffect {
     private var w = -1f
     private var h = -1f
     private var r = -1f
+    private var mr = -1f
     private var applied = false
 
     /** Aplica (o actualiza si cambió el tamaño) la lente a la capa del cristal. */
-    fun apply(layer: GraphicsLayer, width: Float, height: Float, radius: Float) {
-        if (applied && w == width && h == height && r == radius) return
-        val rim = minOf(width, height) * 0.42f
+    fun apply(layer: GraphicsLayer, width: Float, height: Float, radius: Float, maxRim: Float) {
+        if (applied && w == width && h == height && r == radius && mr == maxRim) return
+        // El grosor del borde que refracta tiene tope: una barra y un panel alto se ven igual.
+        val rim = minOf(minOf(width, height) * 0.42f, maxRim)
         shader.setFloatUniform("size", width, height)
         shader.setFloatUniform("radius", radius)
         shader.setFloatUniform("rim", rim)
@@ -218,6 +220,7 @@ class RefractionEffect {
         w = width
         h = height
         r = radius
+        mr = maxRim
         applied = true
     }
 }
@@ -283,7 +286,7 @@ fun Modifier.glassSurface(
                                 }
                             }
                         }
-                        refractor.apply(refractLayer, size.width, h, r)
+                        refractor.apply(refractLayer, size.width, h, r, 24.dp.toPx())
                         drawLayer(refractLayer)
                     } else {
                         translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {

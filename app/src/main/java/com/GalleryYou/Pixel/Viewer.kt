@@ -542,7 +542,7 @@ private fun VideoStage(
         label = "stageTop",
     )
     val bottomPad by animateDpAsState(
-        targetValue = if (chrome) navBottom + (if (settings.playerFloating) 200.dp else 184.dp) else 24.dp,
+        targetValue = if (chrome) navBottom + (if (settings.playerFloating) 132.dp else 116.dp) else 24.dp,
         animationSpec = motion(settings.animations),
         label = "stageBottom",
     )
@@ -816,14 +816,13 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
             // Panel flotante: separado de los bordes de la pantalla y redondeado por los cuatro lados.
             val floating = settings.playerFloating
             Surface(
-                shape = if (floating) RoundedCornerShape(32.dp) else RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                shape = if (floating) RoundedCornerShape(28.dp) else RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
                 color = if (glassOn) Color.Transparent else scheme.surfaceContainer,
                 tonalElevation = if (glassOn) 0.dp else 3.dp,
-                shadowElevation = if (floating) 8.dp else 0.dp,
                 modifier = Modifier
                     .then(
                         if (floating) {
-                            Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                            Modifier.navigationBarsPadding().padding(start = 14.dp, end = 14.dp, bottom = 10.dp)
                         } else {
                             Modifier
                         },
@@ -833,34 +832,38 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         state = ambientGlass,
                         tint = scheme.surfaceContainer.copy(alpha = 0.50f),
                         fallback = scheme.surfaceContainer,
-                        corner = 32.dp,
+                        corner = 28.dp,
                         border = floating && settings.playerBorder == 0,
                         extendBottom = !floating,
                     )
-                    .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, 32.dp, floating),
+                    .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, 28.dp, floating),
             ) {
                 Column(
                     Modifier
                         .then(if (floating) Modifier else Modifier.navigationBarsPadding())
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
                 ) {
-                    SeekBar(
-                        exo = exo,
-                        duration = duration,
-                        playing = isPlaying,
-                        position = position,
-                        dragFraction = dragFraction,
-                        onDrag = { dragFraction = it },
-                    )
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(formatDuration(shownPosition), style = MaterialTheme.typography.labelMedium)
+                    // Tiempo, barra y duración en una sola fila: ocupa menos alto.
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            formatDuration(shownPosition),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(start = 6.dp),
+                        )
+                        SeekBar(
+                            exo = exo,
+                            duration = duration,
+                            playing = isPlaying,
+                            position = position,
+                            dragFraction = dragFraction,
+                            onDrag = { dragFraction = it },
+                            modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                        )
                         Text(
                             formatDuration(duration),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(end = 6.dp),
                         )
                     }
                     Box(
@@ -868,7 +871,10 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         contentAlignment = Alignment.Center,
                     ) {
                         Box(Modifier.align(Alignment.CenterStart)) {
-                            TextButton(onClick = { speedMenu = true }) {
+                            TextButton(
+                                onClick = { speedMenu = true },
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp),
+                            ) {
                                 Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(6.dp))
                                 Text(speedLabel(speed))
@@ -888,7 +894,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { seekBy(-10_000) }) {
+                            IconButton(onClick = { seekBy(-10_000) }, modifier = Modifier.size(40.dp)) {
                                 Icon(AppIcons.Replay10, contentDescription = stringResource(R.string.cd_rewind_10))
                             }
                             PlayPauseButton(
@@ -897,13 +903,13 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                                 animations = settings.animations,
                                 onClick = { togglePlay() },
                             )
-                            IconButton(onClick = { seekBy(10_000) }) {
+                            IconButton(onClick = { seekBy(10_000) }, modifier = Modifier.size(40.dp)) {
                                 Icon(AppIcons.Forward10, contentDescription = stringResource(R.string.cd_forward_10))
                             }
                         }
 
                         IconButton(
-                            modifier = Modifier.align(Alignment.CenterEnd),
+                            modifier = Modifier.align(Alignment.CenterEnd).size(40.dp),
                             onClick = {
                                 muted = !muted
                                 exo.volume = if (muted) 0f else 1f
@@ -933,6 +939,7 @@ private fun SeekBar(
     position: Long,
     dragFraction: Float?,
     onDrag: (Float?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var progress by remember { mutableFloatStateOf(0f) }
 
@@ -956,6 +963,7 @@ private fun SeekBar(
     }
 
     Slider(
+        modifier = modifier,
         value = dragFraction ?: progress,
         onValueChange = { onDrag(it) },
         onValueChangeFinished = {
@@ -984,7 +992,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
         onClick = onClick,
         interactionSource = interaction,
         modifier = Modifier
-            .size(64.dp)
+            .size(52.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -1010,7 +1018,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
                     else -> AppIcons.Play
                 },
                 contentDescription = null,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(30.dp),
             )
         }
     }

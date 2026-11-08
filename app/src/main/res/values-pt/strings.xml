@@ -212,4 +212,11 @@
     <string name="settings_player_panel_desc">Fixos embaixo ou flutuantes</string>
     <string name="player_panel_default">Padrão</string>
     <string name="player_panel_floating">Flutuante</string>
+    <string name="nav_tune_height">Altura</string>
+    <string name="nav_tune_width">Largura</string>
+    <string name="nav_tune_width_note">Não afeta Ilha nem Completa</string>
+    <string name="nav_tune_bottom">Distância da borda inferior</string>
+    <string name="nav_tune_icon">Tamanho dos ícones</string>
+    <string name="nav_tune_round">Arredondamento</string>
+    <string name="nav_tune_reset">Redefinir</string>
 </resources>

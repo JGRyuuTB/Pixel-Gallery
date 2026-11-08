@@ -46,6 +46,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Slider
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -59,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 
 // ------------------------------------------------------------------ Ajustes
 
@@ -174,6 +177,16 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     checked = settings.liquidGlass,
                     onChange = { settings.updateLiquidGlass(it) },
                 )
+                SwitchRow(
+                    title = stringResource(R.string.settings_animations),
+                    subtitle = stringResource(R.string.settings_animations_desc),
+                    checked = settings.animations,
+                    onChange = { settings.updateAnimations(it) },
+                )
+            }
+
+            SettingsGroup(stringResource(R.string.nav_style_title)) {
+                val canBlurNav = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 ScrollChoiceRow(
                     title = stringResource(R.string.nav_style_title),
                     options = NavStyleNames.map { stringResource(it) },
@@ -181,15 +194,49 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     onSelect = {
                         settings.updateNavStyle(it)
                         // La barra TikTok necesita un desenfoque para verse como debe: si estaba apagado, usa el oscuro.
-                        if (it == 2 && canBlur && settings.blur == 0) settings.updateBlur(BLUR_DARK)
+                        if (it == 2 && canBlurNav && settings.blur == 0) settings.updateBlur(BLUR_DARK)
                     },
                 )
-                SwitchRow(
-                    title = stringResource(R.string.settings_animations),
-                    subtitle = stringResource(R.string.settings_animations_desc),
-                    checked = settings.animations,
-                    onChange = { settings.updateAnimations(it) },
+                SliderRow(
+                    title = stringResource(R.string.nav_tune_height),
+                    valueText = "${settings.navHeight}%",
+                    value = settings.navHeight,
+                    range = 70..130,
+                    onChange = { settings.updateNavHeight(it) },
                 )
+                SliderRow(
+                    title = stringResource(R.string.nav_tune_width),
+                    subtitle = stringResource(R.string.nav_tune_width_note),
+                    valueText = "${settings.navWidth}%",
+                    value = settings.navWidth,
+                    range = 60..100,
+                    onChange = { settings.updateNavWidth(it) },
+                )
+                SliderRow(
+                    title = stringResource(R.string.nav_tune_bottom),
+                    valueText = "${settings.navBottom} dp",
+                    value = settings.navBottom,
+                    range = 0..40,
+                    onChange = { settings.updateNavBottom(it) },
+                )
+                SliderRow(
+                    title = stringResource(R.string.nav_tune_icon),
+                    valueText = "${settings.navIcon}%",
+                    value = settings.navIcon,
+                    range = 80..130,
+                    onChange = { settings.updateNavIcon(it) },
+                )
+                SliderRow(
+                    title = stringResource(R.string.nav_tune_round),
+                    valueText = "${settings.navRound}%",
+                    value = settings.navRound,
+                    range = 0..100,
+                    onChange = { settings.updateNavRound(it) },
+                )
+                TextButton(
+                    onClick = { settings.resetNavTuning() },
+                    modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
+                ) { Text(stringResource(R.string.nav_tune_reset)) }
             }
 
             SettingsGroup(stringResource(R.string.settings_photos_albums)) {
@@ -393,6 +440,40 @@ private fun ChoiceRow(
                 )
             }
         }
+    }
+}
+
+/** Fila con un deslizador de enteros y su valor actual a la derecha. */
+@Composable
+private fun SliderRow(
+    title: String,
+    valueText: String,
+    value: Int,
+    range: IntRange,
+    onChange: (Int) -> Unit,
+    subtitle: String? = null,
+) {
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(valueText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+        }
+        if (subtitle != null) {
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Slider(
+            value = value.toFloat(),
+            onValueChange = { onChange(it.roundToInt()) },
+            valueRange = range.first.toFloat()..range.last.toFloat(),
+        )
     }
 }
 

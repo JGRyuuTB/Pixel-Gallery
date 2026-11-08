@@ -208,4 +208,11 @@
     <string name="settings_player_panel_desc">下に固定またはフローティング</string>
     <string name="player_panel_default">標準</string>
     <string name="player_panel_floating">フローティング</string>
+    <string name="nav_tune_height">高さ</string>
+    <string name="nav_tune_width">幅</string>
+    <string name="nav_tune_width_note">アイランドと全幅には適用されません</string>
+    <string name="nav_tune_bottom">下端からの距離</string>
+    <string name="nav_tune_icon">アイコンの大きさ</string>
+    <string name="nav_tune_round">角の丸み</string>
+    <string name="nav_tune_reset">リセット</string>
 </resources>

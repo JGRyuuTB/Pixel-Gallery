@@ -31,7 +31,7 @@
 ### 🎨 Modern UI/UX
 
 - **Material You**: dynamic colors that adapt to your wallpaper.
-- **Floating glass navigation bar** with 7 styles to choose from in Settings: Classic, Stacked, TikTok, Full, Island, Indicator and Bubble. Badge with the number of items in the trash.
+- **Floating glass navigation bar** with 7 styles to choose from in Settings: Classic, Stacked, TikTok, Full, Island, Indicator and Bubble. Badge with the number of items in the trash. Size, width, bottom distance, icon size and roundness can be calibrated in Settings.
 - **7 blur types** for the glass: Soft, Strong, Dark, Frosted, Vivid, Smoke and Acrylic (or none).
 - **Liquid Glass**: transparent glass with real refraction on Android 13+ and edge highlights.
 - **Smooth animations**: the viewer grows from the thumbnail and returns to it, albums and menus slide in and out. You can turn them off.
@@ -107,7 +107,7 @@ You can also follow new versions on the Telegram channel: [Dragon's Bastion](htt
 The project is built automatically with GitHub Actions (`.github/workflows/build-apk.yml`):
 
 1. Push to `main` and download the `Pixel-Gallery-You-apk` artifact from the **Actions** tab.
-2. To publish a release, create a `v1.4.1` tag and push it: the APK is attached to the Release (with the notes from `CHANGELOG.md`), and installed apps will offer it as an update.
+2. To publish a release, create a `v1.4.2` tag and push it: the APK is attached to the Release (with the notes from `CHANGELOG.md`), and installed apps will offer it as an update.
 
 Locally:
 
