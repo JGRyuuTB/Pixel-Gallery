@@ -564,6 +564,7 @@ fun MediaGrid(
             }
         }
     }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -743,7 +744,6 @@ fun Thumb(
                 }
             }
         }
-    }
     }
 }
 
