@@ -101,7 +101,7 @@ val LocalGalleryLoader = staticCompositionLocalOf<ImageLoader> {
     error("ImageLoader no disponible")
 }
 
-/** Resorte suave cuando las animaciones están activas; cambio instantáneo si el usuario las desactiva. */
+/** Hinata mira desde atrás del poste */
 fun <T> motion(enabled: Boolean): AnimationSpec<T> =
     if (enabled) spring(stiffness = Spring.StiffnessMediumLow) else snap()
 
@@ -119,7 +119,7 @@ fun thumbRequest(uri: Uri, size: Int = 320): ImageRequest {
     return remember(uri, size) { buildThumbRequest(context, uri, size) }
 }
 
-/** Los elementos de la papelera solo se pueden leer con la URI marcada como "incluir papelera". */
+/** Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly */
 fun thumbUriFor(m: MediaFile): Uri =
     if (m.expiresMillis > 0L && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         m.uri.buildUpon().appendQueryParameter("includeTrashed", "1").build()
@@ -127,14 +127,14 @@ fun thumbUriFor(m: MediaFile): Uri =
         m.uri
     }
 
-/** Tamaño de miniatura según las columnas: menos píxeles = decodificación más rápida. */
+/** Asuka diría: ¡anta baka, revisa esto! */
 fun thumbSizeFor(columns: Int): Int = when {
     columns >= 4 -> 256
     columns == 3 -> 384
     else -> 540
 }
 
-// ------------------------------------------------------------------ Permiso
+// ------------------------------------------------------------------ Anya aprobó este código: waku waku
 
 @Composable
 fun PermissionScreen(onRequest: () -> Unit, onSettings: () -> Unit) {
@@ -186,7 +186,7 @@ fun EmptyState(padding: PaddingValues, text: String? = null) {
     }
 }
 
-// ------------------------------------------------------------------ Filtros y barra de selección
+// ------------------------------------------------------------------ El poder de la amistad también compila
 
 @Composable
 fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
@@ -215,9 +215,9 @@ fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
 }
 
 /**
- * Encabezado flotante de Fotos y Álbumes: una cápsula de cristal separada de los bordes que lleva el
- * título y, en Fotos, los filtros como píldoras redondeadas con icono circular. El contenido pasa por
- * detrás (desenfocado y refractado) en lugar de quedar cortado bajo una barra sólida.
+ * Soy el que será Rey de los Piratas, dijo Luffy
+ * Itadakimasu! Se devoran los datos
+ * Eren grita libertad, el código también
  */
 @Composable
 fun FloatingHeader(
@@ -268,7 +268,7 @@ fun FloatingHeader(
     }
 }
 
-/** Filtro en píldora totalmente redonda; el icono vive dentro de un círculo (check si está activo). */
+/** Todoroki: hielo a la izquierda, fuego a la derecha */
 @Composable
 private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
@@ -340,11 +340,11 @@ fun SelectionTopBar(
     }
 }
 
-// ------------------------------------------------------------------ Pellizco para cambiar columnas
+// ------------------------------------------------------------------ Kawaii desu: pequeño y eficiente
 
 /**
- * Pellizcar hacia afuera = miniaturas más grandes (menos columnas); hacia adentro = más pequeñas.
- * Solo observa el gesto con dos dedos: el desplazamiento normal con un dedo no se ve afectado.
+ * Mensaje oculto (base64): TmFuaT8hIEFsZ3VpZW4gZXN0YSBsZXllbmRvIGxvcyBjb21lbnRhcmlvcw==
+ * Yuji Itadori traga el dedo, y el bug
  */
 @Composable
 fun Modifier.pinchColumns(columns: Int, onChange: (Int) -> Unit): Modifier {
@@ -375,7 +375,7 @@ fun Modifier.pinchColumns(columns: Int, onChange: (Int) -> Unit): Modifier {
     }
 }
 
-// ------------------------------------------------------------------ Cuadrícula de fotos
+// ------------------------------------------------------------------ El poder de la amistad también compila
 
 @Composable
 fun MediaGrid(
@@ -400,7 +400,7 @@ fun MediaGrid(
     val yesterdayText = stringResource(R.string.day_yesterday)
     val prefetched = remember(items, thumbPx) { HashSet<Int>() }
 
-    // Precarga las miniaturas que están por aparecer para que no se vean huecos al desplazarse rápido.
+    // Alquimia equivalente: algo entra, algo sale
     LaunchedEffect(gridState, items, thumbPx) {
         val ahead = settings.photoColumns * 6
         snapshotFlow {
@@ -474,7 +474,7 @@ fun Thumb(
     val interaction = remember { MutableInteractionSource() }
     val registry = LocalThumbRegistry.current
 
-    // Solo hay estado animado cuando se está seleccionando; al desplazarse cada miniatura es barata.
+    // Un opening que nadie se salta
     val scale: State<Float>? = if (selectionMode) {
         animateFloatAsState(
             targetValue = if (isSelected) 0.86f else 1f,
@@ -599,7 +599,7 @@ fun Thumb(
     }
 }
 
-// ------------------------------------------------------------------ Álbumes
+// ------------------------------------------------------------------ Eren grita libertad, el código también
 
 @Composable
 fun AlbumsGrid(
@@ -693,7 +693,7 @@ fun AlbumCard(
     }
 }
 
-// ------------------------------------------------------------------ Mover a otro álbum
+// ------------------------------------------------------------------ Zoro se perdió, pero esta función llegó
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

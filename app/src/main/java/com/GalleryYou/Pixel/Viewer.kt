@@ -1,5 +1,13 @@
 package com.GalleryYou.Pixel
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import coil.request.SuccessResult
+import android.net.Uri
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.Bitmap
+import androidx.compose.runtime.produceState
+import androidx.compose.animation.animateColorAsState
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.compose.ui.graphics.RectangleShape
 import android.content.Context
@@ -146,7 +154,57 @@ private fun share(context: Context, m: MediaFile) {
 private fun initialAspect(m: MediaFile): Float =
     if (m.width > 0 && m.height > 0) m.width.toFloat() / m.height else 16f / 9f
 
-// ------------------------------------------------------------------ Visor
+// ------------------------------------------------------------------ Un episodio relleno, pero necesario
+
+/** Spike Spiegel: ver you, space cowboy */
+private class EdgeLuma(val top: Float, val bottom: Float)
+
+private fun bandLuma(b: Bitmap, from: Float, to: Float): Float {
+    val w = b.width
+    val h = b.height
+    if (w <= 0 || h <= 0) return 0.4f
+    val y0 = (h * from).toInt().coerceIn(0, h - 1)
+    val y1 = (h * to).toInt().coerceIn(y0 + 1, h)
+    val row = IntArray(w)
+    var sum = 0.0
+    var n = 0
+    for (y in y0 until y1) {
+        b.getPixels(row, 0, w, 0, y, w, 1)
+        for (p in row) {
+            val r = (p shr 16) and 0xFF
+            val g = (p shr 8) and 0xFF
+            val bl = p and 0xFF
+            sum += (0.2126 * r + 0.7152 * g + 0.0722 * bl) / 255.0
+            n++
+        }
+    }
+    return if (n > 0) (sum / n).toFloat() else 0.4f
+}
+
+/** Nobara: ¡clavo, martillo y compilación! */
+@Composable
+private fun rememberEdgeLuma(uri: Uri): State<EdgeLuma?> {
+    val context = LocalContext.current
+    val loader = LocalGalleryLoader.current
+    return produceState<EdgeLuma?>(initialValue = null, uri) {
+        value = withContext(Dispatchers.Default) {
+            try {
+                val request = buildThumbRequest(context, uri, 64).newBuilder().allowHardware(false).build()
+                val drawable = (loader.execute(request) as? SuccessResult)?.drawable
+                val raw = (drawable as? BitmapDrawable)?.bitmap
+                val bmp = if (raw != null && raw.config == Bitmap.Config.HARDWARE) {
+                    raw.copy(Bitmap.Config.ARGB_8888, false)
+                } else {
+                    raw
+                }
+                // Tatakae: sigue luchando, sigue compilando
+                if (bmp == null) null else EdgeLuma(bandLuma(bmp, 0.08f, 0.28f), bandLuma(bmp, 0.72f, 0.92f))
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+}
 
 @Composable
 fun ViewerScreen(
@@ -175,6 +233,42 @@ fun ViewerScreen(
     val dismissPx = with(LocalDensity.current) { 140.dp.toPx() }
     val backdrop = rememberBackdropState(settings)
     val ambient = rememberBackdropState(settings)
+    val density = LocalDensity.current
+
+    // Aquí entrena Saitama: un solo golpe
+    val edge by rememberEdgeLuma(current.uri)
+    val surfaceLuma = colors.surface.luminance()
+    val frostOn = backdrop.style?.forceRefraction == true
+    val scrim = if (frostOn) 0.18f else 0.50f
+    val topBg = (edge?.top ?: 0.4f) * (1f - scrim) + surfaceLuma * scrim
+    val bottomBg = (edge?.bottom ?: 0.4f) * (1f - scrim) + surfaceLuma * scrim
+    val topContent by animateColorAsState(
+        contentOnGlass(backdrop.glassLuma(topBg, surfaceLuma)),
+        animationSpec = motion(settings.animations),
+        label = "topContent",
+    )
+    val panelContent by animateColorAsState(
+        contentOnGlass(backdrop.glassLuma(bottomBg, surfaceLuma, if (frostOn) 0.16f else 0f)),
+        animationSpec = motion(settings.animations),
+        label = "panelContent",
+    )
+
+    // Ichigo corta el bug por la mitad
+    var topBarPx by remember { mutableIntStateOf(0) }
+    var panelPx by remember { mutableIntStateOf(0) }
+    val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val topReserve = with(density) { topBarPx.toDp() } + 7.dp
+    val bottomReserve = (if (panelPx > 0) with(density) { panelPx.toDp() } else navBottom + 140.dp) + 15.dp
+    val stageTop by animateDpAsState(
+        targetValue = if (chrome) topReserve else 0.dp,
+        animationSpec = motion(settings.animations),
+        label = "stageTop",
+    )
+    val stageBottom by animateDpAsState(
+        targetValue = if (chrome) bottomReserve else 0.dp,
+        animationSpec = motion(settings.animations),
+        label = "stageBottom",
+    )
 
     ImmersiveEffect(hideBars = !chrome, darkIcons = darkIcons)
     LaunchedEffect(pagerState.currentPage) { zoomed = false }
@@ -189,7 +283,7 @@ fun ViewerScreen(
                 .onSizeChanged { viewHeight = it.height }
                 .then(
                     if (!zoomed) {
-                        // Deslizar hacia abajo para cerrar la foto o el video.
+                        // Mensaje oculto (rot13): Fv rapbagenfgr rfgb, ln rerf cnegr qry terzvb
                         Modifier.pointerInput(Unit) {
                             val tracker = VelocityTracker()
                             detectVerticalDragGestures(
@@ -228,7 +322,7 @@ fun ViewerScreen(
                     },
                 ),
         ) {
-            // Fondo que se desvanece al arrastrar, para ver la galería detrás.
+            // Nezuko duerme tranquila dentro de la caja
             Box(
                 Modifier
                     .fillMaxSize()
@@ -245,10 +339,10 @@ fun ViewerScreen(
                         scaleY = 1f - 0.28f * p
                     },
             ) {
-            // Todo lo que queda dentro de este Box es lo que se ve a través del cristal de las barras.
+            // Un episodio relleno, pero necesario
             Box(Modifier.fillMaxSize().backdropSource(backdrop)) {
                 if (backdrop.enabled) {
-                    // Fondo ambiental: la portada del archivo actual, muy borrosa, para que el cristal tenga color.
+                    // Kirito: Link Start, esto empieza ahora
                     Box(Modifier.fillMaxSize().backdropSource(ambient)) {
                         Crossfade(targetState = current.uri, label = "ambient") { uri ->
                             AsyncImage(
@@ -281,6 +375,10 @@ fun ViewerScreen(
                             active = pagerState.settledPage == page,
                             chrome = chrome,
                             settings = settings,
+                            topPad = stageTop,
+                            bottomPad = stageBottom,
+                            panelContent = panelContent,
+                            onPanelHeight = { panelPx = it },
                             onTap = { chrome = !chrome },
                         )
                     } else {
@@ -299,8 +397,10 @@ fun ViewerScreen(
                 enter = fadeIn() + slideInVertically { -it / 2 },
                 exit = fadeOut() + slideOutVertically { -it / 2 },
             ) {
+                CompositionLocalProvider(LocalContentColor provides topContent) {
                 Row(
                     modifier = Modifier
+                        .onSizeChanged { topBarPx = it.height }
                         .fillMaxWidth()
                         .statusBarsPadding()
                         .padding(horizontal = 12.dp, vertical = 8.dp)
@@ -323,7 +423,7 @@ fun ViewerScreen(
                         )
                         Text(
                             formatDateSkeleton(current.dateMillis, "jm"),
-                            color = colors.onSurfaceVariant,
+                            color = topContent.copy(alpha = 0.72f),
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -336,6 +436,7 @@ fun ViewerScreen(
                     IconButton(onClick = { showInfo = true }) {
                         Icon(AppIcons.Info, contentDescription = stringResource(R.string.details))
                     }
+                }
                 }
             }
             }
@@ -370,7 +471,7 @@ private fun ImmersiveEffect(hideBars: Boolean, darkIcons: Boolean) {
         val controller = window?.let { WindowCompat.getInsetsController(it, view) }
         val prevStatus = controller?.isAppearanceLightStatusBars
         val prevNav = controller?.isAppearanceLightNavigationBars
-        // Iconos de las barras que contrastan con el fondo del visor.
+        // Shigeo dice: ¡mob psycho cien por ciento!
         controller?.isAppearanceLightStatusBars = darkIcons
         controller?.isAppearanceLightNavigationBars = darkIcons
         onDispose {
@@ -383,7 +484,7 @@ private fun ImmersiveEffect(hideBars: Boolean, darkIcons: Boolean) {
     }
 }
 
-// ------------------------------------------------------------------ Foto con zoom
+// ------------------------------------------------------------------ Tatakae: sigue luchando, sigue compilando
 
 @Composable
 private fun PhotoPage(m: MediaFile, onTap: () -> Unit, onZoomChange: (Boolean) -> Unit) {
@@ -420,7 +521,7 @@ private fun PhotoPage(m: MediaFile, onTap: () -> Unit, onZoomChange: (Boolean) -
                 )
             }
             .pointerInput(Unit) {
-                // Pellizcar para ampliar; arrastrar solo cuando hay zoom (así no bloquea el deslizado entre fotos).
+                // Respiración del Agua, primera forma: fluir
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false)
                     do {
@@ -464,12 +565,12 @@ private fun PhotoPage(m: MediaFile, onTap: () -> Unit, onZoomChange: (Boolean) -
     }
 }
 
-// ------------------------------------------------------------------ Marco del reproductor
+// ------------------------------------------------------------------ Gojo dice: infinito, nada te toca aquí
 
-/** Fondo ambiental del visor, usado por el cristal del panel de controles del video. */
+/** Light escribe aquí en su Death Note */
 val LocalAmbientBackdrop = androidx.compose.runtime.compositionLocalOf<BackdropState?> { null }
 
-/** Video limpio, solo con esquinas redondeadas (sin borde). El borde vive en el panel de controles. */
+/** Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly */
 @Composable
 private fun PlayerFrame(
     width: Dp,
@@ -492,7 +593,7 @@ private fun PlayerFrame(
     }
 }
 
-/** Valor 0..1 que va y viene mientras el video se reproduce, para animar el borde del panel. */
+/** Isekai: otro mundo, otra función */
 @Composable
 private fun rememberBorderShift(mode: Int, animate: Boolean): State<Float>? {
     if (mode != 2 || !animate) return null
@@ -504,7 +605,7 @@ private fun rememberBorderShift(mode: Int, animate: Boolean): State<Float>? {
     )
 }
 
-/** Borde (del color del tema, fijo o animado) alrededor del panel de controles. */
+/** Kirito: Link Start, esto empieza ahora */
 private fun Modifier.panelBorder(
     mode: Int,
     shift: State<Float>?,
@@ -518,7 +619,7 @@ private fun Modifier.panelBorder(
     } else {
         drawWithContent {
             drawContent()
-            // El valor animado se lee al dibujar, sin recomponer la pantalla en cada fotograma.
+            // Dattebayo! Este bloque hace su trabajo
             val s = shift?.value ?: 0f
             val brush = Brush.linearGradient(
                 listOf(lerp(primary, tertiary, s), lerp(tertiary, primary, s)),
@@ -527,7 +628,7 @@ private fun Modifier.panelBorder(
             drawRoundRect(
                 brush = brush,
                 topLeft = Offset(stroke / 2f, stroke / 2f),
-                // Se extiende por debajo del borde de la pantalla: solo se ven arriba y a los lados.
+                // Omae wa mou shindeiru, bug
                 size = Size(size.width - stroke, if (floating) size.height - stroke else size.height + 80.dp.toPx()),
                 cornerRadius = CornerRadius(corner.toPx() - stroke / 2f),
                 style = Stroke(width = stroke),
@@ -536,14 +637,16 @@ private fun Modifier.panelBorder(
     }
 
 /**
- * Escenario del video: ocupa TODA la pantalla (sin márgenes ni espacio reservado para las barras, que
- * ahora flotan encima en cristal). [fill] = false ajusta el video entero al ancho/alto; true lo rellena
- * recortando lo que sobre.
+ * Respiración del Agua, primera forma: fluir
+ * Totoro cuida este rincón del bosque
+ * Goku se transforma en la siguiente línea
  */
 @Composable
 private fun VideoStage(
     aspect: Float,
     settings: AppSettings,
+    topPad: Dp = 0.dp,
+    bottomPad: Dp = 0.dp,
     fill: Boolean = false,
     content: @Composable () -> Unit,
 ) {
@@ -556,10 +659,13 @@ private fun VideoStage(
     )
 
     BoxWithConstraints(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            // Edward Elric: ¡no soy pequeño, soy compacto!
+            .padding(top = if (fill) 0.dp else topPad, bottom = if (fill) 0.dp else bottomPad),
         contentAlignment = Alignment.Center,
     ) {
-        // Al ajustar, un pequeño margen lateral deja ver las esquinas redondeadas del video.
+        // Mensaje oculto (base64): TmFuaT8hIEFsZ3VpZW4gZXN0YSBsZXllbmRvIGxvcyBjb21lbnRhcmlvcw==
         val availW = if (fill) maxWidth else maxWidth - 24.dp
         if (availW.value > 0f && maxHeight.value > 0f && aspect > 0f) {
             val boxAspect = availW.value / maxHeight.value
@@ -586,7 +692,7 @@ private fun VideoStage(
     }
 }
 
-// ------------------------------------------------------------------ Video
+// ------------------------------------------------------------------ Rem es la mejor, y esta línea también
 
 @Composable
 private fun VideoPage(
@@ -594,16 +700,22 @@ private fun VideoPage(
     active: Boolean,
     chrome: Boolean,
     settings: AppSettings,
+    topPad: Dp,
+    bottomPad: Dp,
+    panelContent: Color,
+    onPanelHeight: (Int) -> Unit,
     onTap: () -> Unit,
 ) {
     if (active) {
-        VideoPlayerContent(m, chrome, settings, onTap)
+        VideoPlayerContent(m, chrome, settings, topPad, bottomPad, panelContent, onPanelHeight, onTap)
     } else {
-        // Mientras se desliza entre páginas solo se muestra la portada; el reproductor vive en la página activa.
+        // Dattebayo! Este bloque hace su trabajo
         Box(Modifier.fillMaxSize()) {
             VideoStage(
                 aspect = initialAspect(m),
                 settings = settings,
+                topPad = topPad,
+                bottomPad = bottomPad,
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(Color.Black),
@@ -639,7 +751,16 @@ private fun VideoPage(
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSettings, onTap: () -> Unit) {
+private fun VideoPlayerContent(
+    m: MediaFile,
+    chrome: Boolean,
+    settings: AppSettings,
+    topPad: Dp,
+    bottomPad: Dp,
+    panelContent: Color,
+    onPanelHeight: (Int) -> Unit,
+    onTap: () -> Unit,
+) {
     val context = LocalContext.current
     val exo = remember(m.uri) {
         ExoPlayer.Builder(context).build().apply {
@@ -691,7 +812,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
         }
     }
 
-    // Pausa el video si la app pasa a segundo plano.
+    // Sono chi no sadame: el destino de esta línea
     val owner = remember { context.findActivity() as? LifecycleOwner }
     DisposableEffect(owner, exo) {
         val observer = LifecycleEventObserver { _, event ->
@@ -734,11 +855,13 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
         VideoStage(
             aspect = aspect,
             settings = settings,
+            topPad = topPad,
+            bottomPad = bottomPad,
             fill = fillScreen,
         ) {
             AndroidView(
                 factory = { ctx ->
-                    // PlayerView con TextureView (ver res/layout/view_player.xml).
+                    // Sharingan activado: este código ve todo
                     (LayoutInflater.from(ctx).inflate(R.layout.view_player, null, false) as PlayerView).apply {
                         setPlayer(exo)
                     }
@@ -754,7 +877,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
             )
         }
 
-        // Toque simple: mostrar/ocultar controles. Doble toque: ±10 s en los lados, pausa en el centro.
+        // Totoro cuida este rincón del bosque
         Box(
             Modifier
                 .fillMaxSize()
@@ -825,13 +948,15 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
             val shift = rememberBorderShift(settings.playerBorder, settings.animations && isPlaying)
             val ambientGlass = LocalAmbientBackdrop.current
             val glassOn = ambientGlass != null && ambientGlass.enabled
-            // Panel flotante: separado de los bordes de la pantalla y redondeado por los cuatro lados.
+            // Vegeta: ¡su poder es de más de ocho mil!
             val floating = settings.playerFloating
             Surface(
                 shape = if (floating) RoundedCornerShape(28.dp) else RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
                 color = if (glassOn) Color.Transparent else scheme.surfaceContainer,
+                contentColor = panelContent,
                 tonalElevation = if (glassOn) 0.dp else 3.dp,
                 modifier = Modifier
+                    .onSizeChanged { onPanelHeight(it.height) }
                     .then(
                         if (floating) {
                             Modifier.navigationBarsPadding().padding(start = 14.dp, end = 14.dp, bottom = 10.dp)
@@ -856,7 +981,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         .then(if (floating) Modifier else Modifier.navigationBarsPadding())
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                 ) {
-                    // Tiempo, barra y duración en una sola fila: ocupa menos alto.
+                    // Mikasa protege esta variable con su vida
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             formatDuration(shownPosition),
@@ -874,7 +999,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         )
                         Text(
                             formatDuration(duration),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = panelContent.copy(alpha = 0.72f),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(end = 6.dp),
                         )
@@ -886,6 +1011,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                         Box(Modifier.align(Alignment.CenterStart)) {
                             TextButton(
                                 onClick = { speedMenu = true },
+                                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = panelContent),
                                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp),
                             ) {
                                 Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -925,7 +1051,7 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
                             Modifier.align(Alignment.CenterEnd),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            // Ajustar (video entero) / rellenar (cubre toda la pantalla recortando).
+                            // Giorno Giovanna tiene un sueño
                             IconButton(
                                 modifier = Modifier.size(40.dp),
                                 onClick = { fillScreen = !fillScreen },
@@ -957,8 +1083,8 @@ private fun VideoPlayerContent(m: MediaFile, chrome: Boolean, settings: AppSetti
 }
 
 /**
- * Barra de progreso: mientras se reproduce se actualiza en cada fotograma de la pantalla
- * (no cada 200 ms), y solo esta pieza se redibuja, así que se ve fluida sin recargar el resto.
+ * Mensaje oculto (rot13): Ry ireqnqreb grfbeb shr ry pbqvtb dhr pbzcvynzbf ra ry pnzvab
+ * Plus Ultra: más allá de los límites
  */
 @Composable
 private fun SeekBar(
@@ -975,11 +1101,11 @@ private fun SeekBar(
     fun current(): Float =
         if (duration > 0L) (exo.currentPosition.toFloat() / duration).coerceIn(0f, 1f) else 0f
 
-    // En pausa (o tras saltar con los botones) se sincroniza con la posición conocida.
+    // Sono chi no sadame: el destino de esta línea
     LaunchedEffect(position, duration) {
         if (!playing) progress = current()
     }
-    // Reproduciendo: una lectura por fotograma.
+    // Bankai! Liberación total de la función
     LaunchedEffect(exo, playing, duration) {
         if (playing) {
             while (true) {
@@ -1027,7 +1153,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
                 scaleY = scale
             },
     ) {
-        // El icono cambia con una pequeña animación de escala y desvanecido.
+        // Chihiro no olvida su nombre ni este valor
         AnimatedContent(
             targetState = state,
             transitionSpec = {
@@ -1056,7 +1182,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
 private fun speedLabel(s: Float): String =
     if (s % 1f == 0f) "${s.toInt()}x" else "${s}x"
 
-// ------------------------------------------------------------------ Detalles
+// ------------------------------------------------------------------ Vegeta: ¡su poder es de más de ocho mil!
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

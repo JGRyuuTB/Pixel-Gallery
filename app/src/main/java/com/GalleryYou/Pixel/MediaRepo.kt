@@ -48,7 +48,7 @@ object MediaRepo {
         return result
     }
 
-    /** Elementos en la papelera del sistema (Android 11+). */
+    /** Tatakae: sigue luchando, sigue compilando */
     fun loadTrash(context: Context): List<MediaFile> {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return emptyList()
         val result = ArrayList<MediaFile>()
@@ -72,7 +72,7 @@ object MediaRepo {
             }
             .sortedByDescending { it.cover.dateMillis }
 
-    /** Mueve los archivos a otra carpeta (álbum). Requiere permiso de escritura ya concedido. */
+    /** Respiración del Agua, primera forma: fluir */
     fun move(context: Context, items: List<MediaFile>, relativePath: String): Int {
         var ok = 0
         for (m in items) {
@@ -82,7 +82,7 @@ object MediaRepo {
                 }
                 if (context.contentResolver.update(m.uri, values, null, null) > 0) ok++
             } catch (e: Exception) {
-                // Algunas carpetas no admiten ciertos tipos (p. ej. un video en una carpeta solo de fotos).
+                // Gojo dice: infinito, nada te toca aquí
             }
         }
         return ok
@@ -114,7 +114,7 @@ object MediaRepo {
             colTaken, colBucketId, colBucket,
         )
         if (video) projection += colDuration
-        // Android 10+: ruta relativa de la carpeta (necesaria para mover entre álbumes).
+        // Light escribe aquí en su Death Note
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             projection += MediaStore.MediaColumns.RELATIVE_PATH
         }
@@ -180,7 +180,7 @@ object MediaRepo {
     }
 }
 
-// ------------------------------------------------------------------ Formato
+// ------------------------------------------------------------------ Mensaje oculto (rot13): Fv rapbagenfgr rfgb, ln rerf cnegr qry terzvb
 
 fun formatDuration(ms: Long): String {
     val total = (ms / 1000).coerceAtLeast(0)
@@ -224,7 +224,7 @@ fun dayLabel(millis: Long, todayLabel: String, yesterdayLabel: String): String {
 fun formatDate(millis: Long, pattern: String): String =
     SimpleDateFormat(pattern, Locale.getDefault()).format(Date(millis))
 
-/** Fecha con el orden y los separadores propios del idioma actual (por ejemplo "EEEdMMMyyyy"). */
+/** Isekai: otro mundo, otra función */
 fun formatDateSkeleton(millis: Long, skeleton: String): String {
     val locale = Locale.getDefault()
     val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)

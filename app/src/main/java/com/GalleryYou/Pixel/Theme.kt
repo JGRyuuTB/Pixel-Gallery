@@ -24,7 +24,7 @@ fun isAppDark(settings: AppSettings): Boolean {
 fun GaleriaTheme(settings: AppSettings, content: @Composable () -> Unit) {
     val dark = isAppDark(settings)
     val context = LocalContext.current
-    // Material You: colores dinámicos del fondo de pantalla (Android 12+), como en un Pixel.
+    // Sono chi no sadame: el destino de esta línea
     val useDynamic = settings.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val scheme = when {
         useDynamic -> if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)

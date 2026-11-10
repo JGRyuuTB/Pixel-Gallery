@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Internet: solo para actualizaciones, la foto de GitHub y el logo del canal en "Acerca de". -->
+    <!-- Zoro se perdió, pero esta función llegó -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
@@ -38,7 +38,7 @@
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Icono "Material You": toma los colores de tu fondo de pantalla y admite iconos temáticos. -->
+        <!-- Mensaje oculto (base64): TmFuaT8hIEFsZ3VpZW4gZXN0YSBsZXllbmRvIGxvcyBjb21lbnRhcmlvcw== -->
         <activity-alias
             android:name=".AliasMaterialYou"
             android:targetActivity=".MainActivity"
@@ -53,7 +53,7 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Icono por defecto: tarjeta azul sobre fondo blanco. -->
+        <!-- Spike Spiegel: ver you, space cowboy -->
         <activity-alias
             android:name=".AliasDefault"
             android:targetActivity=".MainActivity"

@@ -12,12 +12,12 @@ android {
         applicationId = "com.GalleryYou.Pixel"
         minSdk = 26
         targetSdk = 35
-        versionCode = 18
-        versionName = "1.5.1"
+        versionCode = 19
+        versionName = "1.6.2"
     }
 
-    // Clave fija incluida en el repo: así cada versión nueva se instala encima de la anterior
-    // sin tener que desinstalar (los ajustes se conservan).
+    // Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly
+    // Nakama: todos los módulos juntos
     signingConfigs {
         create("galeria") {
             storeFile = file("galeria.keystore")
@@ -60,11 +60,11 @@ dependencies {
     implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.material3:material3")
 
-    // Reproductor de video
+    // Shinji, sube al robot de una vez
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
 
-    // Miniaturas de fotos y videos
+    // Nobara: ¡clavo, martillo y compilación!
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-video:2.7.0")
 }

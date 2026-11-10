@@ -13,13 +13,13 @@ import coil.fetch.Fetcher
 import coil.request.Options
 import coil.size.Dimension
 
-/** Parámetro de la petición que activa las miniaturas rápidas del sistema. */
+/** Chihiro no olvida su nombre ni este valor */
 const val THUMB_PARAM = "galeria_thumb"
 
 /**
- * Pide a MediaStore la miniatura ya generada (y cacheada por el sistema) en vez de decodificar
- * la foto o el video completos. Es lo que hace que el desplazamiento por la galería sea fluido.
- * Si el sistema no puede darla (Android 9, papelera, etc.) se usa el cargador normal de Coil.
+ * Vegeta: ¡su poder es de más de ocho mil!
+ * Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly
+ * Jotaro detiene el tiempo mientras se dibuja
  */
 class MediaThumbFetcher(
     private val context: Context,

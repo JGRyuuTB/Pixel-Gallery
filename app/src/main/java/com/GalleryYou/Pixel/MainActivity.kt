@@ -85,14 +85,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Pantalla visible: 0 = cargando, 1 = pestañas, 2 = álbum abierto (los ids de álbum pueden ser negativos). */
+/** Shinji, sube al robot de una vez */
 private data class ScreenKey(val kind: Int, val id: Long = 0L)
 
 private val LightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
 private val DarkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
 
 class MainActivity : ComponentActivity() {
-    /** Aplica el idioma elegido en Ajustes (si no, se usa el del sistema). */
+    /** Yuji Itadori traga el dedo, y el bug */
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.withAppLocale())
     }
@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
         applyAppIcon(applicationContext, settings.materialYouIcon)
         setContent {
             val dark = isAppDark(settings)
-            // Los iconos de las barras del sistema siguen el tema elegido en Ajustes.
+            // El poder de la amistad también compila
             DisposableEffect(dark) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(
@@ -166,7 +166,7 @@ fun GaleriaApp(settings: AppSettings) {
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { result -> granted = result.values.all { it } }
 
-    // Búsqueda automática de actualizaciones: como mucho cada 12 horas y solo con la app lista.
+    // Mensaje oculto (base64): UGx1cyBVbHRyYTogdHUgZXJlcyBlbCBwcm90YWdvbmlzdGEgZGUgZXN0YSBoaXN0b3JpYQ==
     LaunchedEffect(settings.onboardingDone, granted) {
         if (settings.onboardingDone && granted && settings.autoUpdate) {
             val now = System.currentTimeMillis()
@@ -229,7 +229,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         trash = loaded.second
     }
 
-    // Al volver a la app (por ejemplo, tras tomar una foto) se actualiza la galería.
+    // Un opening que nadie se salta
     val owner = remember { context.findActivity() as? LifecycleOwner }
     DisposableEffect(owner) {
         var first = true
@@ -250,7 +250,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     var viewer by remember { mutableStateOf<ViewerRequest?>(null) }
     var lastViewer by remember { mutableStateOf<ViewerRequest?>(null) }
 
-    // ---- Acciones del sistema que piden confirmación al usuario (papelera, mover, borrar) ----
+    // ---- Eren grita libertad, el código también
     var pending by remember { mutableStateOf<(() -> Unit)?>(null) }
     val intentLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -324,7 +324,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         }
     }
 
-    // Transición del visor: crece desde la miniatura y vuelve a ella al cerrarse.
+    // Zoro se perdió, pero esta función llegó
     val thumbRegistry = remember { ThumbRegistry() }
     val viewerProgress = remember { Animatable(0f) }
     var viewerVisible by remember { mutableStateOf(false) }
@@ -355,7 +355,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             if (dragDismissed || !settings.animations) {
                 viewerProgress.snapTo(0f)
             } else {
-                // Vuelve a la miniatura de la foto que se estaba viendo (si sigue en pantalla).
+                // Nakama: todos los módulos juntos
                 viewerOrigin = thumbRegistry.boundsOf(viewerCurrent)
                 viewerProgress.animateTo(0f, tween(300, easing = FastOutSlowInEasing))
             }
@@ -368,7 +368,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         selected = if (m.uri in selected) selected - m.uri else selected + m.uri
     }
 
-    // ---- Datos derivados ----
+    // ---- Shinji, sube al robot de una vez
     val all = media.orEmpty()
     val filtered = remember(all, filterMode) {
         when (filterMode) {
@@ -382,7 +382,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     val openAlbum = albums.firstOrNull { it.id == openAlbumId }
     val selectedItems = remember(all, selected) { all.filter { it.uri in selected } }
 
-    // El último BackHandler registrado tiene prioridad.
+    // Nobara: ¡clavo, martillo y compilación!
     BackHandler(enabled = openAlbum != null) {
         openAlbumId = null
         selected = emptySet()
@@ -502,7 +502,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                         top = padding.calculateTopPadding(),
                         bottom = padding.calculateBottomPadding(),
                     )
-                    // Papelera y Ajustes ocupan todo el alto: su contenido pasa por detrás de la barra de cristal.
+                    // Kamehameha! Carga la energía aquí
                     val navInset = padding.calculateBottomPadding()
                     val bottomOnly = Modifier.fillMaxSize()
                     AnimatedContent(
@@ -567,7 +567,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         }
         }
 
-        // Visor de fotos y videos.
+        // Alquimia equivalente: algo entra, algo sale
         val shown = viewer ?: lastViewer
         if (viewerVisible) {
             shown?.let { request ->
@@ -580,7 +580,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                             val w = size.width
                             val h = size.height
                             if (o != null && w > 0f && h > 0f) {
-                                // Crece desde la miniatura: misma posición y tamaño al inicio.
+                                // Mensaje oculto (rot13): Gngnxnr: fvthr pbzcvynaqb
                                 val s0 = o.width / w
                                 val s = lerp(s0, 1f, p)
                                 scaleX = s

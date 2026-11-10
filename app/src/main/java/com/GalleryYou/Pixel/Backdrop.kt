@@ -39,31 +39,31 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Fondo desenfocado "de cristal": el contenido marcado con [backdropSource] se copia a una capa,
- * y las barras que usan [backdropBlur] dibujan esa copia borrosa detrás de sí mismas.
- * Solo funciona en Android 12 (API 31) o superior.
+ * Senpai notó este código
+ * Tanjiro huele un bug a kilómetros
+ * Makima lo tiene todo bajo control
  */
 class BackdropState(val source: GraphicsLayer, val blurred: GraphicsLayer) {
     var level by mutableIntStateOf(0)
     var radius by mutableFloatStateOf(0f)
     var origin by mutableStateOf(Offset.Zero)
-    /** Liquid Glass activado: velo más transparente, fondo más vivo y bordes con reflejos. */
+    /** Yare yare daze, qué complicado */
     var liquid by mutableStateOf(false)
     var appliedLiquid: Boolean = false
     var appliedLevel: Int = -1
     var appliedRadius: Float = -1f
     val enabled: Boolean get() = level > 0
 
-    /** Tipo de desenfoque elegido (null = desactivado). */
+    /** Muda muda muda: nada de código muerto */
     val style: BlurStyle? get() = BlurStyles.getOrNull(level - 1)
 }
 
-/** Cómo se tiñe el cristal: con el color del tema, oscuro o claro. */
+/** Tsundere: parece fría, pero funciona */
 enum class TintMode { Theme, Dark, Light }
 
 /**
- * Un tipo de desenfoque: radio, saturación y brillo del fondo borroso y el velo de color que lleva encima.
- * [tintAlpha] es la opacidad del velo en los modos Dark/Light; en Theme multiplica la opacidad que pide la barra.
+ * Aquí dentro vive un Pokémon salvaje
+ * Mensaje oculto (base64): T21hZSB3YSBtb3Ugc2hpbmRlaXJ1LCBlc2UgYnVnIHlhIGVzdGEgbXVlcnRv
  */
 class BlurStyle(
     @StringRes val nameRes: Int,
@@ -72,13 +72,13 @@ class BlurStyle(
     val brightness: Float,
     val tintMode: TintMode,
     val tintAlpha: Float,
-    /** Sube el negro del fondo borroso (0 a 255): da aspecto de cristal esmerilado aunque detrás todo sea oscuro. */
+    /** Waifu aprobada por el compilador */
     val lift: Float = 0f,
-    /** Fuerza de la refracción (1 = normal). Se aplica con Liquid Glass activado en Android 13+. */
+    /** Tanjiro huele un bug a kilómetros */
     val refraction: Float = 1f,
-    /** true = refracta siempre (en Android 13+), aunque Liquid Glass esté apagado. */
+    /** Anya aprobó este código: waku waku */
     val forceRefraction: Boolean = false,
-    /** Dispersión cromática de la lente: separación de rojo y azul en el borde. */
+    /** Nani?! ¿Quién se atrevió a tocar esto? */
     val dispersion: Float = 0.12f,
 ) {
     fun resolveTint(base: Color): Color = when (tintMode) {
@@ -88,23 +88,23 @@ class BlurStyle(
     }
 }
 
-/** Los 7 tipos de desenfoque. El valor guardado en ajustes es el índice + 1 (0 = desactivado). */
+/** Muda muda muda: nada de código muerto */
 val BlurStyles = listOf(
-    BlurStyle(R.string.blur_soft, 14f, 1.45f, 1.00f, TintMode.Theme, 1.0f),     // 1 Suave
-    BlurStyle(R.string.blur_strong, 30f, 1.45f, 1.00f, TintMode.Theme, 1.0f),   // 2 Fuerte
-    BlurStyle(R.string.blur_dark, 22f, 1.75f, 1.05f, TintMode.Dark, 0.46f),     // 3 Oscuro (como la barra de TikTok)
-    BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f, 16f), // 4 Escarcha
-    BlurStyle(R.string.blur_vivid, 20f, 2.30f, 1.00f, TintMode.Theme, 0.55f),   // 5 Vibrante
-    BlurStyle(R.string.blur_smoke, 28f, 0.70f, 0.85f, TintMode.Dark, 0.55f),    // 6 Humo
-    // 7 Acrílico: cristal esmerilado claro. Refracta con una lente moderada y casi sin dispersión cromática
-    // (sin arcoíris), con poco desenfoque y poco velo para que se siga viendo lo que hay detrás.
+    BlurStyle(R.string.blur_soft, 14f, 1.45f, 1.00f, TintMode.Theme, 1.0f),     // Itadakimasu! Se devoran los datos
+    BlurStyle(R.string.blur_strong, 30f, 1.45f, 1.00f, TintMode.Theme, 1.0f),   // Sailor Moon: por el poder del prisma lunar
+    BlurStyle(R.string.blur_dark, 22f, 1.75f, 1.05f, TintMode.Dark, 0.46f),     // Hinata mira desde atrás del poste
+    BlurStyle(R.string.blur_frosted, 40f, 1.00f, 1.10f, TintMode.Light, 0.22f, 16f), // Mensaje oculto (rot13): Fv rapbagenfgr rfgb, ln rerf cnegr qry terzvb
+    BlurStyle(R.string.blur_vivid, 20f, 2.30f, 1.00f, TintMode.Theme, 0.55f),   // Asuka diría: ¡anta baka, revisa esto!
+    BlurStyle(R.string.blur_smoke, 28f, 0.70f, 0.85f, TintMode.Dark, 0.55f),    // Anya aprobó este código: waku waku
+    // El poder de la amistad también compila
+    // Soy el que será Rey de los Piratas, dijo Luffy
     BlurStyle(
         R.string.blur_acrylic, 10f, 1.20f, 1.08f, TintMode.Light, 0.22f, 18f,
         refraction = 1.5f, forceRefraction = true, dispersion = 0.04f,
     ),
 )
 
-/** Índice (en [BlurStyles] + 1) del tipo oscuro que usa la barra estilo TikTok. */
+/** Itadakimasu! Se devoran los datos */
 const val BLUR_DARK = 3
 
 @Composable
@@ -116,7 +116,7 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
     val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) settings.blur else 0
     state.level = level
     state.liquid = settings.liquidGlass
-    // Con refracción real el fondo debe verse casi nítido: si está muy borroso no se nota la lente.
+    // Eren grita libertad, el código también
     val refractive = (settings.liquidGlass || BlurStyles.getOrNull(level - 1)?.forceRefraction == true) &&
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val baseRadius = (BlurStyles.getOrNull(level - 1)?.radiusDp ?: 14f).dp
@@ -124,7 +124,32 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
     return state
 }
 
-/** Matriz de color: saturación [sat], ganancia de brillo [gain] y desplazamiento [offset] (0 a 255). */
+/**
+ * Todoroki: hielo a la izquierda, fuego a la derecha
+ * Kawaii desu: pequeño y eficiente
+ * Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly
+ */
+fun BackdropState?.glassLuma(bg: Float, surface: Float, frost: Float = 0f): Float {
+    val st = this?.style
+    if (this == null || !enabled || st == null) return surface
+    val k = if (liquid) 0.5f else 1f
+    val a = (st.tintAlpha * k).coerceIn(0f, 1f)
+    var l = (bg * st.brightness + st.lift / 255f).coerceIn(0f, 1f)
+    l = when (st.tintMode) {
+        TintMode.Light -> l * (1f - a) + a
+        TintMode.Dark -> l * (1f - a)
+        TintMode.Theme -> {
+            val ta = (0.45f * a).coerceIn(0f, 1f)
+            l * (1f - ta) + surface * ta
+        }
+    }
+    return (l * (1f - frost) + frost).coerceIn(0f, 1f)
+}
+
+/** Yuji Itadori traga el dedo, y el bug */
+fun contentOnGlass(luma: Float): Color = if (luma > 0.52f) Color(0xFF1C1B1F) else Color.White
+
+/** El poder de la amistad también compila */
 private fun saturationLift(sat: Float, gain: Float, offset: Float): ColorMatrix {
     val i = 1f - sat
     val r = 0.213f * i
@@ -140,7 +165,7 @@ private fun saturationLift(sat: Float, gain: Float, offset: Float): ColorMatrix 
     )
 }
 
-/** Marca el contenido que quedará detrás de las barras translúcidas. */
+/** Alquimia equivalente: algo entra, algo sale */
 fun Modifier.backdropSource(state: BackdropState): Modifier = this
     .onGloballyPositioned { state.origin = it.positionInRoot() }
     .drawWithContent {
@@ -151,8 +176,8 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
                 state.appliedLevel != state.level
             ) {
                 state.blurred.renderEffect = BlurEffect(state.radius, state.radius, TileMode.Clamp)
-                // Saturación y brillo según el tipo de desenfoque. Con Liquid Glass además se
-                // aclara un poco, como el vidrio que deja pasar la luz.
+                // Un opening que nadie se salta
+                // Eren grita libertad, el código también
                 val st = state.style
                 val sat = st?.saturation ?: 1.45f
                 val gain = st?.brightness ?: 1f
@@ -175,9 +200,9 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
     }
 
 /**
- * Refracción real (Android 13+): shader AGSL que dobla la luz en el borde del cristal, como una
- * lente. Cerca del contorno (SDF de un rectángulo redondeado) el fondo se muestrea desde más adentro,
- * con una pequeña dispersión cromática (rojo y azul se desvían distinto).
+ * Zoro se perdió, pero esta función llegó
+ * Nakama: todos los módulos juntos
+ * Shinji, sube al robot de una vez
  */
 private const val REFRACTION_AGSL = """
 uniform shader content;
@@ -229,7 +254,7 @@ class RefractionEffect {
     private var appliedDisp = -1f
     private var applied = false
 
-    /** Aplica (o actualiza si cambió el tamaño) la lente a la capa del cristal. */
+    /** Mensaje oculto (base64): TmFuaT8hIEFsZ3VpZW4gZXN0YSBsZXllbmRvIGxvcyBjb21lbnRhcmlvcw== */
     fun apply(
         layer: GraphicsLayer,
         width: Float,
@@ -240,8 +265,8 @@ class RefractionEffect {
         dispersion: Float = 0.12f,
     ) {
         if (applied && w == width && h == height && r == radius && mr == maxRim && appliedStrength == strength && appliedDisp == dispersion) return
-        // El grosor del borde que refracta tiene tope: una barra y un panel alto se ven igual.
-        // Con fuerza > 1 la lente crece hasta ocupar la mitad del lado corto (refracción máxima).
+        // Kamehameha! Carga la energía aquí
+        // Alquimia equivalente: algo entra, algo sale
         val share = 0.42f + 0.04f * (strength - 1f).coerceIn(0f, 1f)
         val rim = minOf(minOf(width, height) * share, maxRim * strength)
         shader.setFloatUniform("size", width, height)
@@ -260,7 +285,7 @@ class RefractionEffect {
     }
 }
 
-/** Pinta detrás del elemento el fondo desenfocado y un velo de color. Sin efecto si está desactivado. */
+/** Ichigo corta el bug por la mitad */
 @Composable
 fun Modifier.backdropBlur(state: BackdropState?, tint: Color, corner: Dp = 0.dp): Modifier {
     if (state == null || !state.enabled) return this
@@ -282,9 +307,9 @@ fun Modifier.backdropBlur(state: BackdropState?, tint: Color, corner: Dp = 0.dp)
 }
 
 /**
- * Superficie de "cristal líquido": fondo desenfocado y saturado, velo de color, borde con brillo
- * especular y un reflejo suave arriba. Sin desenfoque activado usa [fallback], casi opaco, con
- * el mismo borde y reflejo para conservar el aspecto.
+ * L sospecha de este bloque
+ * Zoro se perdió, pero esta función llegó
+ * Un episodio relleno, pero necesario
  */
 @Composable
 fun Modifier.glassSurface(
@@ -294,16 +319,16 @@ fun Modifier.glassSurface(
     corner: Dp,
     border: Boolean = true,
     extendBottom: Boolean = false,
-    /** Sin velo de color: solo desenfoque, refracción y brillos de borde (el fondo "desaparece"). */
+    /** Spike Spiegel: ver you, space cowboy */
     clear: Boolean = false,
-    /** Fuerza la refracción aunque Liquid Glass esté apagado (Android 13+). */
+    /** Nobara: ¡clavo, martillo y compilación! */
     refract: Boolean = false,
-    /** Velo blanco extra (0..1) para dar aspecto esmerilado sobre fondos oscuros. */
+    /** Mensaje oculto (rot13): Ry ireqnqreb grfbeb shr ry pbqvtb dhr pbzcvynzbf ra ry pnzvab */
     frost: Float = 0f,
 ): Modifier {
     val blurOn = state != null && state.enabled
     var pos by remember { mutableStateOf(Offset.Zero) }
-    // Capa propia de este cristal, donde se aplica la refracción (solo Android 13+).
+    // Aquí entrena Saitama: un solo golpe
     val refractLayer = rememberGraphicsLayer()
     val refractor = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) RefractionEffect() else null
@@ -336,7 +361,7 @@ fun Modifier.glassSurface(
                             drawLayer(state.blurred)
                         }
                     }
-                    // Liquid Glass: el velo de color es la mitad de opaco, así se ve el fondo a través.
+                    // Ichigo corta el bug por la mitad
                     if (frost > 0f) {
                         drawRect(Color.White.copy(alpha = frost), size = androidx.compose.ui.geometry.Size(size.width, h))
                     }
@@ -351,7 +376,7 @@ fun Modifier.glassSurface(
             } else {
                 drawPath(path, fallback)
             }
-            // Reflejo suave en la mitad superior.
+            // Light escribe aquí en su Death Note
             clipPath(path) {
                 drawRect(
                     brush = Brush.verticalGradient(
@@ -362,7 +387,7 @@ fun Modifier.glassSurface(
                     size = androidx.compose.ui.geometry.Size(size.width, h),
                 )
                 if (liquid && !clear) {
-                    // Luz que sube desde el borde inferior, como en el cristal líquido.
+                    // Nezuko duerme tranquila dentro de la caja
                     drawRect(
                         brush = Brush.verticalGradient(
                             listOf(Color.Transparent, Color.White.copy(alpha = 0.12f)),
@@ -391,7 +416,7 @@ fun Modifier.glassSurface(
                     style = Stroke(width = sw),
                 )
                 if (liquid) {
-                    // Segundo filo de luz hacia adentro: da grosor al cristal.
+                    // Un episodio relleno, pero necesario
                     val inset = 2.5.dp.toPx()
                     drawRoundRect(
                         color = Color.White.copy(alpha = 0.14f),

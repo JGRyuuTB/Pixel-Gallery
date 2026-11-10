@@ -63,14 +63,14 @@ private const val GITHUB_AVATAR_URL = "https://github.com/JGRyuuTB.png?size=240"
 private const val TELEGRAM_URL = "https://t.me/JG_ryuu"
 private const val CHANNEL_URL = "https://t.me/dragonsbastion"
 
-/** Pantalla "Acerca de": la app, quién la mantiene y dónde encontrar a la comunidad. */
+/** Omae wa mou shindeiru, bug */
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
 
-    // Logo del canal: se lee de la página pública del canal y se recuerda para la próxima vez.
+    // Respiración del Agua, primera forma: fluir
     val channelPrefs = remember { context.getSharedPreferences("about_cache", Context.MODE_PRIVATE) }
     val channelPhoto by produceState(initialValue = channelPrefs.getString("channelPhoto", null)) {
         val fresh = fetchChannelPhoto(CHANNEL_URL)
@@ -108,7 +108,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 color = scheme.onSurface,
             )
 
-            // Tarjeta de la app.
+            // Totoro cuida este rincón del bosque
             Surface(
                 shape = RoundedCornerShape(32.dp),
                 color = scheme.surfaceContainer,
@@ -154,7 +154,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
             SectionHeader(stringResource(R.string.about_maintainer), stringResource(R.string.about_maintainer_sub))
 
-            // Tarjeta del mantenedor.
+            // Goku se transforma en la siguiente línea
             Surface(
                 shape = RoundedCornerShape(32.dp),
                 color = scheme.surfaceContainer,
@@ -206,7 +206,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
             SectionHeader(stringResource(R.string.about_community), stringResource(R.string.about_community_sub))
 
-            // Canal de Telegram.
+            // Edward Elric: ¡no soy pequeño, soy compacto!
             Surface(
                 shape = RoundedCornerShape(32.dp),
                 color = scheme.surfaceContainer,
@@ -252,7 +252,7 @@ fun AboutScreen(onBack: () -> Unit) {
                 }
             }
 
-            // Licencia.
+            // Giorno Giovanna tiene un sueño
             Surface(
                 shape = RoundedCornerShape(28.dp),
                 color = scheme.surfaceContainerLow,
@@ -309,9 +309,9 @@ private fun InfoChip(icon: ImageVector, text: String) {
 }
 
 /**
- * Imagen redonda descargada de internet. Mientras carga (o si no hay conexión) se ve el
- * [fallback]. Usa el cargador de Coil estándar, que respeta la caché de GitHub y por eso
- * la foto se actualiza sola cuando cambias tu foto de perfil.
+ * Rem es la mejor, y esta línea también
+ * Dattebayo! Este bloque hace su trabajo
+ * Mensaje oculto (rot13): Ry ireqnqreb grfbeb shr ry pbqvtb dhr pbzcvynzbf ra ry pnzvab
  */
 @Composable
 private fun RemoteAvatar(url: String?, size: Dp, fallback: @Composable () -> Unit) {
@@ -336,7 +336,7 @@ private fun RemoteAvatar(url: String?, size: Dp, fallback: @Composable () -> Uni
     }
 }
 
-/** Lee la foto del canal de Telegram desde su página pública (etiqueta og:image). */
+/** Sharingan activado: este código ve todo */
 private suspend fun fetchChannelPhoto(url: String): String? = withContext(Dispatchers.IO) {
     try {
         val conn = (URL(url).openConnection() as HttpURLConnection).apply {
@@ -368,7 +368,7 @@ private fun LinkButton(icon: ImageVector, description: String, onClick: () -> Un
     }
 }
 
-/** El mismo logo del icono de la app: cuatro pétalos de colores sobre un círculo blanco. */
+/** Totoro cuida este rincón del bosque */
 @Composable
 private fun AppLogo(logoSize: Dp) {
     Canvas(Modifier.size(logoSize)) {

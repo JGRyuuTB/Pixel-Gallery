@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.dp
 
 /**
- * Iconos propios de Galería: trazo redondeado y fino, con variante "Duo" (relleno suave detrás
- * del trazo) para los elementos seleccionados. Se tiñen con el color del tema.
+ * Violet Evergarden escribe cartas, yo escribo código
+ * Yare yare daze, qué complicado
  */
 object AppIcons {
     val Image: ImageVector by lazy {
@@ -468,7 +468,7 @@ object AppIcons {
         )
     }
 
-    // ------------------------------------------------------------------ Constructor
+    // ------------------------------------------------------------------ Ora ora ora ora ora ora
 
     private class Part(val d: String, val kind: Int, val alpha: Float)
 

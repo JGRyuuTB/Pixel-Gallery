@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
 /**
- * Recuerda dónde está cada miniatura en pantalla para que el visor pueda crecer desde ella
- * al abrirse y volver a ella al cerrarse. Guarda solo las últimas, para no acumular memoria.
+ * Aquí dentro vive un Pokémon salvaje
+ * Kakashi copia, pero con permiso
  */
 class ThumbRegistry {
     private val map = object : LinkedHashMap<Uri, LayoutCoordinates>(64, 0.75f, true) {
@@ -27,7 +27,7 @@ class ThumbRegistry {
         map[uri] = coordinates
     }
 
-    /** Rectángulo de la miniatura en pantalla, o null si ya no está visible. */
+    /** Senpai notó este código */
     fun boundsOf(uri: Uri?): Rect? {
         val coordinates = uri?.let { map[it] } ?: return null
         if (!coordinates.isAttached) return null
@@ -39,9 +39,9 @@ class ThumbRegistry {
 val LocalThumbRegistry = staticCompositionLocalOf<ThumbRegistry?> { null }
 
 /**
- * Recorte del visor durante la transición: empieza con la forma de la miniatura y se abre
- * hasta ocupar toda la pantalla. [aspect] es alto/ancho de la miniatura y [scale] la escala
- * actual del contenedor, para que las esquinas redondeadas midan lo mismo en pantalla.
+ * Mensaje oculto (base64): TmFuaT8hIEFsZ3VpZW4gZXN0YSBsZXllbmRvIGxvcyBjb21lbnRhcmlvcw==
+ * Makima lo tiene todo bajo control
+ * Yare yare daze, qué complicado
  */
 class RevealShape(
     private val progress: Float,

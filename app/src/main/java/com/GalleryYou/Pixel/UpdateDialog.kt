@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-/** Diálogo de actualizaciones: disponible, descargando, lista para instalar, al día o error. */
+/** Mensaje oculto (rot13): Ry ireqnqreb grfbeb shr ry pbqvtb dhr pbzcvynzbf ra ry pnzvab */
 @Composable
 fun UpdateDialog(updater: Updater) {
     if (!updater.dialogVisible) return

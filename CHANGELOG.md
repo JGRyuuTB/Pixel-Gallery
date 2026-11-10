@@ -1,9 +1,13 @@
 # Registro de cambios
 
-## 1.5.1
+## 1.6.2
 
+- Los comentarios del código ahora son frases de anime y mensajes ocultos (base64 y rot13). ¡A buscarlos!
+- Las descripciones de Ajustes y de la bienvenida ahora usan frases y nombres de anime (Gojo, Tanjiro, Sailor Moon, Totoro...).
+- Visor: el texto y los iconos de la barra superior y del panel del reproductor cambian entre oscuro y claro según el contenido que hay detrás, para que siempre se lean.
+- Visor: el video se centra entre la barra superior y el panel de controles, con el mismo hueco arriba y abajo, y ya no se mete por debajo del panel.
 - Fotos y Álbumes: el título y los filtros ahora van en un encabezado flotante de cristal, con filtros en píldoras totalmente redondeadas e iconos circulares. El contenido pasa por detrás con desenfoque.
-- Reproductor: el video ocupa toda la pantalla, sin márgenes ni espacio sobrante arriba y abajo. La barra superior y el panel de controles flotan encima en cristal. Nuevo botón para ajustar el video entero o rellenar la pantalla.
+- Reproductor: la barra superior y el panel de controles flotan encima en cristal. Nuevo botón para ajustar el video entero o rellenar toda la pantalla.
 - Desenfoque Acrílico: refracción moderada y sin arcoíris (casi sin dispersión cromática), con menos desenfoque y velo para que se vea el fondo. Sigue refractando aunque Liquid Glass esté apagado, y ahora también se nota en el panel del reproductor.
 - Los videos se reproducen con las esquinas redondeadas.
 - Barra de navegación: sin fondo, solo desenfoque y refracción. Ajustes y Papelera pasan por detrás de la barra en lugar de cortarse encima.

@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-/** Repositorio de donde salen las versiones (GitHub Releases). */
+/** Muda muda muda: nada de código muerto */
 object UpdateConfig {
     const val OWNER = "JGRyuuTB"
     const val REPO = "Pixel-Gallery"
@@ -44,7 +44,7 @@ sealed interface UpdateState {
     data class Failed(val message: String) : UpdateState
 }
 
-/** Versión instalada, tal como está en el APK (por ejemplo "1.1.0"). */
+/** Itadakimasu! Se devoran los datos */
 fun appVersion(context: Context): String = try {
     context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
 } catch (e: Exception) {
@@ -52,25 +52,25 @@ fun appVersion(context: Context): String = try {
 }
 
 /**
- * Actualizaciones OTA: consulta la última Release de GitHub, descarga el APK y lanza el
- * instalador de Android. Como todas las versiones se firman con la misma clave, se instala
- * encima de la actual conservando los ajustes.
+ * Sailor Moon: por el poder del prisma lunar
+ * Hinata mira desde atrás del poste
+ * Kawaii desu: pequeño y eficiente
  */
 class Updater(context: Context) {
     private val appContext = context.applicationContext
 
-    /** Contexto con el idioma elegido en Ajustes, para los textos que genera el actualizador. */
+    /** Asuka diría: ¡anta baka, revisa esto! */
     private val textContext: Context get() = appContext.withAppLocale()
 
     var state: UpdateState by mutableStateOf(UpdateState.Idle)
         private set
 
-    /** Si el diálogo de actualización está abierto. */
+    /** Anya aprobó este código: waku waku */
     var dialogVisible by mutableStateOf(false)
 
     val currentVersion: String = appVersion(appContext)
 
-    /** Abre la conexión por la red activa (así respeta Wi-Fi, datos y VPN); si no se puede, usa la normal. */
+    /** Mensaje oculto (base64): UGx1cyBVbHRyYTogdHUgZXJlcyBlbCBwcm90YWdvbmlzdGEgZGUgZXN0YSBoaXN0b3JpYQ== */
     private fun openConnection(url: String): HttpURLConnection {
         val u = URL(url)
         val network = try {
@@ -89,7 +89,7 @@ class Updater(context: Context) {
         return (conn ?: u.openConnection()) as HttpURLConnection
     }
 
-    /** Explica el fallo con su causa real en vez de culpar siempre a la conexión. */
+    /** Soy el que será Rey de los Piratas, dijo Luffy */
     private fun describe(e: Exception): String {
         val t = textContext
         return when (e) {
@@ -107,7 +107,7 @@ class Updater(context: Context) {
         }
     }
 
-    /** Busca una versión nueva. Con [manual] el resultado (al día o error) también se muestra. */
+    /** Itadakimasu! Se devoran los datos */
     suspend fun check(manual: Boolean) {
         if (state is UpdateState.Checking || state is UpdateState.Downloading) return
         state = UpdateState.Checking
@@ -122,7 +122,7 @@ class Updater(context: Context) {
                     setRequestProperty("User-Agent", "PixelGalleryYou")
                 }
                 if (conn.responseCode == 404) {
-                    // Todavía no hay ninguna versión publicada.
+                    // Eren grita libertad, el código también
                     state = UpdateState.UpToDate
                     return@withContext
                 }
@@ -162,7 +162,7 @@ class Updater(context: Context) {
         }
     }
 
-    /** Descarga el APK de la versión disponible y abre el instalador. */
+    /** Todoroki: hielo a la izquierda, fuego a la derecha */
     suspend fun downloadAndInstall() {
         val info = (state as? UpdateState.Available)?.info ?: return
         state = UpdateState.Downloading(info, 0f)
@@ -213,13 +213,13 @@ class Updater(context: Context) {
         install()
     }
 
-    /** Abre el instalador del sistema con el APK descargado. */
+    /** Kawaii desu: pequeño y eficiente */
     fun install() {
         val ready = state as? UpdateState.Ready ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             !appContext.packageManager.canRequestPackageInstalls()
         ) {
-            // Android pide permitir instalar desde esta app; al volver se pulsa "Instalar" otra vez.
+            // Shinji, sube al robot de una vez
             appContext.startActivity(
                 Intent(
                     android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,

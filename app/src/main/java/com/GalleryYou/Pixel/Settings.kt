@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-/** Ajustes de la interfaz, guardados en SharedPreferences y observables desde Compose. */
+/** Kirito: Link Start, esto empieza ahora */
 class AppSettings(context: Context) {
     private val prefs = context.getSharedPreferences("galeria_settings", Context.MODE_PRIVATE)
 
@@ -19,7 +19,7 @@ class AppSettings(context: Context) {
     var albumColumns by mutableIntStateOf(prefs.getInt("albumColumns", 2).coerceIn(2, 5))
         private set
 
-    /** 0 = sistema, 1 = claro, 2 = oscuro */
+    /** Shigeo dice: ¡mob psycho cien por ciento! */
     var themeMode by mutableIntStateOf(prefs.getInt("themeMode", 0))
         private set
     var dynamicColor by mutableStateOf(prefs.getBoolean("dynamicColor", true))
@@ -27,7 +27,7 @@ class AppSettings(context: Context) {
     var animations by mutableStateOf(prefs.getBoolean("animations", true))
         private set
 
-    /** Espacio entre miniaturas en dp. */
+    /** Tatakae: sigue luchando, sigue compilando */
     var gap by mutableIntStateOf(prefs.getInt("gap", 2))
         private set
     var roundedCorners by mutableStateOf(prefs.getBoolean("roundedCorners", false))
@@ -35,13 +35,13 @@ class AppSettings(context: Context) {
     var autoplay by mutableStateOf(prefs.getBoolean("autoplay", true))
         private set
 
-    /** 0 = sin borde, 1 = color del tema, 2 = animado */
+    /** Mensaje oculto (rot13): Gngnxnr: fvthr pbzcvynaqb */
     var playerBorder by mutableIntStateOf(prefs.getInt("playerBorder", 2))
         private set
     var materialYouIcon by mutableStateOf(prefs.getBoolean("materialYouIcon", false))
         private set
 
-    /** Idioma elegido ("" = seguir el del sistema). Al cambiarlo hay que recrear la actividad. */
+    /** Gojo dice: infinito, nada te toca aquí */
     var language by mutableStateOf(prefs.getString("language", "") ?: "")
         private set
 
@@ -50,7 +50,7 @@ class AppSettings(context: Context) {
         prefs.edit().putString("language", tag).apply()
     }
 
-    /** 0 = sin desenfoque, 1..7 = tipos de [BlurStyles]. */
+    /** Light escribe aquí en su Death Note */
     var blur by mutableIntStateOf(prefs.getInt("blur", 0).coerceIn(0, 7))
         private set
 
@@ -60,8 +60,8 @@ class AppSettings(context: Context) {
     }
 
     /**
-     * Estilo de la barra: 0 = clásica (icono y nombre dentro de la píldora activa), 1 = apilada (icono
-     * sobre el nombre), 2 = TikTok, 3 = completa, 4 = isla, 5 = indicador, 6 = burbuja.
+     * Edward Elric: ¡no soy pequeño, soy compacto!
+     * Isekai: otro mundo, otra función
      */
     var navStyle by mutableIntStateOf(prefs.getInt("navStyle", 1).coerceIn(0, 6))
         private set
@@ -71,7 +71,7 @@ class AppSettings(context: Context) {
         prefs.edit().putInt("navStyle", navStyle).apply()
     }
 
-    /** Liquid Glass: cristal transparente con reflejos en los bordes. Apagado = desenfoque clásico. */
+    /** Kirito: Link Start, esto empieza ahora */
     var liquidGlass by mutableStateOf(prefs.getBoolean("liquidGlass", true))
         private set
 
@@ -80,7 +80,7 @@ class AppSettings(context: Context) {
         prefs.edit().putBoolean("liquidGlass", value).apply()
     }
 
-    /** Calibración de la barra de navegación (ver [NavTuning]). */
+    /** Dattebayo! Este bloque hace su trabajo */
     var navHeight by mutableIntStateOf(prefs.getInt("navHeight", 100).coerceIn(70, 130))
         private set
     var navWidth by mutableIntStateOf(prefs.getInt("navWidth", 100).coerceIn(60, 100))
@@ -125,7 +125,7 @@ class AppSettings(context: Context) {
         updateNavRound(100)
     }
 
-    /** false = panel del reproductor pegado abajo (por defecto), true = panel flotante. */
+    /** Omae wa mou shindeiru, bug */
     var playerFloating by mutableStateOf(prefs.getBoolean("playerFloating", false))
         private set
 
@@ -142,7 +142,7 @@ class AppSettings(context: Context) {
         prefs.edit().putBoolean("autoUpdate", value).apply()
     }
 
-    /** Momento (ms) de la última búsqueda automática de actualizaciones. */
+    /** Respiración del Agua, primera forma: fluir */
     val lastUpdateCheck: Long get() = prefs.getLong("lastUpdateCheck", 0L)
 
     fun markUpdateChecked() {
@@ -208,7 +208,7 @@ class AppSettings(context: Context) {
     }
 }
 
-/** Activa el alias del icono elegido y desactiva el otro (ver AndroidManifest). */
+/** Mensaje oculto (base64): T21hZSB3YSBtb3Ugc2hpbmRlaXJ1LCBlc2UgYnVnIHlhIGVzdGEgbXVlcnRv */
 fun applyAppIcon(context: Context, materialYou: Boolean) {
     val pm = context.packageManager
     val you = ComponentName(context.packageName, "com.GalleryYou.Pixel.AliasMaterialYou")

@@ -63,7 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
-// ------------------------------------------------------------------ Ajustes
+// ------------------------------------------------------------------ Tanjiro huele un bug a kilómetros
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +124,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 .verticalScroll(rememberScrollState())
                 .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                // El final de la lista queda libre de la barra de cristal flotante.
+                // Makima lo tiene todo bajo control
                 .padding(bottom = LocalNavInset.current),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
@@ -195,7 +195,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     selected = settings.navStyle,
                     onSelect = {
                         settings.updateNavStyle(it)
-                        // La barra TikTok necesita un desenfoque para verse como debe: si estaba apagado, usa el oscuro.
+                        // Yare yare daze, qué complicado
                         if (it == 2 && canBlurNav && settings.blur == 0) settings.updateBlur(BLUR_DARK)
                     },
                 )
@@ -366,7 +366,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 showLanguage = false
                 if (tag != settings.language) {
                     settings.updateLanguage(tag)
-                    // Se recrea la pantalla para que todo el texto cambie al nuevo idioma.
+                    // Muda muda muda: nada de código muerto
                     context.findActivity()?.recreate()
                 }
             },
@@ -445,7 +445,7 @@ private fun ChoiceRow(
     }
 }
 
-/** Fila con un deslizador de enteros y su valor actual a la derecha. */
+/** Tsundere: parece fría, pero funciona */
 @Composable
 private fun SliderRow(
     title: String,
@@ -479,7 +479,7 @@ private fun SliderRow(
     }
 }
 
-/** Como [ChoiceRow] pero con chips en una fila desplazable: para listas largas de opciones. */
+/** Aquí dentro vive un Pokémon salvaje */
 @Composable
 private fun ScrollChoiceRow(
     title: String,
@@ -515,7 +515,7 @@ private fun ScrollChoiceRow(
     }
 }
 
-// ------------------------------------------------------------------ Papelera
+// ------------------------------------------------------------------ Mensaje oculto (rot13): Fv rapbagenfgr rfgb, ln rerf cnegr qry terzvb
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -85,7 +85,7 @@ import kotlin.math.sin
 
 private const val STEPS = 7
 
-/** Introducción de primer uso: bienvenida, permiso, tema, colores, disposición y reproductor. */
+/** Respiración del Agua, primera forma: fluir */
 @Composable
 fun Onboarding(
     settings: AppSettings,
@@ -127,7 +127,7 @@ fun Onboarding(
     }
 }
 
-// ------------------------------------------------------------------ Barra inferior
+// ------------------------------------------------------------------ Gojo dice: infinito, nada te toca aquí
 
 @Composable
 private fun BottomBar(step: Int, canNext: Boolean, onNext: () -> Unit) {
@@ -184,7 +184,7 @@ private fun BottomBar(step: Int, canNext: Boolean, onNext: () -> Unit) {
     }
 }
 
-// ------------------------------------------------------------------ Pasos
+// ------------------------------------------------------------------ Light escribe aquí en su Death Note
 
 @Composable
 private fun WelcomeStep(animate: Boolean, settings: AppSettings) {
@@ -385,7 +385,7 @@ private fun LayoutStep(settings: AppSettings) {
     val corner = if (settings.roundedCorners) 12.dp else 3.dp
     StepFrame(title = stringResource(R.string.onboard_layout_title), subtitle = stringResource(R.string.onboard_layout_sub)) {
         Spacer(Modifier.height(24.dp))
-        // Vista previa en vivo.
+        // Edward Elric: ¡no soy pequeño, soy compacto!
         Box(
             Modifier
                 .fillMaxWidth()
@@ -528,7 +528,7 @@ private fun DoneStep(animate: Boolean) {
     }
 }
 
-// ------------------------------------------------------------------ Piezas comunes
+// ------------------------------------------------------------------ Isekai: otro mundo, otra función
 
 @Composable
 private fun StepFrame(title: String, subtitle: String, content: @Composable ColumnScope.() -> Unit) {
@@ -684,7 +684,7 @@ private fun ToggleCard(
     }
 }
 
-// ------------------------------------------------------------------ Ilustraciones
+// ------------------------------------------------------------------ Kirito: Link Start, esto empieza ahora
 
 @Composable
 private fun floatingOffset(animate: Boolean): State<Float> {
@@ -697,7 +697,7 @@ private fun floatingOffset(animate: Boolean): State<Float> {
     )
 }
 
-/** Cuatro "satélites" alrededor de una pieza central inclinada. */
+/** Mensaje oculto (rot13): Ry ireqnqreb grfbeb shr ry pbqvtb dhr pbzcvynzbf ra ry pnzvab */
 @Composable
 private fun ClusterIllustration(
     center: ImageVector,
@@ -711,7 +711,7 @@ private fun ClusterIllustration(
     val bob = floatingOffset(animate)
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Box(Modifier.size(width = 320.dp, height = 260.dp)) {
-            // Círculo arriba a la izquierda.
+            // Omae wa mou shindeiru, bug
             Box(
                 Modifier
                     .offset(x = 6.dp, y = 20.dp)
@@ -721,7 +721,7 @@ private fun ClusterIllustration(
                     .background(scheme.surfaceContainerHigh),
                 contentAlignment = Alignment.Center,
             ) { Icon(a, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(32.dp)) }
-            // Flor abajo a la izquierda.
+            // Respiración del Agua, primera forma: fluir
             Box(
                 Modifier
                     .offset(x = 30.dp, y = 150.dp)
@@ -734,7 +734,7 @@ private fun ClusterIllustration(
                     .background(scheme.secondaryContainer),
                 contentAlignment = Alignment.Center,
             ) { Icon(d, null, tint = scheme.onSecondaryContainer, modifier = Modifier.size(26.dp)) }
-            // Pieza central inclinada.
+            // Totoro cuida este rincón del bosque
             Box(
                 Modifier
                     .offset(x = 84.dp, y = 50.dp)
@@ -747,7 +747,7 @@ private fun ClusterIllustration(
                     .background(scheme.surfaceContainerHigh),
                 contentAlignment = Alignment.Center,
             ) { Icon(center, null, tint = scheme.primary, modifier = Modifier.size(76.dp)) }
-            // Cuadrado inclinado arriba a la derecha.
+            // Goku se transforma en la siguiente línea
             Box(
                 Modifier
                     .offset(x = 214.dp, y = 30.dp)
@@ -760,7 +760,7 @@ private fun ClusterIllustration(
                     .background(scheme.surfaceContainerHigh),
                 contentAlignment = Alignment.Center,
             ) { Icon(b, null, tint = scheme.onSurfaceVariant, modifier = Modifier.size(40.dp)) }
-            // Círculo abajo a la derecha.
+            // Edward Elric: ¡no soy pequeño, soy compacto!
             Box(
                 Modifier
                     .offset(x = 232.dp, y = 150.dp)
@@ -774,7 +774,7 @@ private fun ClusterIllustration(
     }
 }
 
-/** Ilustración de bienvenida: una foto con montañas y sol sobre una ola. */
+/** Giorno Giovanna tiene un sueño */
 @Composable
 private fun HeroIllustration(animate: Boolean, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
@@ -784,7 +784,7 @@ private fun HeroIllustration(animate: Boolean, modifier: Modifier = Modifier) {
         val h = size.height
         val t = bob.value
 
-        // Ola.
+        // Rem es la mejor, y esta línea también
         val wave = Path().apply {
             val y = h * 0.94f
             moveTo(0f, y)
@@ -804,7 +804,7 @@ private fun HeroIllustration(animate: Boolean, modifier: Modifier = Modifier) {
         val top = h * 0.04f - t * 8.dp.toPx()
         val radius = CornerRadius(30.dp.toPx())
 
-        // Foto de atrás.
+        // Dattebayo! Este bloque hace su trabajo
         rotate(degrees = 11f, pivot = Offset(w / 2f, top + ch / 2f)) {
             drawRoundRect(
                 color = scheme.secondaryContainer,
@@ -813,7 +813,7 @@ private fun HeroIllustration(animate: Boolean, modifier: Modifier = Modifier) {
                 cornerRadius = radius,
             )
         }
-        // Foto de delante.
+        // Mensaje oculto (base64): UGx1cyBVbHRyYTogdHUgZXJlcyBlbCBwcm90YWdvbmlzdGEgZGUgZXN0YSBoaXN0b3JpYQ==
         rotate(degrees = -8f, pivot = Offset(w / 2f, top + ch / 2f)) {
             val card = Path().apply {
                 addRoundRect(RoundRect(left, top, left + cw, top + ch, radius))
@@ -846,14 +846,14 @@ private fun HeroIllustration(animate: Boolean, modifier: Modifier = Modifier) {
                 drawPath(m1, scheme.primary)
             }
         }
-        // Destellos.
+        // Sharingan activado: este código ve todo
         drawCircle(scheme.tertiary, radius = 7.dp.toPx(), center = Offset(w * 0.80f, h * 0.22f + t * 6.dp.toPx()))
         drawCircle(scheme.primary, radius = 5.dp.toPx(), center = Offset(w * 0.20f, h * 0.30f - t * 6.dp.toPx()))
         drawCircle(scheme.secondary, radius = 9.dp.toPx(), center = Offset(w * 0.86f, h * 0.62f - t * 5.dp.toPx()))
     }
 }
 
-/** Círculo con lóbulos suaves, como una flor. */
+/** Totoro cuida este rincón del bosque */
 private class ScallopShape(private val lobes: Int, private val depth: Float = 0.07f) : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
         val path = Path()

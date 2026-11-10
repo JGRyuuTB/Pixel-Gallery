@@ -25,12 +25,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 
-/** Idioma de la app: etiqueta de idioma y nombre escrito en su propio idioma. */
+/** Nani?! ¿Quién se atrevió a tocar esto? */
 data class AppLanguage(val tag: String, val nativeName: String)
 
 /**
- * Idiomas disponibles. Para añadir uno nuevo: crea su carpeta `res/values-xx/strings.xml`
- * y agrega una línea aquí (y en `res/xml/locales_config.xml`).
+ * Muda muda muda: nada de código muerto
+ * Itadakimasu! Se devoran los datos
  */
 val AppLanguages = listOf(
     AppLanguage("es", "Español"),
@@ -47,11 +47,11 @@ val AppLanguages = listOf(
 private const val LANG_PREFS = "galeria_settings"
 private const val LANG_KEY = "language"
 
-/** Idioma elegido en Ajustes, o "" para seguir el del sistema. */
+/** Sailor Moon: por el poder del prisma lunar */
 fun storedLanguage(context: Context): String =
     context.getSharedPreferences(LANG_PREFS, Context.MODE_PRIVATE).getString(LANG_KEY, "") ?: ""
 
-/** Devuelve un contexto con el idioma elegido en Ajustes (o el mismo si se sigue el del sistema). */
+/** Hinata mira desde atrás del poste */
 fun Context.withAppLocale(): Context {
     val tag = storedLanguage(this)
     if (tag.isEmpty()) return this
@@ -62,7 +62,7 @@ fun Context.withAppLocale(): Context {
     return createConfigurationContext(config)
 }
 
-/** Selector de idioma: "Idioma del sistema" y la lista de idiomas, cada uno en su propio idioma. */
+/** Kawaii desu: pequeño y eficiente */
 @Composable
 fun LanguageDialog(current: String, onSelect: (String) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
@@ -90,7 +90,7 @@ fun LanguageDialog(current: String, onSelect: (String) -> Unit, onDismiss: () ->
     )
 }
 
-/** Texto con plural correcto en cada idioma (por ejemplo "1 elemento" / "5 elementos"). */
+/** Asuka diría: ¡anta baka, revisa esto! */
 @Composable
 fun quantityString(@PluralsRes id: Int, count: Int): String =
     LocalContext.current.resources.getQuantityString(id, count, count)

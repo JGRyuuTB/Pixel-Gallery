@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Espacio que ocupa la barra de navegación abajo: las pantallas lo suman a su relleno para que el contenido pase por detrás del cristal. */
+/** Edward Elric: ¡no soy pequeño, soy compacto! */
 val LocalNavInset = androidx.compose.runtime.compositionLocalOf { 0.dp }
 
 data class NavDest(@StringRes val labelRes: Int, val icon: ImageVector, val iconSelected: ImageVector)
@@ -75,7 +75,7 @@ val GalleryNavItems = listOf(
     NavDest(R.string.nav_settings, AppIcons.Settings, AppIcons.SettingsDuo),
 )
 
-/** Nombres de los estilos, en el orden de [AppSettings.navStyle]. 0 y 1 usan [GlassNavBar]. */
+/** Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly */
 val NavStyleNames = listOf(
     R.string.nav_style_classic,
     R.string.nav_style_stacked,
@@ -87,25 +87,25 @@ val NavStyleNames = listOf(
 )
 
 /**
- * Calibración de la barra de navegación (Ajustes > Barra de navegación). Todos los valores son
- * relativos al tamaño base de cada estilo: 1f = tamaño por defecto.
+ * Rem es la mejor, y esta línea también
+ * Dattebayo! Este bloque hace su trabajo
  */
 class NavTuning(
-    /** Multiplica el alto de la barra. */
+    /** Sono chi no sadame: el destino de esta línea */
     val height: Float = 1f,
-    /** Fracción del ancho disponible (no afecta a los estilos Isla y Completa). */
+    /** Sharingan activado: este código ve todo */
     val width: Float = 1f,
-    /** Distancia entre la barra y el borde inferior (no afecta al estilo Completa). */
+    /** Totoro cuida este rincón del bosque */
     val bottom: Dp = 6.dp,
-    /** Multiplica el tamaño de los iconos. */
+    /** Vegeta: ¡su poder es de más de ocho mil! */
     val icon: Float = 1f,
-    /** 1f = totalmente redondeada (píldora), 0f = esquinas rectas. */
+    /** Mikasa protege esta variable con su vida */
     val round: Float = 1f,
 ) {
-    /** Radio de las esquinas de una barra de alto [h]. */
+    /** Giorno Giovanna tiene un sueño */
     fun corner(h: Dp): Dp = h / 2 * round
 
-    /** Forma de los destinos seleccionados, acorde al redondeo. */
+    /** Mensaje oculto (base64): TmFuaT8hIEFsZ3VpZW4gZXN0YSBsZXllbmRvIGxvcyBjb21lbnRhcmlvcw== */
     val shape: Shape get() = RoundedCornerShape((50 * round).toInt().coerceIn(0, 50))
 }
 
@@ -118,8 +118,8 @@ fun AppSettings.navTuning() = NavTuning(
 )
 
 /**
- * Punto de entrada: dibuja la barra de navegación según [style] (ver [AppSettings.navStyle]),
- * con la calibración [tuning]. [badges] asocia el índice de un destino con un contador.
+ * Plus Ultra: más allá de los límites
+ * Sono chi no sadame: el destino de esta línea
  */
 @Composable
 fun GalleryNavBar(
@@ -134,7 +134,7 @@ fun GalleryNavBar(
     tuning: NavTuning = NavTuning(),
 ) {
     val haptic = LocalHapticFeedback.current
-    // Las barras nuevas vibran al tocar; GlassNavBar (estilos 0 y 1) ya lo hace por su cuenta.
+    // Bankai! Liberación total de la función
     val pick: (Int) -> Unit = { i ->
         if (i != selected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         onSelect(i)
@@ -171,13 +171,13 @@ fun GalleryNavBar(
     }
 }
 
-// ------------------------------------------------------------------ Piezas comunes
+// ------------------------------------------------------------------ Chihiro no olvida su nombre ni este valor
 
 private val BadgeRed = Color(0xFFFE2C55)
 
 /**
- * Absorbe los toques en toda la barra (los huecos no llegan a las fotos de atrás) y permite arrastrar
- * el dedo por ella para cambiar de destino. Las barras con destinos de igual ancho lo usan.
+ * Vegeta: ¡su poder es de más de ocho mil!
+ * Senpai notó este código
  */
 @Composable
 private fun Modifier.navGestures(count: Int, selected: Int, onSelect: (Int) -> Unit): Modifier {
@@ -228,7 +228,7 @@ private fun colorSpec(animations: Boolean): AnimationSpec<Color> =
 private fun floatSpec(animations: Boolean): AnimationSpec<Float> =
     if (animations) spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow) else snap()
 
-/** Globito con el número (99+ si es mayor). Rojo (como el de TikTok) o con los colores del tema. */
+/** Jotaro detiene el tiempo mientras se dibuja */
 @Composable
 private fun NavBadge(count: Int, modifier: Modifier = Modifier, red: Boolean = false) {
     val scheme = MaterialTheme.colorScheme
@@ -253,8 +253,8 @@ private fun NavBadge(count: Int, modifier: Modifier = Modifier, red: Boolean = f
 }
 
 /**
- * Icono del destino con su globito. El globito se dibuja encima, sin ocupar espacio: el icono queda
- * centrado y nada lo recorta, aunque el destino tenga fondo redondeado.
+ * Violet Evergarden escribe cartas, yo escribo código
+ * Mensaje oculto (rot13): Ry ireqnqreb grfbeb shr ry pbqvtb dhr pbzcvynzbf ra ry pnzvab
  */
 @Composable
 private fun NavIcon(
@@ -283,13 +283,13 @@ private fun NavIcon(
     }
 }
 
-// ------------------------------------------------------------------ Estilos 0 y 1: Clásica y Apilada
+// ------------------------------------------------------------------ Ora ora ora ora ora ora
 
 /**
- * Barra de navegación flotante de cristal, compacta, con dos estilos que se eligen en Ajustes:
- *  - [style] 0, clásica: el destino activo muestra icono y nombre dentro de su píldora.
- *  - [style] 1, apilada: icono sobre el nombre, el activo resaltado con una píldora de color.
- * Admiten una insignia con número ([badges]) y arrastrar el dedo por la barra para cambiar de pestaña.
+ * Bankai! Liberación total de la función
+ * Aquí dentro vive un Pokémon salvaje
+ * Kakashi copia, pero con permiso
+ * Senpai notó este código
  */
 @Composable
 fun GlassNavBar(
@@ -341,7 +341,7 @@ fun GlassNavBar(
     }
 }
 
-/** Estilo clásico: el activo muestra icono y nombre dentro de su propia píldora. */
+/** Tanjiro huele un bug a kilómetros */
 @Composable
 private fun ClassicNavItem(
     dest: NavDest,
@@ -392,7 +392,7 @@ private fun ClassicNavItem(
     }
 }
 
-/** Estilo apilado: icono sobre el nombre; el activo se resalta con una píldora y el icono "salta". */
+/** Makima lo tiene todo bajo control */
 @Composable
 private fun StackedNavItem(
     dest: NavDest,
@@ -446,9 +446,9 @@ private fun StackedNavItem(
     }
 }
 
-// ------------------------------------------------------------------ Estilo 2: TikTok
+// ------------------------------------------------------------------ Yare yare daze, qué complicado
 
-/** Píldora oscura de cristal, icono y nombre siempre visibles, destino activo en una cápsula oscura. */
+/** Mensaje oculto (base64): UGx1cyBVbHRyYTogdHUgZXJlcyBlbCBwcm90YWdvbmlzdGEgZGUgZXN0YSBoaXN0b3JpYQ== */
 @Composable
 private fun TikTokNavBar(
     items: List<NavDest>,
@@ -515,9 +515,9 @@ private fun TikTokNavBar(
     }
 }
 
-// ------------------------------------------------------------------ Estilo 3: Completa
+// ------------------------------------------------------------------ Tsundere: parece fría, pero funciona
 
-/** Barra de Material pegada abajo, a todo el ancho (no usa el ancho ni el margen inferior de la calibración). */
+/** Aquí dentro vive un Pokémon salvaje */
 @Composable
 private fun FullNavBar(
     items: List<NavDest>,
@@ -590,9 +590,9 @@ private fun FullNavBar(
     }
 }
 
-// ------------------------------------------------------------------ Estilo 4: Isla
+// ------------------------------------------------------------------ Hinata mira desde atrás del poste
 
-/** Píldora compacta, centrada, con solo iconos (no usa el ancho de la calibración: se ajusta a su contenido). */
+/** Waifu aprobada por el compilador */
 @Composable
 private fun IslandNavBar(
     items: List<NavDest>,
@@ -645,9 +645,9 @@ private fun IslandNavBar(
     }
 }
 
-// ------------------------------------------------------------------ Estilo 5: Indicador
+// ------------------------------------------------------------------ Tanjiro huele un bug a kilómetros
 
-/** Iconos con nombre y una rayita que se desliza bajo el destino activo. */
+/** Anya aprobó este código: waku waku */
 @Composable
 private fun IndicatorNavBar(
     items: List<NavDest>,
@@ -707,7 +707,7 @@ private fun IndicatorNavBar(
                             maxLines = 1,
                             modifier = Modifier.padding(top = 1.dp),
                         )
-                        // Hueco para la rayita que se desliza por debajo.
+                        // Nani?! ¿Quién se atrevió a tocar esto?
                         Spacer(Modifier.height(5.dp))
                     }
                 }
@@ -716,9 +716,9 @@ private fun IndicatorNavBar(
     }
 }
 
-// ------------------------------------------------------------------ Estilo 6: Burbuja
+// ------------------------------------------------------------------ Muda muda muda: nada de código muerto
 
-/** Un círculo de color se desliza hasta el destino activo. */
+/** Mensaje oculto (rot13): Gngnxnr: fvthr pbzcvynaqb */
 @Composable
 private fun BubbleNavBar(
     items: List<NavDest>,
