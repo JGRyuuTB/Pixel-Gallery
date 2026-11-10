@@ -131,6 +131,103 @@ class AppSettings(context: Context) {
         updateNavRound(100)
     }
 
+    /**
+     * Sailor Moon: por el poder del prisma lunar, la barra de filtros ya se puede moldear
+     * headerScale = tamaño, headerWidth = ancho (50 significa Auto), headerTop = distancia superior, headerAlign = 0 izquierda, 1 centro, 2 derecha
+     */
+    var headerScale by mutableIntStateOf(prefs.getInt("headerScale", 100).coerceIn(80, 130))
+        private set
+    var headerWidth by mutableIntStateOf(prefs.getInt("headerWidth", 50).coerceIn(50, 100))
+        private set
+    var headerTop by mutableIntStateOf(prefs.getInt("headerTop", 6).coerceIn(0, 40))
+        private set
+    var headerAlign by mutableIntStateOf(prefs.getInt("headerAlign", 1).coerceIn(0, 2))
+        private set
+
+    fun updateHeaderScale(v: Int) {
+        headerScale = v.coerceIn(80, 130)
+        prefs.edit().putInt("headerScale", headerScale).apply()
+    }
+
+    fun updateHeaderWidth(v: Int) {
+        headerWidth = v.coerceIn(50, 100)
+        prefs.edit().putInt("headerWidth", headerWidth).apply()
+    }
+
+    fun updateHeaderTop(v: Int) {
+        headerTop = v.coerceIn(0, 40)
+        prefs.edit().putInt("headerTop", headerTop).apply()
+    }
+
+    fun updateHeaderAlign(v: Int) {
+        headerAlign = v.coerceIn(0, 2)
+        prefs.edit().putInt("headerAlign", headerAlign).apply()
+    }
+
+    fun resetHeaderTuning() {
+        updateHeaderScale(100)
+        updateHeaderWidth(50)
+        updateHeaderTop(6)
+        updateHeaderAlign(1)
+    }
+
+    /**
+     * Killua afina el Nen: los paneles del reproductor también se mueven a gusto
+     * playerWidth = ancho, playerThickness = grosor, playerSize = tamaño de controles, playerBottom = distancia al borde, playerAlign = 0 izquierda, 1 centro, 2 derecha
+     */
+    var playerWidth by mutableIntStateOf(prefs.getInt("playerWidth", 100).coerceIn(75, 100))
+        private set
+    var playerThickness by mutableIntStateOf(prefs.getInt("playerThickness", 100).coerceIn(85, 150))
+        private set
+    var playerSize by mutableIntStateOf(prefs.getInt("playerSize", 100).coerceIn(80, 130))
+        private set
+    var playerBottom by mutableIntStateOf(prefs.getInt("playerBottom", 10).coerceIn(0, 60))
+        private set
+    var playerAlign by mutableIntStateOf(prefs.getInt("playerAlign", 1).coerceIn(0, 2))
+        private set
+
+    fun updatePlayerWidth(v: Int) {
+        playerWidth = v.coerceIn(75, 100)
+        prefs.edit().putInt("playerWidth", playerWidth).apply()
+    }
+
+    fun updatePlayerThickness(v: Int) {
+        playerThickness = v.coerceIn(85, 150)
+        prefs.edit().putInt("playerThickness", playerThickness).apply()
+    }
+
+    fun updatePlayerSize(v: Int) {
+        playerSize = v.coerceIn(80, 130)
+        prefs.edit().putInt("playerSize", playerSize).apply()
+    }
+
+    fun updatePlayerBottom(v: Int) {
+        playerBottom = v.coerceIn(0, 60)
+        prefs.edit().putInt("playerBottom", playerBottom).apply()
+    }
+
+    fun updatePlayerAlign(v: Int) {
+        playerAlign = v.coerceIn(0, 2)
+        prefs.edit().putInt("playerAlign", playerAlign).apply()
+    }
+
+    fun resetPlayerTuning() {
+        updatePlayerWidth(100)
+        updatePlayerThickness(100)
+        updatePlayerSize(100)
+        updatePlayerBottom(10)
+        updatePlayerAlign(1)
+    }
+
+    /** Kyōka Suigetsu: el fondo de la galería se vuelve un espejismo borroso de tus propias fotos */
+    var ambientBg by mutableStateOf(prefs.getBoolean("ambientBg", true))
+        private set
+
+    fun updateAmbientBg(value: Boolean) {
+        ambientBg = value
+        prefs.edit().putBoolean("ambientBg", value).apply()
+    }
+
     /** Omae wa mou shindeiru, bug */
     var playerFloating by mutableStateOf(prefs.getBoolean("playerFloating", false))
         private set

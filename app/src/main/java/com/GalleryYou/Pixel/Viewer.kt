@@ -122,6 +122,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -613,7 +614,7 @@ private fun PlayerFrame(
 
 /** Isekai: otro mundo, otra función */
 @Composable
-private fun rememberBorderShift(mode: Int, animate: Boolean): State<Float>? {
+internal fun rememberBorderShift(mode: Int, animate: Boolean): State<Float>? {
     if (mode != 2 || !animate) return null
     return rememberInfiniteTransition(label = "panelBorder").animateFloat(
         initialValue = 0f,
@@ -796,7 +797,6 @@ private fun VideoPlayerContent(
     var dragFraction by remember { mutableStateOf<Float?>(null) }
     var speed by remember { mutableFloatStateOf(1f) }
     var muted by remember { mutableStateOf(false) }
-    var speedMenu by remember { mutableStateOf(false) }
     var fillScreen by remember { mutableStateOf(false) }
     var flashDir by remember { mutableIntStateOf(0) }
     var lastDir by remember { mutableIntStateOf(1) }
@@ -961,96 +961,195 @@ private fun VideoPlayerContent(
             exit = fadeOut() + slideOutVertically { it },
         ) {
             val shownPosition = dragFraction?.let { (it * duration).toLong() } ?: position
-
-            val scheme = MaterialTheme.colorScheme
             val shift = rememberBorderShift(settings.playerBorder, settings.animations && isPlaying)
-            // Vegeta: ¡su poder es de más de ocho mil!
-            val floating = settings.playerFloating
-            // Killua y Gon, cada uno por su lado: la barra de progreso y los botones ya no comparten panel
-            Column(
-                modifier = Modifier
-                    .onSizeChanged { onPanelHeight(it.height) }
-                    .then(
-                        if (floating) {
-                            Modifier.navigationBarsPadding().padding(start = 14.dp, end = 14.dp, bottom = 10.dp)
-                        } else {
-                            Modifier
-                        },
-                    )
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                // Panel de la barra de progreso: fino como el hilo rojo del destino
-                GlassPanel(
-                    settings = settings,
-                    shift = shift,
-                    content = panelContent,
-                    corner = 20.dp,
-                    roundAll = true,
-                    extendBottom = false,
-                    modifier = if (floating) Modifier else Modifier.padding(horizontal = 14.dp),
-                ) {
-                    // Mikasa protege esta variable con su vida
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            formatDuration(shownPosition),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                        SeekBar(
-                            exo = exo,
-                            duration = duration,
-                            playing = isPlaying,
-                            position = position,
-                            dragFraction = dragFraction,
-                            onDrag = { dragFraction = it },
-                            modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
-                        )
-                        Text(
-                            formatDuration(duration),
-                            color = panelContent.copy(alpha = 0.72f),
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
-                }
+            // Killua y Gon, cada uno por su lado: los dos paneles viven en PlayerPanels (el mismo código de la vista previa de Ajustes)
+            PlayerPanels(
+                settings = settings,
+                tuning = settings.playerTuning(),
+                contentColor = panelContent,
+                shift = shift,
+                shownPosition = shownPosition,
+                duration = duration,
+                isPlaying = isPlaying,
+                ended = ended,
+                speed = speed,
+                muted = muted,
+                fillScreen = fillScreen,
+                onSpeed = {
+                    speed = it
+                    exo.setPlaybackSpeed(it)
+                },
+                onRewind = { seekBy(-5_000) },
+                onForward = { seekBy(5_000) },
+                onTogglePlay = { togglePlay() },
+                onFill = { fillScreen = !fillScreen },
+                onMute = {
+                    muted = !muted
+                    exo.volume = if (muted) 0f else 1f
+                },
+                modifier = Modifier.onSizeChanged { onPanelHeight(it.height) },
+            ) { seekModifier, seekHeight ->
+                SeekBar(
+                    exo = exo,
+                    duration = duration,
+                    playing = isPlaying,
+                    position = position,
+                    dragFraction = dragFraction,
+                    onDrag = { dragFraction = it },
+                    modifier = seekModifier,
+                    height = seekHeight,
+                )
+            }
+        }
+    }
+}
 
-                // Panel de los botones: velocidad, saltos de 5 s, pausa, encuadre y volumen
-                GlassPanel(
-                    settings = settings,
-                    shift = shift,
-                    content = panelContent,
-                    corner = 28.dp,
-                    roundAll = floating,
-                    extendBottom = !floating,
+/**
+ * Killua afina el Nen: el reproductor se moldea desde Ajustes
+ * width = fracción del ancho, thickness = grosor de los paneles, size = tamaño de botones y textos,
+ * bottom = distancia al borde inferior, align = 0 izquierda, 1 centro, 2 derecha
+ * (ancho, posición y distancia solo se notan con el panel flotante; grosor y tamaño valen para los dos modos)
+ */
+class PlayerTuning(
+    val width: Float = 1f,
+    val thickness: Float = 1f,
+    val size: Float = 1f,
+    val bottom: Dp = 10.dp,
+    val align: Int = 1,
+)
+
+fun AppSettings.playerTuning() = PlayerTuning(
+    width = playerWidth / 100f,
+    thickness = playerThickness / 100f,
+    size = playerSize / 100f,
+    bottom = playerBottom.dp,
+    align = playerAlign,
+)
+
+/** Mob Psycho 100: el texto crece o encoge según el porcentaje de poder psíquico */
+private fun TextStyle.scaled(s: Float): TextStyle = if (s == 1f) this else copy(fontSize = fontSize * s)
+
+/**
+ * Goku y Vegeta se fusionan: los dos paneles del reproductor (progreso y botones) en un solo sitio.
+ * Lo usan el reproductor de verdad y la vista previa de Ajustes, así que lo que ves allí es lo que obtienes aquí.
+ * [seekBar] recibe el modificador y la altura que debe ocupar la barra de progreso.
+ */
+@Composable
+internal fun PlayerPanels(
+    settings: AppSettings,
+    tuning: PlayerTuning,
+    contentColor: Color,
+    shift: State<Float>?,
+    shownPosition: Long,
+    duration: Long,
+    isPlaying: Boolean,
+    ended: Boolean,
+    speed: Float,
+    muted: Boolean,
+    fillScreen: Boolean,
+    onSpeed: (Float) -> Unit,
+    onRewind: () -> Unit,
+    onForward: () -> Unit,
+    onTogglePlay: () -> Unit,
+    onFill: () -> Unit,
+    onMute: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** Doraemon saca el bolsillo: la vista previa no suma el margen de los botones del sistema */
+    insets: Boolean = true,
+    seekBar: @Composable (Modifier, Dp) -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val floating = settings.playerFloating
+    val t = tuning.thickness
+    val s = tuning.size
+    var speedMenu by remember { mutableStateOf(false) }
+
+    Box(
+        modifier
+            .fillMaxWidth()
+            .then(
+                if (floating) {
+                    Modifier
+                        .then(if (insets) Modifier.navigationBarsPadding() else Modifier)
+                        .padding(start = 14.dp, end = 14.dp, bottom = tuning.bottom)
+                } else {
+                    Modifier
+                },
+            ),
+        contentAlignment = when (tuning.align) {
+            0 -> Alignment.BottomStart
+            2 -> Alignment.BottomEnd
+            else -> Alignment.BottomCenter
+        },
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(if (floating) tuning.width else 1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            // Panel de la barra de progreso: fino como el hilo rojo del destino
+            GlassPanel(
+                settings = settings,
+                shift = shift,
+                content = contentColor,
+                corner = 16.dp * t + 4.dp,
+                roundAll = true,
+                extendBottom = false,
+                modifier = if (floating) Modifier else Modifier.padding(horizontal = 14.dp),
+            ) {
+                // Mikasa protege esta variable con su vida
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(
-                        Modifier
-                            .then(if (floating) Modifier else Modifier.navigationBarsPadding())
-                            .padding(horizontal = 14.dp, vertical = 3.dp),
-                    ) {
-                        Box(
-                            Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Box(Modifier.align(Alignment.CenterStart)) {
+                    Text(
+                        formatDuration(shownPosition),
+                        style = MaterialTheme.typography.labelMedium.scaled(s),
+                    )
+                    seekBar(Modifier.weight(1f).padding(horizontal = 4.dp), 32.dp * t)
+                    Text(
+                        formatDuration(duration),
+                        color = contentColor.copy(alpha = 0.72f),
+                        style = MaterialTheme.typography.labelMedium.scaled(s),
+                    )
+                }
+            }
+
+            // Equipo Rocket despega: velocidad, saltos de 5 s, pausa, encuadre y volumen
+            GlassPanel(
+                settings = settings,
+                shift = shift,
+                content = contentColor,
+                corner = 26.dp * t,
+                roundAll = floating,
+                extendBottom = !floating,
+            ) {
+                Column(
+                    Modifier
+                        .then(if (!floating && insets) Modifier.navigationBarsPadding() else Modifier)
+                        .padding(horizontal = 14.dp),
+                ) {
+                    // Equipo 7: Naruto siempre al centro, Sasuke y Sakura se reparten los lados aunque el panel sea estrecho
+                    BoxWithConstraints(Modifier.fillMaxWidth().height(52.dp * t)) {
+                        val narrow = maxWidth < 290.dp
+                        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                                 TextButton(
                                     onClick = { speedMenu = true },
-                                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = panelContent),
-                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp),
+                                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = contentColor),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = if (narrow) 4.dp else 8.dp),
                                 ) {
-                                    Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(speedLabel(speed))
+                                    if (!narrow) {
+                                        Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(20.dp * s))
+                                        Spacer(Modifier.width(6.dp))
+                                    }
+                                    Text(speedLabel(speed), style = MaterialTheme.typography.labelLarge.scaled(s))
                                 }
                                 DropdownMenu(expanded = speedMenu, onDismissRequest = { speedMenu = false }) {
-                                    listOf(0.5f, 1f, 1.5f, 2f).forEach { s ->
+                                    listOf(0.5f, 1f, 1.5f, 2f).forEach { opt ->
                                         DropdownMenuItem(
-                                            text = { Text(speedLabel(s)) },
+                                            text = { Text(speedLabel(opt)) },
                                             onClick = {
-                                                speed = s
-                                                exo.setPlaybackSpeed(s)
+                                                onSpeed(opt)
                                                 speedMenu = false
                                             },
                                         )
@@ -1059,45 +1158,48 @@ private fun VideoPlayerContent(
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { seekBy(-5_000) }, modifier = Modifier.size(40.dp)) {
-                                    Icon(AppIcons.Replay5, contentDescription = stringResource(R.string.cd_rewind_5))
+                                IconButton(onClick = onRewind, modifier = Modifier.size(40.dp * s)) {
+                                    Icon(
+                                        AppIcons.Replay5,
+                                        contentDescription = stringResource(R.string.cd_rewind_5),
+                                        modifier = Modifier.size(24.dp * s),
+                                    )
                                 }
                                 PlayPauseButton(
                                     isPlaying = isPlaying,
                                     ended = ended,
                                     animations = settings.animations,
-                                    onClick = { togglePlay() },
+                                    scale = s,
+                                    onClick = onTogglePlay,
                                 )
-                                IconButton(onClick = { seekBy(5_000) }, modifier = Modifier.size(40.dp)) {
-                                    Icon(AppIcons.Forward5, contentDescription = stringResource(R.string.cd_forward_5))
+                                IconButton(onClick = onForward, modifier = Modifier.size(40.dp * s)) {
+                                    Icon(
+                                        AppIcons.Forward5,
+                                        contentDescription = stringResource(R.string.cd_forward_5),
+                                        modifier = Modifier.size(24.dp * s),
+                                    )
                                 }
                             }
 
                             Row(
-                                Modifier.align(Alignment.CenterEnd),
+                                Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.End,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 // Giorno Giovanna tiene un sueño
-                                IconButton(
-                                    modifier = Modifier.size(40.dp),
-                                    onClick = { fillScreen = !fillScreen },
-                                ) {
+                                IconButton(modifier = Modifier.size(40.dp * s), onClick = onFill) {
                                     Icon(
                                         AppIcons.Frame,
                                         contentDescription = null,
+                                        modifier = Modifier.size(24.dp * s),
                                         tint = if (fillScreen) scheme.primary else LocalContentColor.current,
                                     )
                                 }
-                                IconButton(
-                                    modifier = Modifier.size(40.dp),
-                                    onClick = {
-                                        muted = !muted
-                                        exo.volume = if (muted) 0f else 1f
-                                    },
-                                ) {
+                                IconButton(modifier = Modifier.size(40.dp * s), onClick = onMute) {
                                     Icon(
                                         if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
                                         contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
+                                        modifier = Modifier.size(24.dp * s),
                                     )
                                 }
                             }
@@ -1162,6 +1264,7 @@ private fun SeekBar(
     dragFraction: Float?,
     onDrag: (Float?) -> Unit,
     modifier: Modifier = Modifier,
+    height: Dp = 32.dp,
 ) {
     var progress by remember { mutableFloatStateOf(0f) }
 
@@ -1184,8 +1287,8 @@ private fun SeekBar(
         }
     }
 
-    // Rock Lee entrena con pesas en los tobillos: el deslizador conserva su alto natural pero la fila mide solo 32 dp
-    Box(modifier.height(32.dp), contentAlignment = Alignment.Center) {
+    // Rock Lee entrena con pesas en los tobillos: el deslizador conserva su alto natural pero la fila mide lo que diga el grosor elegido
+    Box(modifier.height(height), contentAlignment = Alignment.Center) {
         Slider(
             modifier = Modifier.fillMaxWidth().wrapContentHeight(unbounded = true),
             value = dragFraction ?: progress,
@@ -1200,10 +1303,16 @@ private fun SeekBar(
 }
 
 @Composable
-private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Boolean, onClick: () -> Unit) {
+private fun PlayPauseButton(
+    isPlaying: Boolean,
+    ended: Boolean,
+    animations: Boolean,
+    scale: Float = 1f,
+    onClick: () -> Unit,
+) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val scale by animateFloatAsState(
+    val pressScale by animateFloatAsState(
         targetValue = if (pressed) 0.85f else 1f,
         animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium),
         label = "playScale",
@@ -1217,10 +1326,10 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
         onClick = onClick,
         interactionSource = interaction,
         modifier = Modifier
-            .size(46.dp)
+            .size(46.dp * scale)
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
+                scaleX = pressScale
+                scaleY = pressScale
             },
     ) {
         // Chihiro no olvida su nombre ni este valor
@@ -1243,7 +1352,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
                     else -> AppIcons.Play
                 },
                 contentDescription = null,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(28.dp * scale),
             )
         }
     }

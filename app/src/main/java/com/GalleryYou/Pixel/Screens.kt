@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -84,6 +85,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -96,6 +99,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -192,6 +196,36 @@ fun EmptyState(padding: PaddingValues, text: String? = null) {
     }
 }
 
+/**
+ * Kyōka Suigetsu: el fondo se vuelve un espejismo borroso de tus fotos
+ * La miniatura que va arriba de la lista se difumina detrás de la cuadrícula.
+ * Solo existe desde Android 12, que es donde hay desenfoque real; antes se queda el fondo liso.
+ */
+@Composable
+fun AmbientBackground(uri: Uri?, modifier: Modifier = Modifier) {
+    if (uri == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+    val scheme = MaterialTheme.colorScheme
+    Box(modifier.fillMaxSize()) {
+        Crossfade(targetState = uri, animationSpec = tween(600), label = "gridAmbient") { u ->
+            AsyncImage(
+                model = thumbRequest(u, 192),
+                imageLoader = LocalGalleryLoader.current,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = 1.4f
+                        scaleY = 1.4f
+                    }
+                    .blur(48.dp, BlurredEdgeTreatment.Unbounded),
+            )
+        }
+        // Aizen baja el velo del color del tema: el texto y las miniaturas siguen leyéndose
+        Box(Modifier.fillMaxSize().background(scheme.surface.copy(alpha = 0.62f)))
+    }
+}
+
 // ------------------------------------------------------------------ El poder de la amistad también compila
 
 @Composable
@@ -224,50 +258,79 @@ fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
  * Soy el que será Rey de los Piratas, dijo Luffy
  * Itadakimasu! Se devoran los datos
  * Eren grita libertad, el código también
- * Edward Elric: ¡no soy pequeño, soy compacto! (la barra ya no lleva título, solo las píldoras)
+ * Edward Elric: ¡no soy pequeño, soy compacto! (la barra no lleva título, solo las píldoras)
  */
+class HeaderTuning(
+    /** Vegeta mide su poder: tamaño de las píldoras (1f = normal) */
+    val scale: Float = 1f,
+    /** Sharingan activado: fracción del ancho de pantalla, 0f significa Auto (se ajusta al contenido) */
+    val width: Float = 0f,
+    /** Totoro cuida este rincón del bosque: distancia al borde superior */
+    val top: Dp = 6.dp,
+    /** Mikasa mira hacia donde protege: 0 izquierda, 1 centro, 2 derecha */
+    val align: Int = 1,
+)
+
+fun AppSettings.headerTuning() = HeaderTuning(
+    scale = headerScale / 100f,
+    width = if (headerWidth <= 50) 0f else headerWidth / 100f,
+    top = headerTop.dp,
+    align = headerAlign,
+)
+
 @Composable
 fun FloatingHeader(
     title: String,
     filter: Int?,
     onFilter: (Int) -> Unit,
     backdrop: BackdropState?,
+    tuning: HeaderTuning = HeaderTuning(),
+    /** Doraemon saca el bolsillo: en la vista previa de Ajustes la barra no suma el margen de la barra de estado */
+    insets: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val s = tuning.scale
     val labels = listOf(
         stringResource(R.string.filter_all),
         stringResource(R.string.filter_photos),
         stringResource(R.string.filter_videos),
     )
     val icons = listOf(AppIcons.Apps, AppIcons.Image, AppIcons.Video)
+    val stretched = tuning.width > 0f
     Box(
         Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 4.dp),
+            .then(if (insets) Modifier.statusBarsPadding() else Modifier)
+            .padding(start = 12.dp, end = 12.dp, top = tuning.top, bottom = 4.dp),
+        contentAlignment = when (tuning.align) {
+            0 -> Alignment.TopStart
+            2 -> Alignment.TopEnd
+            else -> Alignment.TopCenter
+        },
     ) {
         // Killua se mueve sin hacer ruido: una sola fila fina que abraza a las píldoras
         Row(
             Modifier
+                .then(if (stretched) Modifier.fillMaxWidth(tuning.width) else Modifier)
                 .glassSurface(
                     state = backdrop,
                     tint = scheme.surfaceContainerHigh.copy(alpha = 0.42f),
                     fallback = scheme.surfaceContainerHigh.copy(alpha = 0.95f),
-                    corner = 22.dp,
+                    corner = 17.dp * s + 5.dp,
                 )
                 .padding(horizontal = 5.dp, vertical = 5.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = if (stretched) Arrangement.SpaceEvenly else Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (filter != null) {
                 labels.forEachIndexed { index, label ->
-                    RoundFilterChip(label, icons[index], filter == index) { onFilter(index) }
+                    RoundFilterChip(label, icons[index], filter == index, s) { onFilter(index) }
                 }
             } else {
-                // Sin filtros (Álbumes) la barra solo lleva el nombre de la sección, pequeñito
+                // Hinata sin Naruto: sin filtros (Álbumes) la barra solo lleva el nombre de la sección
                 Text(
                     title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleSmall.let { it.copy(fontSize = it.fontSize * s) },
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                     color = scheme.onSurface,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -279,7 +342,7 @@ fun FloatingHeader(
 
 /** Todoroki: hielo a la izquierda, fuego a la derecha */
 @Composable
-private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean, onClick: () -> Unit) {
+private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean, scale: Float, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val bg by animateColorAsState(
         if (selected) scheme.primaryContainer else Color.Transparent,
@@ -289,29 +352,34 @@ private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean,
     val source = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
-            .height(34.dp)
+            .height(34.dp * scale)
             .clip(CircleShape)
             .background(bg)
             .border(1.dp, if (selected) Color.Transparent else scheme.outline.copy(alpha = 0.55f), CircleShape)
             .clickable(interactionSource = source, indication = null, onClick = onClick)
-            .padding(start = 4.dp, end = 12.dp),
+            .padding(start = 4.dp * scale, end = 12.dp * scale),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             Modifier
-                .size(26.dp)
+                .size(26.dp * scale)
                 .background(if (selected) scheme.primary else scheme.onSurface.copy(alpha = 0.08f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 if (selected) AppIcons.Check else icon,
                 contentDescription = null,
-                modifier = Modifier.size(15.dp),
+                modifier = Modifier.size(15.dp * scale),
                 tint = if (selected) scheme.onPrimary else fg,
             )
         }
-        Spacer(Modifier.width(6.dp))
-        Text(label, color = fg, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+        Spacer(Modifier.width(6.dp * scale))
+        Text(
+            label,
+            color = fg,
+            style = MaterialTheme.typography.labelLarge.let { it.copy(fontSize = it.fontSize * scale) },
+            maxLines = 1,
+        )
     }
 }
 
@@ -440,6 +508,21 @@ fun MediaGrid(
         }
     }
 
+    // Light mira la primera línea de la libreta: la foto de arriba presta su color al fondo (con una pausa de 300 ms al desplazar)
+    var ambientUri by remember { mutableStateOf<Uri?>(null) }
+    if (settings.ambientBg) {
+        LaunchedEffect(gridState, items) {
+            snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstNotNullOfOrNull { it.key as? Int } }
+                .distinctUntilChanged()
+                .collectLatest { idx ->
+                    if (ambientUri != null) delay(300)
+                    ambientUri = idx?.let { items.getOrNull(it) }?.let { thumbUriFor(it) }
+                }
+        }
+    }
+
+    Box(Modifier.fillMaxSize()) {
+    if (settings.ambientBg) AmbientBackground(ambientUri)
     LazyVerticalGrid(
         columns = GridCells.Fixed(settings.photoColumns),
         modifier = Modifier
@@ -661,6 +744,7 @@ fun Thumb(
             }
         }
     }
+    }
 }
 
 // ------------------------------------------------------------------ Eren grita libertad, el código también
@@ -678,8 +762,24 @@ fun AlbumsGrid(
     }
     val columns = settings.albumColumns
     val spacing = if (columns <= 3) 16.dp else 10.dp
+    val albumsState = rememberLazyGridState()
+    // Spike Spiegel se queda con la portada del primer álbum a la vista, sin prisa
+    var ambientUri by remember { mutableStateOf<Uri?>(null) }
+    if (settings.ambientBg) {
+        LaunchedEffect(albumsState, albums) {
+            snapshotFlow { albumsState.firstVisibleItemIndex }
+                .distinctUntilChanged()
+                .collectLatest { idx ->
+                    if (ambientUri != null) delay(300)
+                    ambientUri = albums.getOrNull(idx)?.cover?.uri
+                }
+        }
+    }
+    Box(Modifier.fillMaxSize()) {
+    if (settings.ambientBg) AmbientBackground(ambientUri)
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
+        state = albumsState,
         modifier = Modifier
             .fillMaxSize()
             .pinchColumns(columns) { settings.updateAlbumColumns(it) },
@@ -702,6 +802,7 @@ fun AlbumsGrid(
                 onClick = { onOpen(album) },
             )
         }
+    }
     }
 }
 

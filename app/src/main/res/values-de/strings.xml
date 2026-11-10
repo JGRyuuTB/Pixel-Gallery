@@ -195,6 +195,23 @@
     </plurals>
     <string name="nav_style_title">Navigationsleiste</string>
     <string name="nav_preview">Vorschau</string>
+    <string name="header_bar_title">Filterleiste</string>
+    <string name="header_tune_size">Größe</string>
+    <string name="header_tune_width">Breite</string>
+    <string name="header_tune_width_note">Ganz links ist Auto: passt sich dem Inhalt an, wie Ruffys Gear Second</string>
+    <string name="tune_width_auto">Auto</string>
+    <string name="header_tune_top">Abstand oben</string>
+    <string name="tune_align">Position</string>
+    <string name="align_left">Links</string>
+    <string name="align_center">Mitte</string>
+    <string name="align_right">Rechts</string>
+    <string name="player_tune_width">Breite des Panels</string>
+    <string name="player_tune_thickness">Dicke</string>
+    <string name="player_tune_size">Größe der Bedienelemente</string>
+    <string name="player_tune_bottom">Abstand zum unteren Rand</string>
+    <string name="player_tune_floating_note">Wie Naruto ohne Chakra: Breite, Position und Abstand wirken nur beim schwebenden Panel</string>
+    <string name="settings_ambient_bg">Unscharfer Hintergrund</string>
+    <string name="settings_ambient_bg_desc">Kyōka Suigetsu: Der Hintergrund wird zur verschwommenen Fata Morgana deiner Fotos</string>
     <string name="nav_style_classic">Klassisch</string>
     <string name="nav_style_stacked">Gestapelt</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

@@ -195,6 +195,23 @@
     </plurals>
     <string name="nav_style_title">Barra di navigazione</string>
     <string name="nav_preview">Anteprima</string>
+    <string name="header_bar_title">Barra dei filtri</string>
+    <string name="header_tune_size">Dimensione</string>
+    <string name="header_tune_width">Larghezza</string>
+    <string name="header_tune_width_note">Al minimo è Auto: si adatta al contenuto, come il Gear Second di Rufy</string>
+    <string name="tune_width_auto">Auto</string>
+    <string name="header_tune_top">Distanza dall’alto</string>
+    <string name="tune_align">Posizione</string>
+    <string name="align_left">Sinistra</string>
+    <string name="align_center">Centro</string>
+    <string name="align_right">Destra</string>
+    <string name="player_tune_width">Larghezza del pannello</string>
+    <string name="player_tune_thickness">Spessore</string>
+    <string name="player_tune_size">Dimensione dei controlli</string>
+    <string name="player_tune_bottom">Distanza dal bordo inferiore</string>
+    <string name="player_tune_floating_note">Come Naruto senza chakra: larghezza, posizione e distanza funzionano solo con il pannello flottante</string>
+    <string name="settings_ambient_bg">Sfondo sfocato</string>
+    <string name="settings_ambient_bg_desc">Kyōka Suigetsu: lo sfondo diventa un miraggio sfocato delle tue foto</string>
     <string name="nav_style_classic">Classica</string>
     <string name="nav_style_stacked">Impilata</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

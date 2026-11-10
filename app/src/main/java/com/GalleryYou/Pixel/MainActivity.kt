@@ -553,6 +553,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                     filter = if (tab == 0) filterMode else null,
                                     onFilter = { filterMode = it },
                                     backdrop = backdrop,
+                                    tuning = settings.headerTuning(),
                                 )
                             }
                             }

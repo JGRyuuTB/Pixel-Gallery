@@ -14,6 +14,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.content.res.ResourcesCompat
 import androidx.compose.ui.text.style.TextOverflow
@@ -94,6 +96,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
@@ -109,6 +112,8 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
     // Rock Lee cuenta sus vueltas: el scroll se eleva aquí para que la vista previa de la barra pueda quedarse fija
     val scroll = rememberScrollState()
     val pin = remember { NavPin() }
+    val headerPin = remember { NavPin() }
+    val playerPin = remember { NavPin() }
     val density = LocalDensity.current
     var showAbout by rememberSaveable { mutableStateOf(false) }
     BackHandler(enabled = showAbout) { showAbout = false }
@@ -157,11 +162,21 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
         },
     ) { padding ->
         // Itachi vigila desde lejos: la altura de la barra superior marca dónde se fija la vista previa
-        SideEffect { pin.inset = with(density) { padding.calculateTopPadding().toPx() } }
+        SideEffect {
+            val inset = with(density) { padding.calculateTopPadding().toPx() }
+            pin.inset = inset
+            headerPin.inset = inset
+            playerPin.inset = inset
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .onGloballyPositioned { pin.viewportTop = it.positionInRoot().y }
+                .onGloballyPositioned {
+                    val top = it.positionInRoot().y
+                    pin.viewportTop = top
+                    headerPin.viewportTop = top
+                    playerPin.viewportTop = top
+                }
                 .verticalScroll(scroll)
                 .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -214,6 +229,17 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                         BlurStyles.map { stringResource(it.nameRes) },
                     selected = if (canBlur) settings.blur else 0,
                     onSelect = { if (canBlur) settings.updateBlur(it) },
+                )
+                SwitchRow(
+                    title = stringResource(R.string.settings_ambient_bg),
+                    subtitle = if (canBlur) {
+                        stringResource(R.string.settings_ambient_bg_desc)
+                    } else {
+                        stringResource(R.string.requires_android12)
+                    },
+                    checked = settings.ambientBg && canBlur,
+                    enabled = canBlur,
+                    onChange = { settings.updateAmbientBg(it) },
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_liquid_glass),
@@ -287,6 +313,53 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 }
             }
 
+            SettingsGroup(stringResource(R.string.header_bar_title)) {
+                // Sailor Moon se mira en el espejo: así queda la barra de filtros con cada cambio
+                HeaderPreview(settings = settings, scroll = scroll, pin = headerPin)
+                Column(Modifier.onSizeChanged { headerPin.rowsHeight = it.height }) {
+                    SliderRow(
+                        title = stringResource(R.string.header_tune_size),
+                        valueText = "${settings.headerScale}%",
+                        value = settings.headerScale,
+                        range = 80..130,
+                        onChange = { settings.updateHeaderScale(it) },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.header_tune_width),
+                        subtitle = stringResource(R.string.header_tune_width_note),
+                        valueText = if (settings.headerWidth <= 50) {
+                            stringResource(R.string.tune_width_auto)
+                        } else {
+                            "${settings.headerWidth}%"
+                        },
+                        value = settings.headerWidth,
+                        range = 50..100,
+                        onChange = { settings.updateHeaderWidth(it) },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.header_tune_top),
+                        valueText = "${settings.headerTop} dp",
+                        value = settings.headerTop,
+                        range = 0..40,
+                        onChange = { settings.updateHeaderTop(it) },
+                    )
+                    ChoiceRow(
+                        title = stringResource(R.string.tune_align),
+                        options = listOf(
+                            stringResource(R.string.align_left),
+                            stringResource(R.string.align_center),
+                            stringResource(R.string.align_right),
+                        ),
+                        selected = settings.headerAlign,
+                        onSelect = { settings.updateHeaderAlign(it) },
+                    )
+                    TextButton(
+                        onClick = { settings.resetHeaderTuning() },
+                        modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
+                    ) { Text(stringResource(R.string.nav_tune_reset)) }
+                }
+            }
+
             SettingsGroup(stringResource(R.string.settings_photos_albums)) {
                 ChoiceRow(
                     title = stringResource(R.string.settings_columns_photos),
@@ -320,6 +393,9 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
             }
 
             SettingsGroup(stringResource(R.string.settings_player)) {
+                // Goku se entrena frente al espejo: los paneles del reproductor con cada cambio que hagas
+                PlayerPreview(settings = settings, scroll = scroll, pin = playerPin)
+                Column(Modifier.onSizeChanged { playerPin.rowsHeight = it.height }) {
                 ChoiceRow(
                     title = stringResource(R.string.settings_player_border),
                     options = listOf(
@@ -346,6 +422,53 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     checked = settings.autoplay,
                     onChange = { settings.updateAutoplay(it) },
                 )
+                SliderRow(
+                    title = stringResource(R.string.player_tune_thickness),
+                    valueText = "${settings.playerThickness}%",
+                    value = settings.playerThickness,
+                    range = 85..150,
+                    onChange = { settings.updatePlayerThickness(it) },
+                )
+                SliderRow(
+                    title = stringResource(R.string.player_tune_size),
+                    valueText = "${settings.playerSize}%",
+                    value = settings.playerSize,
+                    range = 80..130,
+                    onChange = { settings.updatePlayerSize(it) },
+                )
+                SliderRow(
+                    title = stringResource(R.string.player_tune_width),
+                    subtitle = stringResource(R.string.player_tune_floating_note),
+                    valueText = "${settings.playerWidth}%",
+                    value = settings.playerWidth,
+                    range = 75..100,
+                    enabled = settings.playerFloating,
+                    onChange = { settings.updatePlayerWidth(it) },
+                )
+                SliderRow(
+                    title = stringResource(R.string.player_tune_bottom),
+                    valueText = "${settings.playerBottom} dp",
+                    value = settings.playerBottom,
+                    range = 0..60,
+                    enabled = settings.playerFloating,
+                    onChange = { settings.updatePlayerBottom(it) },
+                )
+                ChoiceRow(
+                    title = stringResource(R.string.tune_align),
+                    options = listOf(
+                        stringResource(R.string.align_left),
+                        stringResource(R.string.align_center),
+                        stringResource(R.string.align_right),
+                    ),
+                    selected = settings.playerAlign,
+                    enabled = settings.playerFloating,
+                    onSelect = { settings.updatePlayerAlign(it) },
+                )
+                TextButton(
+                    onClick = { settings.resetPlayerTuning() },
+                    modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
+                ) { Text(stringResource(R.string.nav_tune_reset)) }
+                }
             }
 
             SettingsGroup(stringResource(R.string.settings_app_icon)) {
@@ -432,16 +555,25 @@ private class NavPin {
 }
 
 private val NavPreviewHeight = 120.dp
+private val HeaderPreviewHeight = 100.dp
+private val PlayerPreviewHeight = 200.dp
 
 /**
- * Nezuko duerme tranquila dentro de la caja: vista previa en vivo de la barra de navegación.
- * Usa el mismo estilo, calibración y cristal que la barra real, y se queda fija arriba mientras ajustas los controles.
+ * Nezuko duerme tranquila dentro de la caja: marco común de todas las vistas previas de Ajustes.
+ * Dibuja un fondo de fotos de mentira (para que se note el cristal), lleva el rótulo "Vista previa" y se queda fija
+ * arriba mientras ajustas los controles de su grupo. [content] pinta la pieza real encima, con su propio [BackdropState].
  */
 @Composable
-private fun NavPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) {
+private fun StickyPreview(
+    settings: AppSettings,
+    scroll: ScrollState,
+    pin: NavPin,
+    height: Dp,
+    captionAtBottom: Boolean = false,
+    content: @Composable BoxScope.(BackdropState) -> Unit,
+) {
     val scheme = MaterialTheme.colorScheme
     val backdrop = rememberBackdropState(settings)
-    var sel by remember { mutableIntStateOf(0) }
     val tiles = listOf(
         scheme.primary,
         scheme.tertiary,
@@ -450,19 +582,20 @@ private fun NavPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) 
         scheme.tertiaryContainer,
         scheme.secondaryContainer,
     )
-    // El hueco reserva el espacio; la tarjeta de dentro es la que viaja
+    val rows = (height.value / 45f).toInt() + 1
+    // Totoro guarda el sitio; la tarjeta de dentro es la que viaja
     Box(
         Modifier
             .fillMaxWidth()
             .zIndex(1f)
-            .height(NavPreviewHeight + 16.dp)
+            .height(height + 16.dp)
             .onGloballyPositioned { pin.slotTop = it.positionInRoot().y - pin.viewportTop + scroll.value },
     ) {
         Box(
             Modifier
                 .padding(horizontal = 12.dp, vertical = 8.dp)
                 .fillMaxWidth()
-                .height(NavPreviewHeight)
+                .height(height)
                 .graphicsLayer {
                     translationY = (scroll.value - pin.slotTop + pin.inset).coerceIn(0f, pin.rowsHeight.toFloat())
                 }
@@ -470,13 +603,13 @@ private fun NavPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) 
                 .background(scheme.surfaceContainerHighest)
                 .border(1.dp, scheme.outlineVariant, RoundedCornerShape(24.dp)),
         ) {
-            // Fondo de fotos de mentira: sin colores detrás, el cristal y la refracción no se notarían
+            // Genjutsu de Itachi: fotos de mentira, sin colores detrás el cristal y la refracción no se notarían
             Box(Modifier.fillMaxSize().backdropSource(backdrop)) {
                 Column(
                     Modifier.fillMaxSize().offset(y = (-14).dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    repeat(3) { row ->
+                    repeat(rows) { row ->
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                             repeat(6) { col ->
                                 Box(
@@ -495,23 +628,96 @@ private fun NavPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) 
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White,
                 modifier = Modifier
-                    .align(Alignment.TopStart)
+                    .align(if (captionAtBottom) Alignment.BottomStart else Alignment.TopStart)
                     .padding(8.dp)
                     .background(Color.Black.copy(alpha = 0.45f), CircleShape)
                     .padding(horizontal = 8.dp, vertical = 2.dp),
             )
-            GalleryNavBar(
-                style = settings.navStyle,
-                items = GalleryNavItems,
-                selected = sel,
-                animations = settings.animations,
-                onSelect = { sel = it },
+            content(backdrop)
+        }
+    }
+}
+
+/** Kagami no Sekai: vista previa en vivo de la barra de navegación, con el mismo estilo, calibración y cristal que la real */
+@Composable
+private fun NavPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) {
+    var sel by remember { mutableIntStateOf(0) }
+    StickyPreview(settings, scroll, pin, NavPreviewHeight) { backdrop ->
+        GalleryNavBar(
+            style = settings.navStyle,
+            items = GalleryNavItems,
+            selected = sel,
+            animations = settings.animations,
+            onSelect = { sel = it },
+            modifier = Modifier.align(Alignment.BottomCenter),
+            backdrop = backdrop,
+            badges = mapOf(2 to 3),
+            tuning = settings.navTuning(),
+            insets = false,
+        )
+    }
+}
+
+/** Sailor Moon se mira en el espejo: la barra de filtros tal como quedará en la galería */
+@Composable
+private fun HeaderPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) {
+    var sel by remember { mutableIntStateOf(0) }
+    StickyPreview(settings, scroll, pin, HeaderPreviewHeight, captionAtBottom = true) { backdrop ->
+        FloatingHeader(
+            title = stringResource(R.string.nav_albums),
+            filter = sel,
+            onFilter = { sel = it },
+            backdrop = backdrop,
+            tuning = settings.headerTuning(),
+            insets = false,
+        )
+    }
+}
+
+/**
+ * Goku se entrena frente al espejo: los dos paneles del reproductor, con el mismo código que el reproductor real.
+ * Los botones responden (play, velocidad, saltos de 5 s, encuadre, volumen) pero no reproducen nada.
+ */
+@Composable
+private fun PlayerPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) {
+    var playing by remember { mutableStateOf(false) }
+    var speed by remember { mutableFloatStateOf(1f) }
+    var muted by remember { mutableStateOf(false) }
+    var fill by remember { mutableStateOf(false) }
+    var progress by remember { mutableFloatStateOf(0.35f) }
+    val total = 19_000L
+    StickyPreview(settings, scroll, pin, PlayerPreviewHeight) { backdrop ->
+        CompositionLocalProvider(LocalAmbientBackdrop provides backdrop) {
+            val shift = rememberBorderShift(settings.playerBorder, settings.animations && playing)
+            PlayerPanels(
+                settings = settings,
+                tuning = settings.playerTuning(),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                shift = shift,
+                shownPosition = (progress * total).toLong(),
+                duration = total,
+                isPlaying = playing,
+                ended = false,
+                speed = speed,
+                muted = muted,
+                fillScreen = fill,
+                onSpeed = { speed = it },
+                onRewind = { progress = (progress - 5_000f / total).coerceAtLeast(0f) },
+                onForward = { progress = (progress + 5_000f / total).coerceAtMost(1f) },
+                onTogglePlay = { playing = !playing },
+                onFill = { fill = !fill },
+                onMute = { muted = !muted },
                 modifier = Modifier.align(Alignment.BottomCenter),
-                backdrop = backdrop,
-                badges = mapOf(2 to 3),
-                tuning = settings.navTuning(),
                 insets = false,
-            )
+            ) { seekModifier, seekHeight ->
+                Box(seekModifier.height(seekHeight), contentAlignment = Alignment.Center) {
+                    Slider(
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(unbounded = true),
+                        value = progress,
+                        onValueChange = { progress = it },
+                    )
+                }
+            }
         }
     }
 }
@@ -648,6 +854,7 @@ private fun ChoiceRow(
     options: List<String>,
     selected: Int,
     subtitle: String? = null,
+    enabled: Boolean = true,
     onSelect: (Int) -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
@@ -665,6 +872,7 @@ private fun ChoiceRow(
                 SegmentedButton(
                     selected = index == selected,
                     onClick = { onSelect(index) },
+                    enabled = enabled,
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     icon = {},
                     label = { Text(label) },
@@ -683,6 +891,7 @@ private fun SliderRow(
     range: IntRange,
     onChange: (Int) -> Unit,
     subtitle: String? = null,
+    enabled: Boolean = true,
 ) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
         Row(
@@ -704,6 +913,7 @@ private fun SliderRow(
             value = value.toFloat(),
             onValueChange = { onChange(it.roundToInt()) },
             valueRange = range.first.toFloat()..range.last.toFloat(),
+            enabled = enabled,
         )
     }
 }

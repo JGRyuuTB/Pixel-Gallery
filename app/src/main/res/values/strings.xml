@@ -195,6 +195,23 @@
     </plurals>
     <string name="nav_style_title">Navigation bar</string>
     <string name="nav_preview">Preview</string>
+    <string name="header_bar_title">Filter bar</string>
+    <string name="header_tune_size">Size</string>
+    <string name="header_tune_width">Width</string>
+    <string name="header_tune_width_note">At the minimum it is Auto: it fits its content, like Luffy’s Gear Second</string>
+    <string name="tune_width_auto">Auto</string>
+    <string name="header_tune_top">Top distance</string>
+    <string name="tune_align">Position</string>
+    <string name="align_left">Left</string>
+    <string name="align_center">Center</string>
+    <string name="align_right">Right</string>
+    <string name="player_tune_width">Panel width</string>
+    <string name="player_tune_thickness">Thickness</string>
+    <string name="player_tune_size">Controls size</string>
+    <string name="player_tune_bottom">Distance from bottom edge</string>
+    <string name="player_tune_floating_note">Like Naruto without chakra: width, position and distance only work with the floating panel</string>
+    <string name="settings_ambient_bg">Blurred background</string>
+    <string name="settings_ambient_bg_desc">Kyōka Suigetsu: the background becomes a blurry mirage of your photos</string>
     <string name="nav_style_classic">Classic</string>
     <string name="nav_style_stacked">Stacked</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

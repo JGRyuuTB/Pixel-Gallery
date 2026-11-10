@@ -191,6 +191,23 @@
     </plurals>
     <string name="nav_style_title">导航栏</string>
     <string name="nav_preview">预览</string>
+    <string name="header_bar_title">筛选栏</string>
+    <string name="header_tune_size">大小</string>
+    <string name="header_tune_width">宽度</string>
+    <string name="header_tune_width_note">调到最小为“自动”：像路飞的二档一样贴合内容</string>
+    <string name="tune_width_auto">自动</string>
+    <string name="header_tune_top">顶部距离</string>
+    <string name="tune_align">位置</string>
+    <string name="align_left">靠左</string>
+    <string name="align_center">居中</string>
+    <string name="align_right">靠右</string>
+    <string name="player_tune_width">面板宽度</string>
+    <string name="player_tune_thickness">厚度</string>
+    <string name="player_tune_size">控件大小</string>
+    <string name="player_tune_bottom">距底边距离</string>
+    <string name="player_tune_floating_note">就像没有查克拉的鸣人：宽度、位置和距离仅在悬浮面板下生效</string>
+    <string name="settings_ambient_bg">模糊背景</string>
+    <string name="settings_ambient_bg_desc">镜花水月：背景变成你照片的模糊幻象</string>
     <string name="nav_style_classic">经典</string>
     <string name="nav_style_stacked">上下排列</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

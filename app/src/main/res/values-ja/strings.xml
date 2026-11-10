@@ -191,6 +191,23 @@
     </plurals>
     <string name="nav_style_title">ナビゲーションバー</string>
     <string name="nav_preview">プレビュー</string>
+    <string name="header_bar_title">フィルターバー</string>
+    <string name="header_tune_size">サイズ</string>
+    <string name="header_tune_width">幅</string>
+    <string name="header_tune_width_note">最小は「自動」：ルフィのギア2のように中身に合わせます</string>
+    <string name="tune_width_auto">自動</string>
+    <string name="header_tune_top">上からの距離</string>
+    <string name="tune_align">位置</string>
+    <string name="align_left">左</string>
+    <string name="align_center">中央</string>
+    <string name="align_right">右</string>
+    <string name="player_tune_width">パネルの幅</string>
+    <string name="player_tune_thickness">厚さ</string>
+    <string name="player_tune_size">コントロールのサイズ</string>
+    <string name="player_tune_bottom">下端からの距離</string>
+    <string name="player_tune_floating_note">チャクラのないナルトのように、幅・位置・距離はフローティングパネルでのみ有効です</string>
+    <string name="settings_ambient_bg">ぼかし背景</string>
+    <string name="settings_ambient_bg_desc">鏡花水月：背景が写真のぼやけた蜃気楼になります</string>
     <string name="nav_style_classic">クラシック</string>
     <string name="nav_style_stacked">縦並び</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

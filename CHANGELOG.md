@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 1.9.1
+
+- Barra de filtros (Todo, Fotos, Videos): ahora va centrada por defecto y se ajusta desde Ajustes, en el nuevo grupo "Barra de filtros": tamaño, ancho (al mínimo es Auto), distancia superior y posición (izquierda, centro o derecha). Incluye vista previa en vivo que se queda fija arriba mientras mueves los controles.
+- Fondo difuminado: detrás de la cuadrícula de fotos y de álbumes aparece la foto de arriba convertida en un fondo borroso que cambia al desplazar. Se activa y desactiva desde Ajustes, en Apariencia ("Fondo difuminado"). Requiere Android 12 o superior.
+- Reproductor: los dos paneles (progreso y botones) se ajustan desde Ajustes, en el grupo Reproductor: grosor, tamaño de los controles, ancho, distancia al borde inferior y posición (izquierda, centro o derecha). El ancho, la distancia y la posición se aplican con el panel flotante; grosor y tamaño valen para los dos modos. Incluye vista previa con los mismos paneles que el reproductor real.
+- Código: los paneles del reproductor viven ahora en un solo composable compartido (PlayerPanels), así que la vista previa y el reproductor real no pueden diferir.
+
 ## 1.8.9
 
 - Fotos: el encabezado ya no dice "Fotos". Ahora es una barra fina y compacta con solo los filtros (Todo, Fotos, Videos) y se queda fija mientras desplazas la galería, sin esconderse. En Álbumes la barra lleva solo el nombre de la sección.
