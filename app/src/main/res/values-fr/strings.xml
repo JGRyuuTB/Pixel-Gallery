@@ -219,13 +219,14 @@
     <string name="nav_tune_icon">Taille des icônes</string>
     <string name="nav_tune_round">Arrondi</string>
     <string name="nav_tune_reset">Réinitialiser</string>
-    <string name="icon_aurora">Aurore</string>
-    <string name="icon_mosaic">Mosaïque</string>
-    <string name="icon_lens">Objectif</string>
-    <string name="icon_polaroid">Polaroid</string>
-    <string name="icon_sunset">Coucher de soleil</string>
+    <string name="icon_outline">Contour</string>
+    <string name="icon_pastel">Pastel</string>
+    <string name="icon_glass">Verre</string>
+    <string name="icon_mono">Mono</string>
+    <string name="icon_sunset">Crépuscule</string>
     <string name="icon_sakura">Sakura</string>
     <string name="icon_neon">Néon</string>
-    <string name="icon_minimal">Minimaliste</string>
-    <string name="icon_prisma">Prisme</string>
+    <string name="icon_flat">Aplat</string>
+    <string name="icon_pixel">Pixel Style</string>
+    <string name="icon_anime">Pixel Art</string>
 </resources>

@@ -215,13 +215,14 @@
     <string name="nav_tune_icon">アイコンの大きさ</string>
     <string name="nav_tune_round">角の丸み</string>
     <string name="nav_tune_reset">リセット</string>
-    <string name="icon_aurora">オーロラ</string>
-    <string name="icon_mosaic">モザイク</string>
-    <string name="icon_lens">レンズ</string>
-    <string name="icon_polaroid">ポラロイド</string>
+    <string name="icon_outline">アウトライン</string>
+    <string name="icon_pastel">パステル</string>
+    <string name="icon_glass">ガラス</string>
+    <string name="icon_mono">モノ</string>
     <string name="icon_sunset">夕焼け</string>
     <string name="icon_sakura">桜</string>
     <string name="icon_neon">ネオン</string>
-    <string name="icon_minimal">ミニマル</string>
-    <string name="icon_prisma">プリズム</string>
+    <string name="icon_flat">フラット</string>
+    <string name="icon_pixel">Pixel Style</string>
+    <string name="icon_anime">ドット絵</string>
 </resources>

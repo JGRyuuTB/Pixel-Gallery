@@ -1,9 +1,13 @@
 # Registro de cambios
 
+## 1.7.4
+
+- Iconos: se suman "Pixel Art" (la forma del icono por defecto en pixeles) y "Pixel Style" (la forma del icono por defecto con colores rojo, amarillo, verde y azul, más brillantes).
+
 ## 1.7.3
 
 - Fotos animadas: los GIF y los WebP animados (y AVIF animado desde Android 12) se reproducen en el visor. Los GIF llevan una insignia en la cuadrícula.
-- Ajustes: nuevo selector de iconos de la app con vista previa real. Se suman Aurora, Mosaico, Lente, Polaroid, Atardecer, Sakura, Neón, Minimal y Prisma a los dos que ya existían.
+- Ajustes: nuevo selector de iconos de la app con vista previa real. Se suman 8 variantes del icono original (Contorno, Pastel, Cristal, Mono, Atardecer, Sakura, Neón y Plano) a los dos que ya existían.
 - Animaciones: las miniaturas entran con un efecto escalonado, se hunden al tocarlas y se reacomodan al cambiar de filtro. Los álbumes y los grupos de Ajustes entran en cascada.
 - Tirar de la lista hacia abajo recarga la galería con un indicador animado. El encabezado flotante se esconde al bajar y vuelve al subir.
 - Visor: la foto o el video se abre con un velo y un movimiento más vivo, y al deslizar entre archivos el que sale se aleja y se atenúa.

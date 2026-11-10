@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M48,27 h3 v3 h-3 z M51,27 h3 v3 h-3 z M54,27 h3 v3 h-3 z M57,27 h3 v3 h-3 z M42,30 h3 v3 h-3 z M45,30 h3 v3 h-3 z M48,30 h3 v3 h-3 z M51,30 h3 v3 h-3 z M54,30 h3 v3 h-3 z M57,30 h3 v3 h-3 z M60,30 h3 v3 h-3 z M63,30 h3 v3 h-3 z M42,33 h3 v3 h-3 z M45,33 h3 v3 h-3 z M48,33 h3 v3 h-3 z M51,33 h3 v3 h-3 z M54,33 h3 v3 h-3 z M57,33 h3 v3 h-3 z M60,33 h3 v3 h-3 z M63,33 h3 v3 h-3 z M39,36 h3 v3 h-3 z M42,36 h3 v3 h-3 z M45,36 h3 v3 h-3 z M48,36 h3 v3 h-3 z M51,36 h3 v3 h-3 z M54,36 h3 v3 h-3 z M57,36 h3 v3 h-3 z M60,36 h3 v3 h-3 z M63,36 h3 v3 h-3 z M66,36 h3 v3 h-3 z M45,39 h3 v3 h-3 z M48,39 h3 v3 h-3 z M51,39 h3 v3 h-3 z M54,39 h3 v3 h-3 z M57,39 h3 v3 h-3 z M60,39 h3 v3 h-3 z M51,42 h3 v3 h-3 z M54,42 h3 v3 h-3 z"
+        android:fillColor="#4285F4" />
+    <path
+        android:pathData="M36,39 h3 v3 h-3 z M30,42 h3 v3 h-3 z M33,42 h3 v3 h-3 z M36,42 h3 v3 h-3 z M30,45 h3 v3 h-3 z M33,45 h3 v3 h-3 z M36,45 h3 v3 h-3 z M39,45 h3 v3 h-3 z M27,48 h3 v3 h-3 z M30,48 h3 v3 h-3 z M33,48 h3 v3 h-3 z M36,48 h3 v3 h-3 z M39,48 h3 v3 h-3 z M27,51 h3 v3 h-3 z M30,51 h3 v3 h-3 z M33,51 h3 v3 h-3 z M36,51 h3 v3 h-3 z M39,51 h3 v3 h-3 z M42,51 h3 v3 h-3 z M27,54 h3 v3 h-3 z M30,54 h3 v3 h-3 z M33,54 h3 v3 h-3 z M36,54 h3 v3 h-3 z M39,54 h3 v3 h-3 z M42,54 h3 v3 h-3 z M27,57 h3 v3 h-3 z M30,57 h3 v3 h-3 z M33,57 h3 v3 h-3 z M36,57 h3 v3 h-3 z M39,57 h3 v3 h-3 z M30,60 h3 v3 h-3 z M33,60 h3 v3 h-3 z M36,60 h3 v3 h-3 z M39,60 h3 v3 h-3 z M30,63 h3 v3 h-3 z M33,63 h3 v3 h-3 z M36,63 h3 v3 h-3 z M36,66 h3 v3 h-3 z"
+        android:fillColor="#F25C8A" />
+    <path
+        android:pathData="M39,39 h3 v3 h-3 z M42,39 h3 v3 h-3 z M39,42 h3 v3 h-3 z M42,42 h3 v3 h-3 z M45,42 h3 v3 h-3 z M48,42 h3 v3 h-3 z M42,45 h3 v3 h-3 z M45,45 h3 v3 h-3 z M48,45 h3 v3 h-3 z M51,45 h3 v3 h-3 z M42,48 h3 v3 h-3 z M45,48 h3 v3 h-3 z M48,48 h3 v3 h-3 z M51,48 h3 v3 h-3 z M45,51 h3 v3 h-3 z M48,51 h3 v3 h-3 z M51,51 h3 v3 h-3 z"
+        android:fillColor="#A985C8" />
+    <path
+        android:pathData="M63,39 h3 v3 h-3 z M66,39 h3 v3 h-3 z M57,42 h3 v3 h-3 z M60,42 h3 v3 h-3 z M63,42 h3 v3 h-3 z M66,42 h3 v3 h-3 z M54,45 h3 v3 h-3 z M57,45 h3 v3 h-3 z M60,45 h3 v3 h-3 z M63,45 h3 v3 h-3 z M54,48 h3 v3 h-3 z M57,48 h3 v3 h-3 z M60,48 h3 v3 h-3 z M63,48 h3 v3 h-3 z M54,51 h3 v3 h-3 z M57,51 h3 v3 h-3 z M60,51 h3 v3 h-3 z"
+        android:fillColor="#58B4D1" />
+    <path
+        android:pathData="M69,39 h3 v3 h-3 z M69,42 h3 v3 h-3 z M72,42 h3 v3 h-3 z M75,42 h3 v3 h-3 z M66,45 h3 v3 h-3 z M69,45 h3 v3 h-3 z M72,45 h3 v3 h-3 z M75,45 h3 v3 h-3 z M66,48 h3 v3 h-3 z M69,48 h3 v3 h-3 z M72,48 h3 v3 h-3 z M75,48 h3 v3 h-3 z M78,48 h3 v3 h-3 z M63,51 h3 v3 h-3 z M66,51 h3 v3 h-3 z M69,51 h3 v3 h-3 z M72,51 h3 v3 h-3 z M75,51 h3 v3 h-3 z M78,51 h3 v3 h-3 z M63,54 h3 v3 h-3 z M66,54 h3 v3 h-3 z M69,54 h3 v3 h-3 z M72,54 h3 v3 h-3 z M75,54 h3 v3 h-3 z M78,54 h3 v3 h-3 z M66,57 h3 v3 h-3 z M69,57 h3 v3 h-3 z M72,57 h3 v3 h-3 z M75,57 h3 v3 h-3 z M78,57 h3 v3 h-3 z M66,60 h3 v3 h-3 z M69,60 h3 v3 h-3 z M72,60 h3 v3 h-3 z M75,60 h3 v3 h-3 z M69,63 h3 v3 h-3 z M72,63 h3 v3 h-3 z M75,63 h3 v3 h-3 z M69,66 h3 v3 h-3 z"
+        android:fillColor="#34C9A0" />
+    <path
+        android:pathData="M45,54 h3 v3 h-3 z M48,54 h3 v3 h-3 z M51,54 h3 v3 h-3 z M42,57 h3 v3 h-3 z M45,57 h3 v3 h-3 z M48,57 h3 v3 h-3 z M51,57 h3 v3 h-3 z M42,60 h3 v3 h-3 z M45,60 h3 v3 h-3 z M48,60 h3 v3 h-3 z M51,60 h3 v3 h-3 z M39,63 h3 v3 h-3 z M42,63 h3 v3 h-3 z M45,63 h3 v3 h-3 z M48,63 h3 v3 h-3 z M39,66 h3 v3 h-3 z M42,66 h3 v3 h-3 z"
+        android:fillColor="#CF7CC6" />
+    <path
+        android:pathData="M54,54 h3 v3 h-3 z M57,54 h3 v3 h-3 z M60,54 h3 v3 h-3 z M54,57 h3 v3 h-3 z M57,57 h3 v3 h-3 z M60,57 h3 v3 h-3 z M63,57 h3 v3 h-3 z M54,60 h3 v3 h-3 z M57,60 h3 v3 h-3 z M60,60 h3 v3 h-3 z M63,60 h3 v3 h-3 z M57,63 h3 v3 h-3 z M60,63 h3 v3 h-3 z M63,63 h3 v3 h-3 z M66,63 h3 v3 h-3 z M63,66 h3 v3 h-3 z M66,66 h3 v3 h-3 z"
+        android:fillColor="#7EAAD0" />
+    <path
+        android:pathData="M51,63 h3 v3 h-3 z M54,63 h3 v3 h-3 z M45,66 h3 v3 h-3 z M48,66 h3 v3 h-3 z M51,66 h3 v3 h-3 z M54,66 h3 v3 h-3 z M57,66 h3 v3 h-3 z M60,66 h3 v3 h-3 z M39,69 h3 v3 h-3 z M42,69 h3 v3 h-3 z M45,69 h3 v3 h-3 z M48,69 h3 v3 h-3 z M51,69 h3 v3 h-3 z M54,69 h3 v3 h-3 z M57,69 h3 v3 h-3 z M60,69 h3 v3 h-3 z M63,69 h3 v3 h-3 z M66,69 h3 v3 h-3 z M42,72 h3 v3 h-3 z M45,72 h3 v3 h-3 z M48,72 h3 v3 h-3 z M51,72 h3 v3 h-3 z M54,72 h3 v3 h-3 z M57,72 h3 v3 h-3 z M60,72 h3 v3 h-3 z M63,72 h3 v3 h-3 z M42,75 h3 v3 h-3 z M45,75 h3 v3 h-3 z M48,75 h3 v3 h-3 z M51,75 h3 v3 h-3 z M54,75 h3 v3 h-3 z M57,75 h3 v3 h-3 z M60,75 h3 v3 h-3 z M63,75 h3 v3 h-3 z M48,78 h3 v3 h-3 z M51,78 h3 v3 h-3 z M54,78 h3 v3 h-3 z M57,78 h3 v3 h-3 z"
+        android:fillColor="#9C6EF0" />
+</vector>

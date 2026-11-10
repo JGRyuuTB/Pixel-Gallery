@@ -236,15 +236,16 @@ class AppIconOption(val alias: String, @StringRes val nameRes: Int, @DrawableRes
 val AppIconOptions = listOf(
     AppIconOption("AliasDefault", R.string.icon_default, R.mipmap.ic_launcher_default),
     AppIconOption("AliasMaterialYou", R.string.icon_material_you, R.mipmap.ic_launcher_you),
-    AppIconOption("AliasAurora", R.string.icon_aurora, R.mipmap.ic_launcher_aurora),
-    AppIconOption("AliasMosaic", R.string.icon_mosaic, R.mipmap.ic_launcher_mosaic),
-    AppIconOption("AliasLens", R.string.icon_lens, R.mipmap.ic_launcher_lens),
-    AppIconOption("AliasPolaroid", R.string.icon_polaroid, R.mipmap.ic_launcher_polaroid),
+    AppIconOption("AliasOutline", R.string.icon_outline, R.mipmap.ic_launcher_outline),
+    AppIconOption("AliasPastel", R.string.icon_pastel, R.mipmap.ic_launcher_pastel),
+    AppIconOption("AliasGlass", R.string.icon_glass, R.mipmap.ic_launcher_glass),
+    AppIconOption("AliasMono", R.string.icon_mono, R.mipmap.ic_launcher_mono),
     AppIconOption("AliasSunset", R.string.icon_sunset, R.mipmap.ic_launcher_sunset),
     AppIconOption("AliasSakura", R.string.icon_sakura, R.mipmap.ic_launcher_sakura),
     AppIconOption("AliasNeon", R.string.icon_neon, R.mipmap.ic_launcher_neon),
-    AppIconOption("AliasMinimal", R.string.icon_minimal, R.mipmap.ic_launcher_minimal),
-    AppIconOption("AliasPrisma", R.string.icon_prisma, R.mipmap.ic_launcher_prisma),
+    AppIconOption("AliasFlat", R.string.icon_flat, R.mipmap.ic_launcher_flat),
+    AppIconOption("AliasPixel", R.string.icon_pixel, R.mipmap.ic_launcher_pixel),
+    AppIconOption("AliasAnime", R.string.icon_anime, R.mipmap.ic_launcher_anime),
 )
 
 internal tailrec fun Context.findActivity(): Activity? = when (this) {
