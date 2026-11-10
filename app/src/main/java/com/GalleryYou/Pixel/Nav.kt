@@ -132,6 +132,8 @@ fun GalleryNavBar(
     backdrop: BackdropState? = null,
     badges: Map<Int, Int> = emptyMap(),
     tuning: NavTuning = NavTuning(),
+    /** Doraemon saca el bolsillo: en la vista previa de Ajustes la barra no suma los márgenes del sistema */
+    insets: Boolean = true,
 ) {
     val haptic = LocalHapticFeedback.current
     // Bankai! Liberación total de la función
@@ -140,7 +142,7 @@ fun GalleryNavBar(
         onSelect(i)
     }
     if (style == 3) {
-        FullNavBar(items, selected, animations, pick, onSelect, modifier, backdrop, badges, tuning)
+        FullNavBar(items, selected, animations, pick, onSelect, modifier, backdrop, badges, tuning, insets)
         return
     }
     val sidePad = when (style) {
@@ -152,7 +154,7 @@ fun GalleryNavBar(
     Box(
         modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
+            .then(if (insets) Modifier.navigationBarsPadding() else Modifier)
             .padding(start = sidePad, end = sidePad, top = 4.dp, bottom = tuning.bottom),
         contentAlignment = Alignment.Center,
     ) {
@@ -529,6 +531,7 @@ private fun FullNavBar(
     backdrop: BackdropState?,
     badges: Map<Int, Int>,
     tuning: NavTuning,
+    insets: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
     Box(
@@ -548,7 +551,7 @@ private fun FullNavBar(
         Row(
             Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
+                .then(if (insets) Modifier.navigationBarsPadding() else Modifier)
                 .height(56.dp * tuning.height)
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,

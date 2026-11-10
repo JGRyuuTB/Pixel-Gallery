@@ -201,6 +201,36 @@ fun formatSize(bytes: Long): String {
     }
 }
 
+/**
+ * Gon pesca un día entero de una sola tirada
+ * Agrupa por día aprovechando que la lista viene ordenada: reutiliza un único Calendar y solo
+ * lo consulta cuando una foto cae fuera del día en curso (antes se creaba uno por cada foto).
+ */
+fun groupByDay(items: List<MediaFile>): List<List<IndexedValue<MediaFile>>> {
+    val out = ArrayList<ArrayList<IndexedValue<MediaFile>>>()
+    val cal = Calendar.getInstance()
+    var start = Long.MAX_VALUE
+    var end = Long.MIN_VALUE
+    var current = ArrayList<IndexedValue<MediaFile>>()
+    for (item in items.withIndex()) {
+        val t = item.value.dateMillis
+        if (t < start || t >= end) {
+            cal.timeInMillis = t
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+            start = cal.timeInMillis
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            end = cal.timeInMillis
+            current = ArrayList()
+            out.add(current)
+        }
+        current.add(item)
+    }
+    return out
+}
+
 fun dayKey(millis: Long): Int {
     val c = Calendar.getInstance().apply { timeInMillis = millis }
     return c.get(Calendar.YEAR) * 1000 + c.get(Calendar.DAY_OF_YEAR)
@@ -227,6 +257,11 @@ fun formatDate(millis: Long, pattern: String): String =
 /** Isekai: otro mundo, otra función */
 fun formatDateSkeleton(millis: Long, skeleton: String): String {
     val locale = Locale.getDefault()
-    val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)
+    // Doraemon guarda el patrón en su bolsillo: getBestDateTimePattern es lento y no cambia
+    val pattern = skeletonPatterns.getOrPut("$locale|$skeleton") {
+        android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)
+    }
     return SimpleDateFormat(pattern, locale).format(Date(millis))
 }
+
+private val skeletonPatterns = java.util.concurrent.ConcurrentHashMap<String, String>()

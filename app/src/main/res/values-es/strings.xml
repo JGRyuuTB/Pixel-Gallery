@@ -30,10 +30,10 @@
     <string name="cd_back">Volver</string>
     <string name="cd_cancel_selection">Cancelar selección</string>
     <string name="cd_empty_trash">Vaciar papelera</string>
-    <string name="cd_forward_10">Avanzar 10 segundos</string>
+    <string name="cd_forward_5">Avanzar 5 segundos</string>
     <string name="cd_mute">Silenciar</string>
     <string name="cd_restore">Restaurar</string>
-    <string name="cd_rewind_10">Retroceder 10 segundos</string>
+    <string name="cd_rewind_5">Retroceder 5 segundos</string>
     <string name="cd_select_all">Seleccionar todo</string>
     <string name="cd_share">Compartir</string>
     <string name="cd_unmute">Activar sonido</string>
@@ -194,6 +194,7 @@
         <item quantity="other">%d elementos en la papelera</item>
     </plurals>
     <string name="nav_style_title">Barra de navegación</string>
+    <string name="nav_preview">Vista previa</string>
     <string name="nav_style_classic">Clásica</string>
     <string name="nav_style_stacked">Apilada</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

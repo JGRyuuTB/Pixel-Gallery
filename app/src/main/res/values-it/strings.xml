@@ -30,10 +30,10 @@
     <string name="cd_back">Indietro</string>
     <string name="cd_cancel_selection">Annulla selezione</string>
     <string name="cd_empty_trash">Svuota cestino</string>
-    <string name="cd_forward_10">Avanti di 10 secondi</string>
+    <string name="cd_forward_5">Avanti di 5 secondi</string>
     <string name="cd_mute">Disattiva audio</string>
     <string name="cd_restore">Ripristina</string>
-    <string name="cd_rewind_10">Indietro di 10 secondi</string>
+    <string name="cd_rewind_5">Indietro di 5 secondi</string>
     <string name="cd_select_all">Seleziona tutto</string>
     <string name="cd_share">Condividi</string>
     <string name="cd_unmute">Attiva audio</string>
@@ -194,6 +194,7 @@
         <item quantity="other">%d elementi nel cestino</item>
     </plurals>
     <string name="nav_style_title">Barra di navigazione</string>
+    <string name="nav_preview">Anteprima</string>
     <string name="nav_style_classic">Classica</string>
     <string name="nav_style_stacked">Impilata</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

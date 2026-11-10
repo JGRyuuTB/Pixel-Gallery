@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 1.8.9
+
+- Fotos: el encabezado ya no dice "Fotos". Ahora es una barra fina y compacta con solo los filtros (Todo, Fotos, Videos) y se queda fija mientras desplazas la galería, sin esconderse. En Álbumes la barra lleva solo el nombre de la sección.
+- Ajustes: la sección "Barra de navegación" muestra una vista previa en vivo con el estilo, el alto, el ancho, la distancia al borde, el tamaño de los iconos, el redondeo y el desenfoque que tengas aplicados. La vista previa se queda fija arriba mientras mueves los controles.
+- Reproductor: la barra de progreso y los botones (velocidad, pausa, encuadre, volumen) ahora van en dos paneles de cristal separados, más finos y compactos. Adelantar y atrasar salta 5 segundos en lugar de 10, también con doble toque en los lados del video.
+- Rendimiento: la cuadrícula de fotos se desplaza y carga con menos lag. Las miniaturas ya no registran su posición en cada fotograma de scroll, solo las nuevas crean animación de entrada, la agrupación por días y las etiquetas de fecha se calculan una sola vez, la precarga espera a que el scroll se calme y no repite lo que ya se ve, y la carga de miniaturas se limita y se cancela al salir de pantalla. Una recarga que no trae cambios ya no vuelve a pintar toda la galería. Todos los desenfoques y opciones se mantienen igual.
+
 ## 1.7.4
 
 - Iconos: se suman "Pixel Art" (la forma del icono por defecto en pixeles) y "Pixel Style" (la forma del icono por defecto con colores rojo, amarillo, verde y azul, más brillantes).

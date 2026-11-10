@@ -30,10 +30,10 @@
     <string name="cd_back">戻る</string>
     <string name="cd_cancel_selection">選択を解除</string>
     <string name="cd_empty_trash">ゴミ箱を空にする</string>
-    <string name="cd_forward_10">10秒進む</string>
+    <string name="cd_forward_5">5秒進む</string>
     <string name="cd_mute">ミュート</string>
     <string name="cd_restore">復元</string>
-    <string name="cd_rewind_10">10秒戻る</string>
+    <string name="cd_rewind_5">5秒戻る</string>
     <string name="cd_select_all">すべて選択</string>
     <string name="cd_share">共有</string>
     <string name="cd_unmute">ミュート解除</string>
@@ -190,6 +190,7 @@
         <item quantity="other">%d 件をゴミ箱に移動しました</item>
     </plurals>
     <string name="nav_style_title">ナビゲーションバー</string>
+    <string name="nav_preview">プレビュー</string>
     <string name="nav_style_classic">クラシック</string>
     <string name="nav_style_stacked">縦並び</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

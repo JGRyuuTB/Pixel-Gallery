@@ -30,10 +30,10 @@
     <string name="cd_back">Retour</string>
     <string name="cd_cancel_selection">Annuler la sélection</string>
     <string name="cd_empty_trash">Vider la corbeille</string>
-    <string name="cd_forward_10">Avancer de 10 secondes</string>
+    <string name="cd_forward_5">Avancer de 5 secondes</string>
     <string name="cd_mute">Couper le son</string>
     <string name="cd_restore">Restaurer</string>
-    <string name="cd_rewind_10">Reculer de 10 secondes</string>
+    <string name="cd_rewind_5">Reculer de 5 secondes</string>
     <string name="cd_select_all">Tout sélectionner</string>
     <string name="cd_share">Partager</string>
     <string name="cd_unmute">Activer le son</string>
@@ -194,6 +194,7 @@
         <item quantity="other">%d éléments dans la corbeille</item>
     </plurals>
     <string name="nav_style_title">Barre de navigation</string>
+    <string name="nav_preview">Aperçu</string>
     <string name="nav_style_classic">Classique</string>
     <string name="nav_style_stacked">Empilée</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

@@ -63,6 +63,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -70,6 +71,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -904,14 +906,14 @@ private fun VideoPlayerContent(
                             val w = size.width
                             when {
                                 pos.x < w / 3f -> {
-                                    seekBy(-10_000)
+                                    seekBy(-5_000)
                                     lastDir = -1
                                     flashDir = -1
                                     flashTick++
                                 }
 
                                 pos.x > w * 2f / 3f -> {
-                                    seekBy(10_000)
+                                    seekBy(5_000)
                                     lastDir = 1
                                     flashDir = 1
                                     flashTick++
@@ -937,7 +939,7 @@ private fun VideoPlayerContent(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    if (lastDir < 0) AppIcons.Replay10 else AppIcons.Forward10,
+                    if (lastDir < 0) AppIcons.Replay5 else AppIcons.Forward5,
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = Color.White,
@@ -962,15 +964,10 @@ private fun VideoPlayerContent(
 
             val scheme = MaterialTheme.colorScheme
             val shift = rememberBorderShift(settings.playerBorder, settings.animations && isPlaying)
-            val ambientGlass = LocalAmbientBackdrop.current
-            val glassOn = ambientGlass != null && ambientGlass.enabled
             // Vegeta: ¡su poder es de más de ocho mil!
             val floating = settings.playerFloating
-            Surface(
-                shape = if (floating) RoundedCornerShape(28.dp) else RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = if (glassOn) Color.Transparent else scheme.surfaceContainer,
-                contentColor = panelContent,
-                tonalElevation = if (glassOn) 0.dp else 3.dp,
+            // Killua y Gon, cada uno por su lado: la barra de progreso y los botones ya no comparten panel
+            Column(
                 modifier = Modifier
                     .onSizeChanged { onPanelHeight(it.height) }
                     .then(
@@ -980,29 +977,27 @@ private fun VideoPlayerContent(
                             Modifier
                         },
                     )
-                    .fillMaxWidth()
-                    .glassSurface(
-                        state = ambientGlass,
-                        tint = scheme.surfaceContainer.copy(alpha = 0.50f),
-                        fallback = scheme.surfaceContainer,
-                        corner = 28.dp,
-                        border = floating && settings.playerBorder == 0,
-                        extendBottom = !floating,
-                        frost = if (ambientGlass?.style?.forceRefraction == true) 0.16f else 0f,
-                    )
-                    .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, 28.dp, floating),
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Column(
-                    Modifier
-                        .then(if (floating) Modifier else Modifier.navigationBarsPadding())
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
+                // Panel de la barra de progreso: fino como el hilo rojo del destino
+                GlassPanel(
+                    settings = settings,
+                    shift = shift,
+                    content = panelContent,
+                    corner = 20.dp,
+                    roundAll = true,
+                    extendBottom = false,
+                    modifier = if (floating) Modifier else Modifier.padding(horizontal = 14.dp),
                 ) {
                     // Mikasa protege esta variable con su vida
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text(
                             formatDuration(shownPosition),
                             style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(start = 6.dp),
                         )
                         SeekBar(
                             exo = exo,
@@ -1017,84 +1012,140 @@ private fun VideoPlayerContent(
                             formatDuration(duration),
                             color = panelContent.copy(alpha = 0.72f),
                             style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(end = 6.dp),
                         )
                     }
-                    Box(
-                        Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
+                }
+
+                // Panel de los botones: velocidad, saltos de 5 s, pausa, encuadre y volumen
+                GlassPanel(
+                    settings = settings,
+                    shift = shift,
+                    content = panelContent,
+                    corner = 28.dp,
+                    roundAll = floating,
+                    extendBottom = !floating,
+                ) {
+                    Column(
+                        Modifier
+                            .then(if (floating) Modifier else Modifier.navigationBarsPadding())
+                            .padding(horizontal = 14.dp, vertical = 3.dp),
                     ) {
-                        Box(Modifier.align(Alignment.CenterStart)) {
-                            TextButton(
-                                onClick = { speedMenu = true },
-                                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = panelContent),
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp),
-                            ) {
-                                Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(20.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text(speedLabel(speed))
-                            }
-                            DropdownMenu(expanded = speedMenu, onDismissRequest = { speedMenu = false }) {
-                                listOf(0.5f, 1f, 1.5f, 2f).forEach { s ->
-                                    DropdownMenuItem(
-                                        text = { Text(speedLabel(s)) },
-                                        onClick = {
-                                            speed = s
-                                            exo.setPlaybackSpeed(s)
-                                            speedMenu = false
-                                        },
-                                    )
+                        Box(
+                            Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Box(Modifier.align(Alignment.CenterStart)) {
+                                TextButton(
+                                    onClick = { speedMenu = true },
+                                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = panelContent),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp),
+                                ) {
+                                    Icon(AppIcons.Speed, contentDescription = null, modifier = Modifier.size(20.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(speedLabel(speed))
+                                }
+                                DropdownMenu(expanded = speedMenu, onDismissRequest = { speedMenu = false }) {
+                                    listOf(0.5f, 1f, 1.5f, 2f).forEach { s ->
+                                        DropdownMenuItem(
+                                            text = { Text(speedLabel(s)) },
+                                            onClick = {
+                                                speed = s
+                                                exo.setPlaybackSpeed(s)
+                                                speedMenu = false
+                                            },
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { seekBy(-10_000) }, modifier = Modifier.size(40.dp)) {
-                                Icon(AppIcons.Replay10, contentDescription = stringResource(R.string.cd_rewind_10))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = { seekBy(-5_000) }, modifier = Modifier.size(40.dp)) {
+                                    Icon(AppIcons.Replay5, contentDescription = stringResource(R.string.cd_rewind_5))
+                                }
+                                PlayPauseButton(
+                                    isPlaying = isPlaying,
+                                    ended = ended,
+                                    animations = settings.animations,
+                                    onClick = { togglePlay() },
+                                )
+                                IconButton(onClick = { seekBy(5_000) }, modifier = Modifier.size(40.dp)) {
+                                    Icon(AppIcons.Forward5, contentDescription = stringResource(R.string.cd_forward_5))
+                                }
                             }
-                            PlayPauseButton(
-                                isPlaying = isPlaying,
-                                ended = ended,
-                                animations = settings.animations,
-                                onClick = { togglePlay() },
-                            )
-                            IconButton(onClick = { seekBy(10_000) }, modifier = Modifier.size(40.dp)) {
-                                Icon(AppIcons.Forward10, contentDescription = stringResource(R.string.cd_forward_10))
-                            }
-                        }
 
-                        Row(
-                            Modifier.align(Alignment.CenterEnd),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            // Giorno Giovanna tiene un sueño
-                            IconButton(
-                                modifier = Modifier.size(40.dp),
-                                onClick = { fillScreen = !fillScreen },
+                            Row(
+                                Modifier.align(Alignment.CenterEnd),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Icon(
-                                    AppIcons.Frame,
-                                    contentDescription = null,
-                                    tint = if (fillScreen) scheme.primary else LocalContentColor.current,
-                                )
-                            }
-                            IconButton(
-                                modifier = Modifier.size(40.dp),
-                                onClick = {
-                                    muted = !muted
-                                    exo.volume = if (muted) 0f else 1f
-                                },
-                            ) {
-                                Icon(
-                                    if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
-                                    contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
-                                )
+                                // Giorno Giovanna tiene un sueño
+                                IconButton(
+                                    modifier = Modifier.size(40.dp),
+                                    onClick = { fillScreen = !fillScreen },
+                                ) {
+                                    Icon(
+                                        AppIcons.Frame,
+                                        contentDescription = null,
+                                        tint = if (fillScreen) scheme.primary else LocalContentColor.current,
+                                    )
+                                }
+                                IconButton(
+                                    modifier = Modifier.size(40.dp),
+                                    onClick = {
+                                        muted = !muted
+                                        exo.volume = if (muted) 0f else 1f
+                                    },
+                                ) {
+                                    Icon(
+                                        if (muted) AppIcons.VolumeOff else AppIcons.VolumeUp,
+                                        contentDescription = stringResource(if (muted) R.string.cd_unmute else R.string.cd_mute),
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+/**
+ * Killua y Gon: dos mitades, un mismo cristal
+ * Cada panel del reproductor usa el mismo vidrio, borde y color de texto adaptativo que antes tenía el panel único.
+ */
+@Composable
+private fun GlassPanel(
+    settings: AppSettings,
+    shift: State<Float>?,
+    content: Color,
+    corner: Dp,
+    roundAll: Boolean,
+    extendBottom: Boolean,
+    modifier: Modifier = Modifier,
+    body: @Composable () -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val ambientGlass = LocalAmbientBackdrop.current
+    val glassOn = ambientGlass != null && ambientGlass.enabled
+    Surface(
+        shape = if (roundAll) RoundedCornerShape(corner) else RoundedCornerShape(topStart = corner, topEnd = corner),
+        color = if (glassOn) Color.Transparent else scheme.surfaceContainer,
+        contentColor = content,
+        tonalElevation = if (glassOn) 0.dp else 3.dp,
+        modifier = modifier
+            .fillMaxWidth()
+            .glassSurface(
+                state = ambientGlass,
+                tint = scheme.surfaceContainer.copy(alpha = 0.50f),
+                fallback = scheme.surfaceContainer,
+                corner = corner,
+                border = roundAll && settings.playerBorder == 0,
+                extendBottom = extendBottom,
+                frost = if (ambientGlass?.style?.forceRefraction == true) 0.16f else 0f,
+            )
+            .panelBorder(settings.playerBorder, shift, scheme.primary, scheme.tertiary, corner, roundAll),
+    ) {
+        body()
     }
 }
 
@@ -1133,16 +1184,19 @@ private fun SeekBar(
         }
     }
 
-    Slider(
-        modifier = modifier,
-        value = dragFraction ?: progress,
-        onValueChange = { onDrag(it) },
-        onValueChangeFinished = {
-            dragFraction?.let { f -> exo.seekTo((f * duration).toLong()) }
-            onDrag(null)
-        },
-        valueRange = 0f..1f,
-    )
+    // Rock Lee entrena con pesas en los tobillos: el deslizador conserva su alto natural pero la fila mide solo 32 dp
+    Box(modifier.height(32.dp), contentAlignment = Alignment.Center) {
+        Slider(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(unbounded = true),
+            value = dragFraction ?: progress,
+            onValueChange = { onDrag(it) },
+            onValueChangeFinished = {
+                dragFraction?.let { f -> exo.seekTo((f * duration).toLong()) }
+                onDrag(null)
+            },
+            valueRange = 0f..1f,
+        )
+    }
 }
 
 @Composable
@@ -1163,7 +1217,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
         onClick = onClick,
         interactionSource = interaction,
         modifier = Modifier
-            .size(52.dp)
+            .size(46.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -1189,7 +1243,7 @@ private fun PlayPauseButton(isPlaying: Boolean, ended: Boolean, animations: Bool
                     else -> AppIcons.Play
                 },
                 contentDescription = null,
-                modifier = Modifier.size(30.dp),
+                modifier = Modifier.size(28.dp),
             )
         }
     }

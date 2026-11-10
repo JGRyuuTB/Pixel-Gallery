@@ -147,20 +147,19 @@ object AppIcons {
             line("M4.5,4.2 V8.6 H8.9"),
         )
     }
-    val Replay10: ImageVector by lazy {
-        build("Replay10",
+    // Rock Lee suelta las pesas: de 10 a 5 segundos (el cinco dibujado con una sola pincelada)
+    val Replay5: ImageVector by lazy {
+        build("Replay5",
             line("M12,5.2 A7.6,7.6 0 1 1 5.4,9.2"),
             line("M12,2.4 L9.3,5.2 L12,8"),
-            line("M9.6,10.9 L11,10.2 V16"),
-            line("M14.6,10.4 A1.5,2.7 0 0 0 14.6,16 A1.5,2.7 0 0 0 14.6,10.4"),
+            line("M14.3,10.3 H11 L10.6,12.9 C12,12.2 14.4,12.6 14.4,14.2 C14.4,15.8 12,16.4 10.5,15.5"),
         )
     }
-    val Forward10: ImageVector by lazy {
-        build("Forward10",
+    val Forward5: ImageVector by lazy {
+        build("Forward5",
             line("M12,5.2 A7.6,7.6 0 1 0 18.6,9.2"),
             line("M12,2.4 L14.7,5.2 L12,8"),
-            line("M9.6,10.9 L11,10.2 V16"),
-            line("M14.6,10.4 A1.5,2.7 0 0 0 14.6,16 A1.5,2.7 0 0 0 14.6,10.4"),
+            line("M14.3,10.3 H11 L10.6,12.9 C12,12.2 14.4,12.6 14.4,14.2 C14.4,15.8 12,16.4 10.5,15.5"),
         )
     }
     val VolumeUp: ImageVector by lazy {

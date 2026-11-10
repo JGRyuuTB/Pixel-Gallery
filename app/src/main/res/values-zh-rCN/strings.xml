@@ -30,10 +30,10 @@
     <string name="cd_back">返回</string>
     <string name="cd_cancel_selection">取消选择</string>
     <string name="cd_empty_trash">清空回收站</string>
-    <string name="cd_forward_10">快进 10 秒</string>
+    <string name="cd_forward_5">快进 5 秒</string>
     <string name="cd_mute">静音</string>
     <string name="cd_restore">恢复</string>
-    <string name="cd_rewind_10">后退 10 秒</string>
+    <string name="cd_rewind_5">后退 5 秒</string>
     <string name="cd_select_all">全选</string>
     <string name="cd_share">分享</string>
     <string name="cd_unmute">取消静音</string>
@@ -190,6 +190,7 @@
         <item quantity="other">已将 %d 项移到回收站</item>
     </plurals>
     <string name="nav_style_title">导航栏</string>
+    <string name="nav_preview">预览</string>
     <string name="nav_style_classic">经典</string>
     <string name="nav_style_stacked">上下排列</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

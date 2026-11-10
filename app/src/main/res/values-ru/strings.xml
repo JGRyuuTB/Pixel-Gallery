@@ -30,10 +30,10 @@
     <string name="cd_back">Назад</string>
     <string name="cd_cancel_selection">Отменить выбор</string>
     <string name="cd_empty_trash">Очистить корзину</string>
-    <string name="cd_forward_10">Вперёд на 10 секунд</string>
+    <string name="cd_forward_5">Вперёд на 5 секунд</string>
     <string name="cd_mute">Выключить звук</string>
     <string name="cd_restore">Восстановить</string>
-    <string name="cd_rewind_10">Назад на 10 секунд</string>
+    <string name="cd_rewind_5">Назад на 5 секунд</string>
     <string name="cd_select_all">Выбрать все</string>
     <string name="cd_share">Поделиться</string>
     <string name="cd_unmute">Включить звук</string>
@@ -202,6 +202,7 @@
         <item quantity="other">%d элемента в корзине</item>
     </plurals>
     <string name="nav_style_title">Панель навигации</string>
+    <string name="nav_preview">Предпросмотр</string>
     <string name="nav_style_classic">Классическая</string>
     <string name="nav_style_stacked">Вертикальная</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

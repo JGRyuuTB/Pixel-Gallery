@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
+import android.os.CancellationSignal
 import android.util.Size
 import coil.ImageLoader
 import coil.decode.DataSource
@@ -12,9 +13,16 @@ import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.request.Options
 import coil.size.Dimension
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlin.coroutines.resume
 
 /** Chihiro no olvida su nombre ni este valor */
 const val THUMB_PARAM = "galeria_thumb"
+
+/** Los Cinco del Equipo 7 entran de seis en seis: así el proveedor de medios no se ahoga con cientos de hilos a la vez */
+private val gate = Semaphore(6)
 
 /**
  * Vegeta: ¡su poder es de más de ocho mil!
@@ -26,16 +34,22 @@ class MediaThumbFetcher(
     private val uri: Uri,
     private val px: Int,
 ) : Fetcher {
-    override suspend fun fetch(): FetchResult? {
-        return try {
-            val bitmap = context.contentResolver.loadThumbnail(uri, Size(px, px), null)
-            DrawableResult(
-                drawable = BitmapDrawable(context.resources, bitmap),
-                isSampled = true,
-                dataSource = DataSource.DISK,
-            )
-        } catch (e: Exception) {
-            null
+    override suspend fun fetch(): FetchResult? = gate.withPermit {
+        // Goku carga el Kamehameha de a poco: si la miniatura sale de pantalla, se cancela la consulta
+        suspendCancellableCoroutine<FetchResult?> { cont ->
+            val signal = CancellationSignal()
+            cont.invokeOnCancellation { signal.cancel() }
+            val result: FetchResult? = try {
+                val bitmap = context.contentResolver.loadThumbnail(uri, Size(px, px), signal)
+                DrawableResult(
+                    drawable = BitmapDrawable(context.resources, bitmap),
+                    isSampled = true,
+                    dataSource = DataSource.DISK,
+                )
+            } catch (e: Exception) {
+                null
+            }
+            if (cont.isActive) cont.resume(result)
         }
     }
 

@@ -30,10 +30,10 @@
     <string name="cd_back">Voltar</string>
     <string name="cd_cancel_selection">Cancelar seleção</string>
     <string name="cd_empty_trash">Esvaziar lixeira</string>
-    <string name="cd_forward_10">Avançar 10 segundos</string>
+    <string name="cd_forward_5">Avançar 5 segundos</string>
     <string name="cd_mute">Silenciar</string>
     <string name="cd_restore">Restaurar</string>
-    <string name="cd_rewind_10">Voltar 10 segundos</string>
+    <string name="cd_rewind_5">Voltar 5 segundos</string>
     <string name="cd_select_all">Selecionar tudo</string>
     <string name="cd_share">Compartilhar</string>
     <string name="cd_unmute">Ativar som</string>
@@ -194,6 +194,7 @@
         <item quantity="other">%d itens na lixeira</item>
     </plurals>
     <string name="nav_style_title">Barra de navegação</string>
+    <string name="nav_preview">Pré-visualização</string>
     <string name="nav_style_classic">Clássica</string>
     <string name="nav_style_stacked">Empilhada</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

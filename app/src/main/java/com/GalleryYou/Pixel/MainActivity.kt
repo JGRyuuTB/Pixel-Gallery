@@ -253,8 +253,9 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         val loaded = withContext(Dispatchers.IO) {
             MediaRepo.load(context) to MediaRepo.loadTrash(context)
         }
-        media = loaded.first
-        trash = loaded.second
+        // Light cierra la libreta si no hay nombres nuevos: una lista idéntica no vuelve a pintar toda la cuadrícula
+        if (loaded.first != media) media = loaded.first
+        if (loaded.second != trash) trash = loaded.second
     }
 
     // Un opening que nadie se salta
@@ -471,15 +472,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                 val inSelection = selected.isNotEmpty() && tab == 0
                 val backdrop = rememberBackdropState(settings)
 
-                // Encabezado que se esconde al bajar por la lista y vuelve al subir.
-                var headerHidden by remember { mutableStateOf(false) }
-                val headerHide by animateFloatAsState(
-                    targetValue = if (headerHidden && !inSelection && tab <= 1) 1f else 0f,
-                    animationSpec = if (settings.animations) tween(260, easing = FastOutSlowInEasing) else snap(),
-                    label = "headerHide",
-                )
-                LaunchedEffect(tab) { headerHidden = false }
-
+                // Sailor Moon: la barra de filtros se queda fija mientras desplazas las fotos
                 // Tirar hacia abajo desde el inicio de la lista recarga la galería (con indicador animado).
                 var refreshing by remember { mutableStateOf(false) }
                 var pullPx by remember { mutableFloatStateOf(0f) }
@@ -494,7 +487,6 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                 val refreshConnection = remember(pullEnabled, pullThreshold) {
                     object : NestedScrollConnection {
                         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                            if (available.y < -6f) headerHidden = true else if (available.y > 6f) headerHidden = false
                             if (pullEnabled && pullPx > 0f && available.y < 0f && source == NestedScrollSource.UserInput) {
                                 val d = maxOf(available.y, -pullPx)
                                 pullPx += d
@@ -556,19 +548,12 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                     }
                                 }
                             } else {
-                                Box(
-                                    Modifier.graphicsLayer {
-                                        translationY = -size.height * headerHide
-                                        alpha = 1f - headerHide
-                                    },
-                                ) {
-                                    FloatingHeader(
-                                        title = stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums),
-                                        filter = if (tab == 0) filterMode else null,
-                                        onFilter = { filterMode = it },
-                                        backdrop = backdrop,
-                                    )
-                                }
+                                FloatingHeader(
+                                    title = stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums),
+                                    filter = if (tab == 0) filterMode else null,
+                                    onFilter = { filterMode = it },
+                                    backdrop = backdrop,
+                                )
                             }
                             }
                         }

@@ -100,6 +100,7 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 val LocalGalleryLoader = staticCompositionLocalOf<ImageLoader> {
@@ -223,6 +224,7 @@ fun FilterRow(selected: Int, onSelect: (Int) -> Unit) {
  * Soy el que será Rey de los Piratas, dijo Luffy
  * Itadakimasu! Se devoran los datos
  * Eren grita libertad, el código también
+ * Edward Elric: ¡no soy pequeño, soy compacto! (la barra ya no lleva título, solo las píldoras)
  */
 @Composable
 fun FloatingHeader(
@@ -242,32 +244,34 @@ fun FloatingHeader(
         Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 6.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 4.dp),
     ) {
-        Column(
+        // Killua se mueve sin hacer ruido: una sola fila fina que abraza a las píldoras
+        Row(
             Modifier
-                .fillMaxWidth()
                 .glassSurface(
                     state = backdrop,
                     tint = scheme.surfaceContainerHigh.copy(alpha = 0.42f),
                     fallback = scheme.surfaceContainerHigh.copy(alpha = 0.95f),
-                    corner = 30.dp,
+                    corner = 22.dp,
                 )
-                .padding(start = 20.dp, end = 12.dp, top = 12.dp, bottom = if (filter != null) 12.dp else 14.dp),
+                .padding(horizontal = 5.dp, vertical = 5.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                color = scheme.onSurface,
-            )
             if (filter != null) {
-                Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    labels.forEachIndexed { index, label ->
-                        RoundFilterChip(label, icons[index], filter == index) { onFilter(index) }
-                    }
+                labels.forEachIndexed { index, label ->
+                    RoundFilterChip(label, icons[index], filter == index) { onFilter(index) }
                 }
+            } else {
+                // Sin filtros (Álbumes) la barra solo lleva el nombre de la sección, pequeñito
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    color = scheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                )
             }
         }
     }
@@ -285,28 +289,28 @@ private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean,
     val source = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
-            .height(40.dp)
+            .height(34.dp)
             .clip(CircleShape)
             .background(bg)
             .border(1.dp, if (selected) Color.Transparent else scheme.outline.copy(alpha = 0.55f), CircleShape)
             .clickable(interactionSource = source, indication = null, onClick = onClick)
-            .padding(start = 5.dp, end = 14.dp),
+            .padding(start = 4.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             Modifier
-                .size(30.dp)
+                .size(26.dp)
                 .background(if (selected) scheme.primary else scheme.onSurface.copy(alpha = 0.08f), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 if (selected) AppIcons.Check else icon,
                 contentDescription = null,
-                modifier = Modifier.size(17.dp),
+                modifier = Modifier.size(15.dp),
                 tint = if (selected) scheme.onPrimary else fg,
             )
         }
-        Spacer(Modifier.width(7.dp))
+        Spacer(Modifier.width(6.dp))
         Text(label, color = fg, style = MaterialTheme.typography.labelLarge, maxLines = 1)
     }
 }
@@ -392,9 +396,8 @@ fun MediaGrid(
     onClick: (MediaFile, Int) -> Unit,
     onLongClick: (MediaFile) -> Unit,
 ) {
-    val groups = remember(items) {
-        items.withIndex().groupBy { dayKey(it.value.dateMillis) }.values.toList()
-    }
+    // Gon pesca un día entero de una sola tirada (sin crear un Calendar por foto)
+    val groups = remember(items) { groupByDay(items) }
     val selectionMode = selected.isNotEmpty()
     val gap = settings.gap.dp
     val context = LocalContext.current
@@ -407,17 +410,28 @@ fun MediaGrid(
     // Miniaturas que ya entraron una vez: solo la primera aparición se anima.
     val seen = remember { HashSet<Uri>() }
 
+    // Etiquetas de día ya calculadas: formatear fechas en cada aparición era un lastre
+    val dayLabels = remember(groups, todayText, yesterdayText) { HashMap<Int, String>() }
+
     // Alquimia equivalente: algo entra, algo sale
+    // Gohan espera a que el combate se calme (70 ms) antes de precargar, y nunca repite lo que ya se ve
     LaunchedEffect(gridState, items, thumbPx) {
-        val ahead = settings.photoColumns * 6
+        val ahead = settings.photoColumns * 4
         snapshotFlow {
             val keys = gridState.layoutInfo.visibleItemsInfo.mapNotNull { it.key as? Int }
             if (keys.isEmpty()) null else keys.min() to keys.max()
-        }.distinctUntilChanged().collect { range ->
+        }.distinctUntilChanged().collectLatest { range ->
             if (range != null) {
+                delay(70)
+                for (i in range.first..range.second) prefetched.add(i)
                 val from = (range.first - ahead).coerceAtLeast(0)
                 val to = (range.second + ahead).coerceAtMost(items.lastIndex)
-                for (i in from..to) {
+                for (i in range.second + 1..to) {
+                    if (prefetched.add(i)) {
+                        loader.enqueue(buildThumbRequest(context, thumbUriFor(items[i]), thumbPx))
+                    }
+                }
+                for (i in range.first - 1 downTo from) {
                     if (prefetched.add(i)) {
                         loader.enqueue(buildThumbRequest(context, thumbUriFor(items[i]), thumbPx))
                     }
@@ -443,7 +457,7 @@ fun MediaGrid(
             val first = group.first()
             item(span = { GridItemSpan(maxLineSpan) }, key = "day-${first.index}", contentType = "day") {
                 Text(
-                    dayLabel(first.value.dateMillis, todayText, yesterdayText),
+                    dayLabels.getOrPut(first.index) { dayLabel(first.value.dateMillis, todayText, yesterdayText) },
                     style = MaterialTheme.typography.titleSmall,
                     modifier = (if (settings.animations) Modifier.animateItem() else Modifier)
                         .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
@@ -488,10 +502,11 @@ fun Thumb(
     val interaction = remember { MutableInteractionSource() }
     val registry = LocalThumbRegistry.current
 
-    // Entrada: aparece creciendo desde abajo, con un pequeño retraso según su columna.
-    val enter = remember(m.uri) { Animatable(if (animateIn) 0f else 1f) }
-    LaunchedEffect(m.uri) {
-        if (enter.value < 1f) {
+    // Gon lanza la caña una sola vez: solo las miniaturas nuevas crean animación de entrada
+    // (antes cada celda estrenaba un Animatable y una corrutina aunque no se moviera).
+    val enter = remember(m.uri) { if (animateIn) Animatable(0f) else null }
+    if (enter != null) {
+        LaunchedEffect(enter) {
             delay(enterDelay.toLong())
             enter.animateTo(1f, tween(360, easing = FastOutSlowInEasing))
         }
@@ -519,30 +534,26 @@ fun Thumb(
         roundedCorners -> 12.dp
         else -> 4.dp
     }
-
+    // Kakashi copia una sola vez: la posición se registra al nacer, no en cada fotograma de scroll
+    val registered = remember(m.uri) { BooleanArray(1) }
+    // Kawaii desu: pequeño y eficiente (una sola capa gráfica por miniatura en vez de dos)
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .onGloballyPositioned { registry?.put(m.uri, it) }
+            .onGloballyPositioned {
+                if (!registered[0]) {
+                    registered[0] = true
+                    registry?.put(m.uri, it)
+                }
+            }
             .graphicsLayer {
-                val e = enter.value
+                val e = enter?.value ?: 1f
                 alpha = e
-                val s = (0.84f + 0.16f * e) * pressScale
+                val s = (0.84f + 0.16f * e) * pressScale * (scale?.value ?: 1f)
                 scaleX = s
                 scaleY = s
                 translationY = (1f - e) * 24.dp.toPx()
             }
-            .then(
-                if (scale != null) {
-                    Modifier.graphicsLayer {
-                        val s = scale.value
-                        scaleX = s
-                        scaleY = s
-                    }
-                } else {
-                    Modifier
-                },
-            )
             .clip(RoundedCornerShape(corner))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .combinedClickable(
@@ -555,7 +566,7 @@ fun Thumb(
                 },
             ),
     ) {
-        val thumbUri = thumbUriFor(m)
+        val thumbUri = remember(m.uri, m.expiresMillis) { thumbUriFor(m) }
         AsyncImage(
             model = thumbRequest(thumbUri, thumbPx),
             imageLoader = LocalGalleryLoader.current,

@@ -30,10 +30,10 @@
     <string name="cd_back">Zurück</string>
     <string name="cd_cancel_selection">Auswahl aufheben</string>
     <string name="cd_empty_trash">Papierkorb leeren</string>
-    <string name="cd_forward_10">10 Sekunden vor</string>
+    <string name="cd_forward_5">5 Sekunden vor</string>
     <string name="cd_mute">Stummschalten</string>
     <string name="cd_restore">Wiederherstellen</string>
-    <string name="cd_rewind_10">10 Sekunden zurück</string>
+    <string name="cd_rewind_5">5 Sekunden zurück</string>
     <string name="cd_select_all">Alle auswählen</string>
     <string name="cd_share">Teilen</string>
     <string name="cd_unmute">Ton einschalten</string>
@@ -194,6 +194,7 @@
         <item quantity="other">%d Elemente im Papierkorb</item>
     </plurals>
     <string name="nav_style_title">Navigationsleiste</string>
+    <string name="nav_preview">Vorschau</string>
     <string name="nav_style_classic">Klassisch</string>
     <string name="nav_style_stacked">Gestapelt</string>
     <string name="settings_liquid_glass">Liquid Glass</string>

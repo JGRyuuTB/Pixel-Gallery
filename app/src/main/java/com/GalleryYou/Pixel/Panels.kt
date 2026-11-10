@@ -1,6 +1,17 @@
 package com.GalleryYou.Pixel
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.core.graphics.drawable.toBitmap
@@ -95,6 +106,10 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
     val scope = rememberCoroutineScope()
     val canDynamic = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val gapValues = listOf(0, 2, 6)
+    // Rock Lee cuenta sus vueltas: el scroll se eleva aquí para que la vista previa de la barra pueda quedarse fija
+    val scroll = rememberScrollState()
+    val pin = remember { NavPin() }
+    val density = LocalDensity.current
     var showAbout by rememberSaveable { mutableStateOf(false) }
     BackHandler(enabled = showAbout) { showAbout = false }
     var showLanguage by rememberSaveable { mutableStateOf(false) }
@@ -141,10 +156,13 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
             )
         },
     ) { padding ->
+        // Itachi vigila desde lejos: la altura de la barra superior marca dónde se fija la vista previa
+        SideEffect { pin.inset = with(density) { padding.calculateTopPadding().toPx() } }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .onGloballyPositioned { pin.viewportTop = it.positionInRoot().y }
+                .verticalScroll(scroll)
                 .padding(padding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 // Makima lo tiene todo bajo control
@@ -212,57 +230,61 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
             }
 
             SettingsGroup(stringResource(R.string.nav_style_title)) {
-                val canBlurNav = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                ScrollChoiceRow(
-                    title = stringResource(R.string.nav_style_title),
-                    options = NavStyleNames.map { stringResource(it) },
-                    selected = settings.navStyle,
-                    onSelect = {
-                        settings.updateNavStyle(it)
-                        // Yare yare daze, qué complicado
-                        if (it == 2 && canBlurNav && settings.blur == 0) settings.updateBlur(BLUR_DARK)
-                    },
-                )
-                SliderRow(
-                    title = stringResource(R.string.nav_tune_height),
-                    valueText = "${settings.navHeight}%",
-                    value = settings.navHeight,
-                    range = 70..130,
-                    onChange = { settings.updateNavHeight(it) },
-                )
-                SliderRow(
-                    title = stringResource(R.string.nav_tune_width),
-                    subtitle = stringResource(R.string.nav_tune_width_note),
-                    valueText = "${settings.navWidth}%",
-                    value = settings.navWidth,
-                    range = 60..100,
-                    onChange = { settings.updateNavWidth(it) },
-                )
-                SliderRow(
-                    title = stringResource(R.string.nav_tune_bottom),
-                    valueText = "${settings.navBottom} dp",
-                    value = settings.navBottom,
-                    range = 0..40,
-                    onChange = { settings.updateNavBottom(it) },
-                )
-                SliderRow(
-                    title = stringResource(R.string.nav_tune_icon),
-                    valueText = "${settings.navIcon}%",
-                    value = settings.navIcon,
-                    range = 80..130,
-                    onChange = { settings.updateNavIcon(it) },
-                )
-                SliderRow(
-                    title = stringResource(R.string.nav_tune_round),
-                    valueText = "${settings.navRound}%",
-                    value = settings.navRound,
-                    range = 0..100,
-                    onChange = { settings.updateNavRound(it) },
-                )
-                TextButton(
-                    onClick = { settings.resetNavTuning() },
-                    modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
-                ) { Text(stringResource(R.string.nav_tune_reset)) }
+                // Nezuko se asoma por la caja: así se verá la barra con cada cambio que hagas
+                NavPreview(settings = settings, scroll = scroll, pin = pin)
+                Column(Modifier.onSizeChanged { pin.rowsHeight = it.height }) {
+                    val canBlurNav = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    ScrollChoiceRow(
+                        title = stringResource(R.string.nav_style_title),
+                        options = NavStyleNames.map { stringResource(it) },
+                        selected = settings.navStyle,
+                        onSelect = {
+                            settings.updateNavStyle(it)
+                            // Yare yare daze, qué complicado
+                            if (it == 2 && canBlurNav && settings.blur == 0) settings.updateBlur(BLUR_DARK)
+                        },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.nav_tune_height),
+                        valueText = "${settings.navHeight}%",
+                        value = settings.navHeight,
+                        range = 70..130,
+                        onChange = { settings.updateNavHeight(it) },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.nav_tune_width),
+                        subtitle = stringResource(R.string.nav_tune_width_note),
+                        valueText = "${settings.navWidth}%",
+                        value = settings.navWidth,
+                        range = 60..100,
+                        onChange = { settings.updateNavWidth(it) },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.nav_tune_bottom),
+                        valueText = "${settings.navBottom} dp",
+                        value = settings.navBottom,
+                        range = 0..40,
+                        onChange = { settings.updateNavBottom(it) },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.nav_tune_icon),
+                        valueText = "${settings.navIcon}%",
+                        value = settings.navIcon,
+                        range = 80..130,
+                        onChange = { settings.updateNavIcon(it) },
+                    )
+                    SliderRow(
+                        title = stringResource(R.string.nav_tune_round),
+                        valueText = "${settings.navRound}%",
+                        value = settings.navRound,
+                        range = 0..100,
+                        onChange = { settings.updateNavRound(it) },
+                    )
+                    TextButton(
+                        onClick = { settings.resetNavTuning() },
+                        modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
+                    ) { Text(stringResource(R.string.nav_tune_reset)) }
+                }
             }
 
             SettingsGroup(stringResource(R.string.settings_photos_albums)) {
@@ -395,6 +417,102 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
             },
             onDismiss = { showLanguage = false },
         )
+    }
+}
+
+/**
+ * Gojo y Sukuna se reparten el cielo: aquí se anota quién sostiene la vista previa mientras se desplaza
+ * [viewportTop] y [slotTop] sitúan el hueco, [inset] es la altura de la barra superior y [rowsHeight] el recorrido máximo.
+ */
+private class NavPin {
+    var viewportTop by mutableFloatStateOf(0f)
+    var slotTop by mutableFloatStateOf(0f)
+    var inset by mutableFloatStateOf(0f)
+    var rowsHeight by mutableIntStateOf(0)
+}
+
+private val NavPreviewHeight = 120.dp
+
+/**
+ * Nezuko duerme tranquila dentro de la caja: vista previa en vivo de la barra de navegación.
+ * Usa el mismo estilo, calibración y cristal que la barra real, y se queda fija arriba mientras ajustas los controles.
+ */
+@Composable
+private fun NavPreview(settings: AppSettings, scroll: ScrollState, pin: NavPin) {
+    val scheme = MaterialTheme.colorScheme
+    val backdrop = rememberBackdropState(settings)
+    var sel by remember { mutableIntStateOf(0) }
+    val tiles = listOf(
+        scheme.primary,
+        scheme.tertiary,
+        scheme.secondary,
+        scheme.primaryContainer,
+        scheme.tertiaryContainer,
+        scheme.secondaryContainer,
+    )
+    // El hueco reserva el espacio; la tarjeta de dentro es la que viaja
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .zIndex(1f)
+            .height(NavPreviewHeight + 16.dp)
+            .onGloballyPositioned { pin.slotTop = it.positionInRoot().y - pin.viewportTop + scroll.value },
+    ) {
+        Box(
+            Modifier
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .height(NavPreviewHeight)
+                .graphicsLayer {
+                    translationY = (scroll.value - pin.slotTop + pin.inset).coerceIn(0f, pin.rowsHeight.toFloat())
+                }
+                .clip(RoundedCornerShape(24.dp))
+                .background(scheme.surfaceContainerHighest)
+                .border(1.dp, scheme.outlineVariant, RoundedCornerShape(24.dp)),
+        ) {
+            // Fondo de fotos de mentira: sin colores detrás, el cristal y la refracción no se notarían
+            Box(Modifier.fillMaxSize().backdropSource(backdrop)) {
+                Column(
+                    Modifier.fillMaxSize().offset(y = (-14).dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    repeat(3) { row ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            repeat(6) { col ->
+                                Box(
+                                    Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .background(tiles[(row * 2 + col) % tiles.size]),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Text(
+                stringResource(R.string.nav_preview),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+                    .background(Color.Black.copy(alpha = 0.45f), CircleShape)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+            )
+            GalleryNavBar(
+                style = settings.navStyle,
+                items = GalleryNavItems,
+                selected = sel,
+                animations = settings.animations,
+                onSelect = { sel = it },
+                modifier = Modifier.align(Alignment.BottomCenter),
+                backdrop = backdrop,
+                badges = mapOf(2 to 3),
+                tuning = settings.navTuning(),
+                insets = false,
+            )
+        }
     }
 }
 
