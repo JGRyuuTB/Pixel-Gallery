@@ -486,7 +486,8 @@ private fun rememberIconBitmap(@DrawableRes res: Int, sizePx: Int): ImageBitmap?
 
 @Composable
 private fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
-    val order = remember { LocalGroupCounter.current.n++ }
+    val counter = LocalGroupCounter.current
+    val order = remember { counter.n++ }
     Column(Modifier.staggerIn(order, stepMs = 55)) {
         Text(
             title,
