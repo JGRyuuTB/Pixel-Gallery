@@ -1,5 +1,15 @@
 package com.GalleryYou.Pixel
 
+import kotlinx.coroutines.delay
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Animatable
 import android.net.Uri
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.CornerRadius
@@ -57,5 +67,28 @@ class RevealShape(
         val screenRadius = 14f * density.density * (1f - progress)
         val radius = if (scale > 0.01f) screenRadius / scale else 0f
         return Outline.Rounded(RoundRect(0f, top, w, top + rh, CornerRadius(radius)))
+    }
+}
+
+/** Refleja el ajuste "Animaciones" para los efectos que no reciben [AppSettings] directamente. */
+val LocalAnimations = staticCompositionLocalOf { true }
+
+/**
+ * Entrada escalonada: el elemento sube desde abajo y aparece con un retraso que crece con [index],
+ * como los episodios de un opening que van entrando uno tras otro.
+ */
+fun Modifier.staggerIn(index: Int, stepMs: Int = 45): Modifier = composed {
+    val enabled = LocalAnimations.current
+    val progress = remember { Animatable(if (enabled) 0f else 1f) }
+    LaunchedEffect(Unit) {
+        if (progress.value < 1f) {
+            delay(index.coerceIn(0, 12) * stepMs.toLong())
+            progress.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
+        }
+    }
+    graphicsLayer {
+        val p = progress.value
+        alpha = p
+        translationY = (1f - p) * 36.dp.toPx()
     }
 }

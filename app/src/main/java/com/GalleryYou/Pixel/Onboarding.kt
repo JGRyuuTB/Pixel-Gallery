@@ -360,10 +360,11 @@ private fun ColorsStep(settings: AppSettings) {
             title = stringResource(R.string.onboard_icon_title),
             desc = stringResource(R.string.onboard_icon_desc),
             icon = AppIcons.Apps,
-            checked = settings.materialYouIcon,
+            checked = settings.appIcon == 1,
         ) {
-            settings.updateMaterialYouIcon(it)
-            applyAppIcon(context, it)
+            val index = if (it) 1 else 0
+            settings.updateAppIcon(index)
+            applyAppIcon(context, index)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Spacer(Modifier.height(12.dp))

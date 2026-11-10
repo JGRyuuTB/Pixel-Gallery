@@ -1,5 +1,24 @@
 package com.GalleryYou.Pixel
 
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.Spring
+import coil.decode.ImageDecoderDecoder
+import coil.decode.GifDecoder
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -101,7 +120,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val settings = AppSettings(applicationContext)
-        applyAppIcon(applicationContext, settings.materialYouIcon)
+        applyAppIcon(applicationContext, settings.appIcon)
         setContent {
             val dark = isAppDark(settings)
             // El poder de la amistad también compila
@@ -133,6 +152,12 @@ fun GaleriaApp(settings: AppSettings) {
             .components {
                 add(MediaThumbFetcher.Factory(context))
                 add(VideoFrameDecoder.Factory())
+                // Fotos animadas: GIF, WebP animado y (desde Android 12) AVIF animado.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
             }
             .crossfade(false)
             .allowRgb565(true)
@@ -177,7 +202,10 @@ fun GaleriaApp(settings: AppSettings) {
         }
     }
 
-    CompositionLocalProvider(LocalGalleryLoader provides imageLoader) {
+    CompositionLocalProvider(
+        LocalGalleryLoader provides imageLoader,
+        LocalAnimations provides settings.animations,
+    ) {
         if (!settings.onboardingDone) {
             Onboarding(
                 settings = settings,
@@ -347,7 +375,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             viewerVisible = true
             if (settings.animations) {
                 viewerProgress.snapTo(0f)
-                viewerProgress.animateTo(1f, tween(340, easing = FastOutSlowInEasing))
+                viewerProgress.animateTo(1f, tween(420, easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)))
             } else {
                 viewerProgress.snapTo(1f)
             }
@@ -442,6 +470,62 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             else -> {
                 val inSelection = selected.isNotEmpty() && tab == 0
                 val backdrop = rememberBackdropState(settings)
+
+                // Encabezado que se esconde al bajar por la lista y vuelve al subir.
+                var headerHidden by remember { mutableStateOf(false) }
+                val headerHide by animateFloatAsState(
+                    targetValue = if (headerHidden && !inSelection && tab <= 1) 1f else 0f,
+                    animationSpec = if (settings.animations) tween(260, easing = FastOutSlowInEasing) else snap(),
+                    label = "headerHide",
+                )
+                LaunchedEffect(tab) { headerHidden = false }
+
+                // Tirar hacia abajo desde el inicio de la lista recarga la galería (con indicador animado).
+                var refreshing by remember { mutableStateOf(false) }
+                var pullPx by remember { mutableFloatStateOf(0f) }
+                val pullThreshold = with(LocalDensity.current) { 84.dp.toPx() }
+                LaunchedEffect(refreshing) {
+                    if (refreshing) {
+                        delay(900)
+                        refreshing = false
+                    }
+                }
+                val pullEnabled = tab <= 1 && !inSelection
+                val refreshConnection = remember(pullEnabled, pullThreshold) {
+                    object : NestedScrollConnection {
+                        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                            if (available.y < -6f) headerHidden = true else if (available.y > 6f) headerHidden = false
+                            if (pullEnabled && pullPx > 0f && available.y < 0f && source == NestedScrollSource.UserInput) {
+                                val d = maxOf(available.y, -pullPx)
+                                pullPx += d
+                                return Offset(0f, d)
+                            }
+                            return Offset.Zero
+                        }
+
+                        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                            if (pullEnabled && !refreshing && source == NestedScrollSource.UserInput && available.y > 0f) {
+                                pullPx = (pullPx + available.y * 0.5f).coerceAtMost(pullThreshold * 1.6f)
+                                return Offset(0f, available.y)
+                            }
+                            return Offset.Zero
+                        }
+
+                        override suspend fun onPreFling(available: Velocity): Velocity {
+                            if (pullPx >= pullThreshold && !refreshing) {
+                                refreshing = true
+                                reload++
+                            }
+                            if (pullPx > 0f) {
+                                val from = pullPx
+                                scope.launch {
+                                    animate(from, 0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { v, _ -> pullPx = v }
+                                }
+                            }
+                            return Velocity.Zero
+                        }
+                    }
+                }
                 Scaffold(
                     topBar = {
                         if (tab <= 1) {
@@ -472,12 +556,19 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                     }
                                 }
                             } else {
-                                FloatingHeader(
-                                    title = stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums),
-                                    filter = if (tab == 0) filterMode else null,
-                                    onFilter = { filterMode = it },
-                                    backdrop = backdrop,
-                                )
+                                Box(
+                                    Modifier.graphicsLayer {
+                                        translationY = -size.height * headerHide
+                                        alpha = 1f - headerHide
+                                    },
+                                ) {
+                                    FloatingHeader(
+                                        title = stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums),
+                                        filter = if (tab == 0) filterMode else null,
+                                        onFilter = { filterMode = it },
+                                        backdrop = backdrop,
+                                    )
+                                }
                             }
                             }
                         }
@@ -505,6 +596,8 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                     // Kamehameha! Carga la energía aquí
                     val navInset = padding.calculateBottomPadding()
                     val bottomOnly = Modifier.fillMaxSize()
+                    Box(Modifier.fillMaxSize().nestedScroll(refreshConnection)) {
+                    Box(Modifier.fillMaxSize().graphicsLayer { translationY = pullPx * 0.55f }) {
                     AnimatedContent(
                         modifier = Modifier.fillMaxSize().backdropSource(backdrop),
                         targetState = tab,
@@ -562,6 +655,16 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                             }
                         }
                     }
+                    }
+                    PullIndicator(
+                        pull = { pullPx },
+                        threshold = pullThreshold,
+                        refreshing = refreshing,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = padding.calculateTopPadding()),
+                    )
+                    }
                 }
             }
         }
@@ -570,6 +673,12 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         // Alquimia equivalente: algo entra, algo sale
         val shown = viewer ?: lastViewer
         if (viewerVisible) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { alpha = viewerProgress.value.coerceIn(0f, 1f) }
+                    .background(Color.Black.copy(alpha = 0.5f)),
+            )
             shown?.let { request ->
                 Box(
                     Modifier
@@ -591,9 +700,10 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                 clip = true
                                 shape = RevealShape(p, o.height / o.width, s)
                             } else {
-                                val s = 0.92f + 0.08f * p
+                                val s = 0.84f + 0.16f * p
                                 scaleX = s
                                 scaleY = s
+                                translationY = (1f - p) * h * 0.05f
                                 alpha = p.coerceIn(0f, 1f)
                             }
                         },
@@ -689,3 +799,41 @@ fun AlbumDetail(
     }
 }
 
+
+
+/** Círculo que baja con el dedo al tirar de la lista; gira solo mientras se recarga. */
+@Composable
+private fun PullIndicator(
+    pull: () -> Float,
+    threshold: Float,
+    refreshing: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        shadowElevation = 6.dp,
+        modifier = modifier
+            .size(42.dp)
+            .graphicsLayer {
+                val p = (pull() / threshold).coerceIn(0f, 1f)
+                val shown = if (refreshing) 1f else p
+                alpha = shown
+                scaleX = 0.6f + 0.4f * shown
+                scaleY = 0.6f + 0.4f * shown
+                translationY = if (refreshing) 28.dp.toPx() else pull() * 0.55f - 14.dp.toPx()
+            },
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (refreshing) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
+            } else {
+                CircularProgressIndicator(
+                    progress = { (pull() / threshold).coerceIn(0f, 1f) },
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 3.dp,
+                )
+            }
+        }
+    }
+}

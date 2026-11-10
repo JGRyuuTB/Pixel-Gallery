@@ -12,8 +12,8 @@ android {
         applicationId = "com.GalleryYou.Pixel"
         minSdk = 26
         targetSdk = 35
-        versionCode = 19
-        versionName = "1.6.2"
+        versionCode = 20
+        versionName = "1.7.3"
     }
 
     // Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly
@@ -67,4 +67,5 @@ dependencies {
     // Nobara: ¡clavo, martillo y compilación!
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-video:2.7.0")
+    implementation("io.coil-kt:coil-gif:2.7.0")
 }

@@ -1,5 +1,28 @@
 package com.GalleryYou.Pixel
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.content.res.ResourcesCompat
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.animateColorAsState
+import androidx.annotation.DrawableRes
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.BackHandler
@@ -128,6 +151,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 .padding(bottom = LocalNavInset.current),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
+            CompositionLocalProvider(LocalGroupCounter provides remember { GroupCounter() }) {
             SettingsGroup(stringResource(R.string.settings_language)) {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_language)) },
@@ -303,20 +327,18 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
             }
 
             SettingsGroup(stringResource(R.string.settings_app_icon)) {
-                ChoiceRow(
-                    title = stringResource(R.string.settings_icon),
-                    subtitle = stringResource(R.string.settings_icon_desc),
-                    options = listOf(
-                        stringResource(R.string.icon_material_you),
-                        stringResource(R.string.icon_default),
-                    ),
-                    selected = if (settings.materialYouIcon) 0 else 1,
-                    onSelect = {
-                        val you = it == 0
-                        settings.updateMaterialYouIcon(you)
-                        applyAppIcon(context, you)
-                    },
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                    Text(stringResource(R.string.settings_icon), style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        stringResource(R.string.settings_icon_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconPicker(selected = settings.appIcon, animations = settings.animations) {
+                    settings.updateAppIcon(it)
+                    applyAppIcon(context, it)
+                }
             }
 
             SettingsGroup(stringResource(R.string.settings_updates)) {
@@ -354,6 +376,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
             }
 
             Spacer(Modifier.height(16.dp))
+            }
         }
     }
     }
@@ -375,9 +398,96 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
     }
 }
 
+/** Cuenta los grupos de Ajustes para escalonar su entrada (uno nuevo por pantalla). */
+private class GroupCounter { var n = 0 }
+
+private val LocalGroupCounter = staticCompositionLocalOf { GroupCounter() }
+
+/** Cuadrícula de iconos de la app con vista previa real del icono adaptativo. */
+@Composable
+private fun IconPicker(selected: Int, animations: Boolean, onSelect: (Int) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
+        AppIconOptions.chunked(4).forEachIndexed { rowIndex, rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                rowItems.forEachIndexed { col, option ->
+                    val index = rowIndex * 4 + col
+                    IconTile(option, index == selected, animations) { onSelect(index) }
+                }
+                repeat(4 - rowItems.size) { Spacer(Modifier.width(72.dp)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IconTile(option: AppIconOption, selected: Boolean, animations: Boolean, onClick: () -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val bitmap = rememberIconBitmap(option.previewRes, 192)
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1.08f else 1f,
+        animationSpec = if (animations) spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium) else snap(),
+        label = "iconTileScale",
+    )
+    val ring by animateColorAsState(if (selected) scheme.primary else Color.Transparent, label = "iconTileRing")
+    Column(
+        modifier = Modifier
+            .width(72.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .border(2.5.dp, ring, CircleShape)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (bitmap != null) {
+                Image(bitmap = bitmap, contentDescription = null, modifier = Modifier.fillMaxSize())
+            } else {
+                Box(Modifier.fillMaxSize().background(scheme.primaryContainer, CircleShape))
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(option.nameRes),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (selected) scheme.primary else scheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** Dibuja el icono adaptativo tal como lo enmascara el launcher (con los colores del tema si es Material You). */
+@Composable
+private fun rememberIconBitmap(@DrawableRes res: Int, sizePx: Int): ImageBitmap? {
+    val context = LocalContext.current
+    return remember(res, sizePx) {
+        try {
+            ResourcesCompat.getDrawable(context.resources, res, context.theme)
+                ?.toBitmap(sizePx, sizePx)
+                ?.asImageBitmap()
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
+
 @Composable
 private fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column {
+    val order = remember { LocalGroupCounter.current.n++ }
+    Column(Modifier.staggerIn(order, stepMs = 55)) {
         Text(
             title,
             style = MaterialTheme.typography.labelLarge,

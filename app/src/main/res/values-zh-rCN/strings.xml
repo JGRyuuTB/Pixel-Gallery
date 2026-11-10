@@ -215,4 +215,13 @@
     <string name="nav_tune_icon">图标大小</string>
     <string name="nav_tune_round">圆角</string>
     <string name="nav_tune_reset">重置</string>
+    <string name="icon_aurora">极光</string>
+    <string name="icon_mosaic">马赛克</string>
+    <string name="icon_lens">镜头</string>
+    <string name="icon_polaroid">拍立得</string>
+    <string name="icon_sunset">日落</string>
+    <string name="icon_sakura">樱花</string>
+    <string name="icon_neon">霓虹</string>
+    <string name="icon_minimal">极简</string>
+    <string name="icon_prisma">棱镜</string>
 </resources>

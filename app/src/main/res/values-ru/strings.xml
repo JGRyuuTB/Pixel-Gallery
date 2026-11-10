@@ -227,4 +227,13 @@
     <string name="nav_tune_icon">Размер значков</string>
     <string name="nav_tune_round">Скругление</string>
     <string name="nav_tune_reset">Сбросить</string>
+    <string name="icon_aurora">Аврора</string>
+    <string name="icon_mosaic">Мозаика</string>
+    <string name="icon_lens">Объектив</string>
+    <string name="icon_polaroid">Полароид</string>
+    <string name="icon_sunset">Закат</string>
+    <string name="icon_sakura">Сакура</string>
+    <string name="icon_neon">Неон</string>
+    <string name="icon_minimal">Минимализм</string>
+    <string name="icon_prisma">Призма</string>
 </resources>

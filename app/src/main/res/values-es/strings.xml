@@ -219,4 +219,13 @@
     <string name="nav_tune_icon">Tamaño de los iconos</string>
     <string name="nav_tune_round">Redondeo</string>
     <string name="nav_tune_reset">Restablecer</string>
+    <string name="icon_aurora">Aurora</string>
+    <string name="icon_mosaic">Mosaico</string>
+    <string name="icon_lens">Lente</string>
+    <string name="icon_polaroid">Polaroid</string>
+    <string name="icon_sunset">Atardecer</string>
+    <string name="icon_sakura">Sakura</string>
+    <string name="icon_neon">Neón</string>
+    <string name="icon_minimal">Minimal</string>
+    <string name="icon_prisma">Prisma</string>
 </resources>

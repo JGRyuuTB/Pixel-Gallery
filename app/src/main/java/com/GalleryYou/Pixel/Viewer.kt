@@ -1,5 +1,6 @@
 package com.GalleryYou.Pixel
 
+import kotlin.math.absoluteValue
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import coil.request.SuccessResult
@@ -369,6 +370,20 @@ fun ViewerScreen(
                     key = { items[it].uri.toString() },
                 ) { page ->
                     val m = items[page]
+                    // Al deslizar entre fotos, la que sale se aleja y se atenúa mientras la nueva crece.
+                    val pageFx = if (settings.animations) {
+                        Modifier.graphicsLayer {
+                            val o = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
+                                .absoluteValue.coerceIn(0f, 1f)
+                            val sc = 1f - 0.1f * o
+                            scaleX = sc
+                            scaleY = sc
+                            alpha = 1f - 0.45f * o
+                        }
+                    } else {
+                        Modifier
+                    }
+                    Box(pageFx.fillMaxSize()) {
                     if (m.isVideo) {
                         VideoPage(
                             m = m,
@@ -387,6 +402,7 @@ fun ViewerScreen(
                             onTap = { chrome = !chrome },
                             onZoomChange = { zoomed = it },
                         )
+                    }
                     }
                 }
             }
@@ -501,7 +517,7 @@ private fun PhotoPage(m: MediaFile, onTap: () -> Unit, onZoomChange: (Boolean) -
         return Offset(o.x.coerceIn(-maxX, maxX), o.y.coerceIn(-maxY, maxY))
     }
 
-    val request = remember(m.uri) { ImageRequest.Builder(context).data(m.uri).build() }
+    val request = remember(m.uri) { ImageRequest.Builder(context).data(m.uri).crossfade(220).build() }
 
     Box(
         modifier = Modifier

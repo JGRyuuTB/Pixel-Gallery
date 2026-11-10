@@ -1,5 +1,10 @@
 package com.GalleryYou.Pixel
 
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -399,6 +404,8 @@ fun MediaGrid(
     val todayText = stringResource(R.string.day_today)
     val yesterdayText = stringResource(R.string.day_yesterday)
     val prefetched = remember(items, thumbPx) { HashSet<Int>() }
+    // Miniaturas que ya entraron una vez: solo la primera aparición se anima.
+    val seen = remember { HashSet<Uri>() }
 
     // Alquimia equivalente: algo entra, algo sale
     LaunchedEffect(gridState, items, thumbPx) {
@@ -438,11 +445,16 @@ fun MediaGrid(
                 Text(
                     dayLabel(first.value.dateMillis, todayText, yesterdayText),
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
+                    modifier = (if (settings.animations) Modifier.animateItem() else Modifier)
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 4.dp),
                 )
             }
             items(group, key = { it.index }, contentType = { "thumb" }) { indexed ->
+                val firstTime = remember { seen.add(indexed.value.uri) }
                 Thumb(
+                    modifier = if (settings.animations) Modifier.animateItem() else Modifier,
+                    animateIn = settings.animations && firstTime,
+                    enterDelay = (indexed.index % settings.photoColumns) * 32,
                     m = indexed.value,
                     selectionMode = selectionMode,
                     isSelected = indexed.value.uri in selected,
@@ -469,10 +481,28 @@ fun Thumb(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
+    animateIn: Boolean = false,
+    enterDelay: Int = 0,
 ) {
     val haptic = LocalHapticFeedback.current
     val interaction = remember { MutableInteractionSource() }
     val registry = LocalThumbRegistry.current
+
+    // Entrada: aparece creciendo desde abajo, con un pequeño retraso según su columna.
+    val enter = remember(m.uri) { Animatable(if (animateIn) 0f else 1f) }
+    LaunchedEffect(m.uri) {
+        if (enter.value < 1f) {
+            delay(enterDelay.toLong())
+            enter.animateTo(1f, tween(360, easing = FastOutSlowInEasing))
+        }
+    }
+    // Pulsar la miniatura la hunde un poco, como un botón de verdad.
+    val pressed by interaction.collectIsPressedAsState()
+    val pressScale by animateFloatAsState(
+        targetValue = if (pressed) 0.95f else 1f,
+        animationSpec = if (animations) spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium) else snap(),
+        label = "thumbPress",
+    )
 
     // Un opening que nadie se salta
     val scale: State<Float>? = if (selectionMode) {
@@ -494,6 +524,14 @@ fun Thumb(
         modifier = modifier
             .aspectRatio(1f)
             .onGloballyPositioned { registry?.put(m.uri, it) }
+            .graphicsLayer {
+                val e = enter.value
+                alpha = e
+                val s = (0.84f + 0.16f * e) * pressScale
+                scaleX = s
+                scaleY = s
+                translationY = (1f - e) * 24.dp.toPx()
+            }
             .then(
                 if (scale != null) {
                     Modifier.graphicsLayer {
@@ -548,6 +586,21 @@ fun Thumb(
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
+            }
+        }
+
+        if (m.mime.equals("image/gif", ignoreCase = true)) {
+            Surface(
+                color = Color.Black.copy(alpha = 0.55f),
+                shape = CircleShape,
+                modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
+            ) {
+                Text(
+                    "GIF",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                )
             }
         }
 
@@ -628,8 +681,10 @@ fun AlbumsGrid(
         horizontalArrangement = Arrangement.spacedBy(spacing),
         verticalArrangement = Arrangement.spacedBy(spacing),
     ) {
-        items(albums, key = { it.id }) { album ->
+        itemsIndexed(albums, key = { _, a -> a.id }) { index, album ->
             AlbumCard(
+                modifier = (if (settings.animations) Modifier.animateItem() else Modifier)
+                    .let { if (index < 14) it.staggerIn(index) else it },
                 album = album,
                 columns = columns,
                 anim = settings.animations,

@@ -219,4 +219,13 @@
     <string name="nav_tune_icon">Symbolgröße</string>
     <string name="nav_tune_round">Rundung</string>
     <string name="nav_tune_reset">Zurücksetzen</string>
+    <string name="icon_aurora">Aurora</string>
+    <string name="icon_mosaic">Mosaik</string>
+    <string name="icon_lens">Objektiv</string>
+    <string name="icon_polaroid">Polaroid</string>
+    <string name="icon_sunset">Sonnenuntergang</string>
+    <string name="icon_sakura">Sakura</string>
+    <string name="icon_neon">Neon</string>
+    <string name="icon_minimal">Minimal</string>
+    <string name="icon_prisma">Prisma</string>
 </resources>

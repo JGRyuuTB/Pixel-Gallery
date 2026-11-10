@@ -1,5 +1,7 @@
 package com.GalleryYou.Pixel
 
+import androidx.annotation.StringRes
+import androidx.annotation.DrawableRes
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
@@ -38,7 +40,11 @@ class AppSettings(context: Context) {
     /** Mensaje oculto (rot13): Gngnxnr: fvthr pbzcvynaqb */
     var playerBorder by mutableIntStateOf(prefs.getInt("playerBorder", 2))
         private set
-    var materialYouIcon by mutableStateOf(prefs.getBoolean("materialYouIcon", false))
+    /** Índice del icono de la app dentro de [AppIconOptions] (migra el antiguo ajuste Material You sí/no). */
+    var appIcon by mutableIntStateOf(
+        prefs.getInt("appIcon", if (prefs.getBoolean("materialYouIcon", false)) 1 else 0)
+            .coerceIn(0, AppIconOptions.lastIndex),
+    )
         private set
 
     /** Gojo dice: infinito, nada te toca aquí */
@@ -202,30 +208,44 @@ class AppSettings(context: Context) {
         prefs.edit().putInt("playerBorder", value).apply()
     }
 
-    fun updateMaterialYouIcon(value: Boolean) {
-        materialYouIcon = value
-        prefs.edit().putBoolean("materialYouIcon", value).apply()
+    fun updateAppIcon(value: Int) {
+        appIcon = value.coerceIn(0, AppIconOptions.lastIndex)
+        prefs.edit().putInt("appIcon", appIcon).apply()
     }
 }
 
 /** Mensaje oculto (base64): T21hZSB3YSBtb3Ugc2hpbmRlaXJ1LCBlc2UgYnVnIHlhIGVzdGEgbXVlcnRv */
-fun applyAppIcon(context: Context, materialYou: Boolean) {
+fun applyAppIcon(context: Context, index: Int) {
     val pm = context.packageManager
-    val you = ComponentName(context.packageName, "com.GalleryYou.Pixel.AliasMaterialYou")
-    val default = ComponentName(context.packageName, "com.GalleryYou.Pixel.AliasDefault")
-    val enable = if (materialYou) you else default
-    val disable = if (materialYou) default else you
-    pm.setComponentEnabledSetting(
-        enable,
-        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-        PackageManager.DONT_KILL_APP,
-    )
-    pm.setComponentEnabledSetting(
-        disable,
-        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-        PackageManager.DONT_KILL_APP,
-    )
+    val chosen = index.coerceIn(0, AppIconOptions.lastIndex)
+    fun component(i: Int) = ComponentName(context.packageName, "com.GalleryYou.Pixel.${AppIconOptions[i].alias}")
+    fun set(i: Int, state: Int) {
+        val c = component(i)
+        if (pm.getComponentEnabledSetting(c) != state) {
+            pm.setComponentEnabledSetting(c, state, PackageManager.DONT_KILL_APP)
+        }
+    }
+    // Primero se activa el elegido, así siempre queda un icono disponible en el launcher.
+    set(chosen, PackageManager.COMPONENT_ENABLED_STATE_ENABLED)
+    AppIconOptions.indices.filter { it != chosen }.forEach { set(it, PackageManager.COMPONENT_ENABLED_STATE_DISABLED) }
 }
+
+/** Un icono de la app: su alias del manifest, su nombre y el mipmap adaptativo que se usa de vista previa. */
+class AppIconOption(val alias: String, @StringRes val nameRes: Int, @DrawableRes val previewRes: Int)
+
+val AppIconOptions = listOf(
+    AppIconOption("AliasDefault", R.string.icon_default, R.mipmap.ic_launcher_default),
+    AppIconOption("AliasMaterialYou", R.string.icon_material_you, R.mipmap.ic_launcher_you),
+    AppIconOption("AliasAurora", R.string.icon_aurora, R.mipmap.ic_launcher_aurora),
+    AppIconOption("AliasMosaic", R.string.icon_mosaic, R.mipmap.ic_launcher_mosaic),
+    AppIconOption("AliasLens", R.string.icon_lens, R.mipmap.ic_launcher_lens),
+    AppIconOption("AliasPolaroid", R.string.icon_polaroid, R.mipmap.ic_launcher_polaroid),
+    AppIconOption("AliasSunset", R.string.icon_sunset, R.mipmap.ic_launcher_sunset),
+    AppIconOption("AliasSakura", R.string.icon_sakura, R.mipmap.ic_launcher_sakura),
+    AppIconOption("AliasNeon", R.string.icon_neon, R.mipmap.ic_launcher_neon),
+    AppIconOption("AliasMinimal", R.string.icon_minimal, R.mipmap.ic_launcher_minimal),
+    AppIconOption("AliasPrisma", R.string.icon_prisma, R.mipmap.ic_launcher_prisma),
+)
 
 internal tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
