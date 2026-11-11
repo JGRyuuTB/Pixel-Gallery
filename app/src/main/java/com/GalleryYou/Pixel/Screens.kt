@@ -1,6 +1,7 @@
 package com.GalleryYou.Pixel
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.animation.animateColorAsState
 import android.net.Uri
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.Bitmap
 import android.os.Build
 import android.provider.MediaStore
 import androidx.compose.animation.AnimatedVisibility
@@ -26,6 +29,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -79,6 +83,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -88,8 +93,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -104,8 +112,10 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.request.SuccessResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.withContext
 
 val LocalGalleryLoader = staticCompositionLocalOf<ImageLoader> {
     error("ImageLoader no disponible")
@@ -196,33 +206,131 @@ fun EmptyState(padding: PaddingValues, text: String? = null) {
     }
 }
 
+/** Hokage guarda lo que ya sabe: color medio de cada foto ya vista (así volver atrás no cuesta nada) */
+private val ambientColorCache = android.util.LruCache<Uri, Int>(256)
+
 /**
- * Kyōka Suigetsu: el fondo se vuelve un espejismo borroso de tus fotos
- * La miniatura que va arriba de la lista se difumina detrás de la cuadrícula.
- * Solo existe desde Android 12, que es donde hay desenfoque real; antes se queda el fondo liso.
+ * Kakashi copia el color de un vistazo: promedia una miniatura diminuta y lo aviva un poco
+ * (más saturación, brillo contenido) para que sirva de luz de fondo.
+ */
+private suspend fun averageColorOf(context: android.content.Context, loader: ImageLoader, uri: Uri): Color? {
+    ambientColorCache.get(uri)?.let { return Color(it) }
+    return withContext(Dispatchers.Default) {
+        try {
+            val request = buildThumbRequest(context, uri, 32).newBuilder().allowHardware(false).crossfade(false).build()
+            val raw = ((loader.execute(request) as? SuccessResult)?.drawable as? BitmapDrawable)?.bitmap
+                ?: return@withContext null
+            val small = Bitmap.createScaledBitmap(raw, 8, 8, true)
+            val px = IntArray(64)
+            small.getPixels(px, 0, 8, 0, 0, 8, 8)
+            var r = 0L
+            var g = 0L
+            var b = 0L
+            for (p in px) {
+                r += (p shr 16) and 0xFF
+                g += (p shr 8) and 0xFF
+                b += p and 0xFF
+            }
+            if (small !== raw) small.recycle()
+            val avg = android.graphics.Color.rgb((r / 64).toInt(), (g / 64).toInt(), (b / 64).toInt())
+            val hsv = FloatArray(3)
+            android.graphics.Color.colorToHSV(avg, hsv)
+            hsv[1] = (hsv[1] * 1.35f + 0.08f).coerceIn(0f, 1f)
+            hsv[2] = hsv[2].coerceIn(0.45f, 0.95f)
+            val tuned = android.graphics.Color.HSVToColor(hsv)
+            ambientColorCache.put(uri, tuned)
+            Color(tuned)
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
+
+/**
+ * Kyōka Suigetsu: el fondo respira los colores de tus fotos
+ * Tres luces de aurora (sacadas de las fotos que se ven arriba, en medio y abajo) cambian con suavidad al desplazar.
+ * Desde Android 12 se añade encima la primera foto difuminada. Un velo del color del tema cuida la lectura.
  */
 @Composable
-fun AmbientBackground(uri: Uri?, modifier: Modifier = Modifier) {
-    if (uri == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+fun AmbientBackground(uris: List<Uri>, modifier: Modifier = Modifier) {
+    if (uris.isEmpty()) return
+    val context = LocalContext.current
+    val loader = LocalGalleryLoader.current
     val scheme = MaterialTheme.colorScheme
+    val dark = scheme.background.luminance() < 0.5f
+    val colors by produceState(initialValue = emptyList<Color>(), uris) {
+        value = uris.mapNotNull { averageColorOf(context, loader, it) }
+    }
+    // Sasuke y Naruto se funden despacio: cada luz cambia de color con una transición de casi un segundo
+    val c0 by animateColorAsState(
+        targetValue = colors.getOrNull(0) ?: Color.Transparent,
+        animationSpec = tween(900),
+        label = "ambientA",
+    )
+    val c1 by animateColorAsState(
+        targetValue = colors.getOrNull(1) ?: colors.getOrNull(0) ?: Color.Transparent,
+        animationSpec = tween(900),
+        label = "ambientB",
+    )
+    val c2 by animateColorAsState(
+        targetValue = colors.getOrNull(2) ?: colors.getOrNull(0) ?: Color.Transparent,
+        animationSpec = tween(900),
+        label = "ambientC",
+    )
     Box(modifier.fillMaxSize()) {
-        Crossfade(targetState = uri, animationSpec = tween(600), label = "gridAmbient") { u ->
-            AsyncImage(
-                model = thumbRequest(u, 192),
-                imageLoader = LocalGalleryLoader.current,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        scaleX = 1.4f
-                        scaleY = 1.4f
-                    }
-                    .blur(48.dp, BlurredEdgeTreatment.Unbounded),
-            )
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val strength = if (dark) 0.55f else 0.38f
+            fun glow(c: Color, cx: Float, cy: Float, rad: Float) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(c.copy(alpha = c.alpha * strength), Color.Transparent),
+                        center = Offset(cx, cy),
+                        radius = rad,
+                    ),
+                    radius = rad,
+                    center = Offset(cx, cy),
+                )
+            }
+            glow(c0, w * 0.10f, h * 0.10f, w * 1.05f)
+            glow(c1, w * 0.95f, h * 0.42f, w * 0.95f)
+            glow(c2, w * 0.15f, h * 0.88f, w * 1.05f)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Crossfade(
+                targetState = uris[0],
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 0.5f },
+                animationSpec = tween(600),
+                label = "gridAmbient",
+            ) { u ->
+                AsyncImage(
+                    model = thumbRequest(u, 192),
+                    imageLoader = loader,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            scaleX = 1.4f
+                            scaleY = 1.4f
+                        }
+                        .blur(48.dp, BlurredEdgeTreatment.Unbounded),
+                )
+            }
         }
         // Aizen baja el velo del color del tema: el texto y las miniaturas siguen leyéndose
-        Box(Modifier.fillMaxSize().background(scheme.surface.copy(alpha = 0.62f)))
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    listOf(
+                        scheme.surface.copy(alpha = 0.55f),
+                        scheme.surface.copy(alpha = 0.30f),
+                        scheme.surface.copy(alpha = 0.55f),
+                    ),
+                ),
+            ),
+        )
     }
 }
 
@@ -509,20 +617,23 @@ fun MediaGrid(
     }
 
     // Light mira la primera línea de la libreta: la foto de arriba presta su color al fondo (con una pausa de 300 ms al desplazar)
-    var ambientUri by remember { mutableStateOf<Uri?>(null) }
+    var ambientUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     if (settings.ambientBg) {
         LaunchedEffect(gridState, items) {
-            snapshotFlow { gridState.layoutInfo.visibleItemsInfo.firstNotNullOfOrNull { it.key as? Int } }
+            snapshotFlow {
+                val keys = gridState.layoutInfo.visibleItemsInfo.mapNotNull { it.key as? Int }
+                if (keys.isEmpty()) emptyList<Int>() else listOf(keys.first(), keys[keys.size / 2], keys.last())
+            }
                 .distinctUntilChanged()
                 .collectLatest { idx ->
-                    if (ambientUri != null) delay(300)
-                    ambientUri = idx?.let { items.getOrNull(it) }?.let { thumbUriFor(it) }
+                    if (ambientUris.isNotEmpty()) delay(300)
+                    ambientUris = idx.mapNotNull { items.getOrNull(it) }.map { thumbUriFor(it) }.distinct()
                 }
         }
     }
 
     Box(Modifier.fillMaxSize()) {
-    if (settings.ambientBg) AmbientBackground(ambientUri)
+    if (settings.ambientBg) AmbientBackground(ambientUris)
     LazyVerticalGrid(
         columns = GridCells.Fixed(settings.photoColumns),
         modifier = Modifier
@@ -685,16 +796,17 @@ fun Thumb(
         }
 
         if (m.mime.equals("image/gif", ignoreCase = true)) {
+            // Mob Psycho 100: sin letras, solo el icono de foto animada
             Surface(
                 color = Color.Black.copy(alpha = 0.55f),
                 shape = CircleShape,
                 modifier = Modifier.align(Alignment.TopEnd).padding(6.dp),
             ) {
-                Text(
-                    "GIF",
-                    color = Color.White,
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                Icon(
+                    AppIcons.Animated,
+                    contentDescription = stringResource(R.string.cd_animated_photo),
+                    modifier = Modifier.padding(4.dp).size(16.dp),
+                    tint = Color.White,
                 )
             }
         }
@@ -764,19 +876,20 @@ fun AlbumsGrid(
     val spacing = if (columns <= 3) 16.dp else 10.dp
     val albumsState = rememberLazyGridState()
     // Spike Spiegel se queda con la portada del primer álbum a la vista, sin prisa
-    var ambientUri by remember { mutableStateOf<Uri?>(null) }
+    var ambientUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     if (settings.ambientBg) {
         LaunchedEffect(albumsState, albums) {
-            snapshotFlow { albumsState.firstVisibleItemIndex }
+            snapshotFlow { albumsState.layoutInfo.visibleItemsInfo.map { it.index } }
                 .distinctUntilChanged()
-                .collectLatest { idx ->
-                    if (ambientUri != null) delay(300)
-                    ambientUri = albums.getOrNull(idx)?.cover?.uri
+                .collectLatest { idxs ->
+                    if (ambientUris.isNotEmpty()) delay(300)
+                    val picks = listOfNotNull(idxs.firstOrNull(), idxs.getOrNull(idxs.size / 2), idxs.lastOrNull()).distinct()
+                    ambientUris = picks.mapNotNull { albums.getOrNull(it)?.cover?.uri }
                 }
         }
     }
     Box(Modifier.fillMaxSize()) {
-    if (settings.ambientBg) AmbientBackground(ambientUri)
+    if (settings.ambientBg) AmbientBackground(ambientUris)
     LazyVerticalGrid(
         columns = GridCells.Fixed(columns),
         state = albumsState,

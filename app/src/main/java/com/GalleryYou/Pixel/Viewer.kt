@@ -218,6 +218,8 @@ fun ViewerScreen(
     onTrash: (MediaFile) -> Unit,
     onPageChanged: (android.net.Uri) -> Unit = {},
     onDragDismiss: () -> Unit = onClose,
+    /** Edward Elric transmuta la foto: abre el editor (solo para fotos que no sean animadas ni estén en la papelera) */
+    onEdit: (MediaFile) -> Unit = {},
 ) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
@@ -439,6 +441,7 @@ fun ViewerScreen(
                         Text(
                             formatDateSkeleton(current.dateMillis, "dMMMyyyy"),
                             style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
                         )
                         Text(
                             formatDateSkeleton(current.dateMillis, "jm"),
@@ -446,13 +449,19 @@ fun ViewerScreen(
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
-                    IconButton(onClick = { share(context, current) }) {
+                    // Botones de 44 dp para que quepa el lápiz del editor sin apretar la fecha
+                    if (!current.isVideo && current.expiresMillis == 0L && !current.mime.equals("image/gif", ignoreCase = true)) {
+                        IconButton(onClick = { onEdit(current) }, modifier = Modifier.size(44.dp)) {
+                            Icon(AppIcons.Edit, contentDescription = stringResource(R.string.cd_edit))
+                        }
+                    }
+                    IconButton(onClick = { share(context, current) }, modifier = Modifier.size(44.dp)) {
                         Icon(AppIcons.Share, contentDescription = stringResource(R.string.cd_share))
                     }
-                    IconButton(onClick = { onTrash(current) }) {
+                    IconButton(onClick = { onTrash(current) }, modifier = Modifier.size(44.dp)) {
                         Icon(AppIcons.Trash, contentDescription = stringResource(R.string.move_to_trash))
                     }
-                    IconButton(onClick = { showInfo = true }) {
+                    IconButton(onClick = { showInfo = true }, modifier = Modifier.size(44.dp)) {
                         Icon(AppIcons.Info, contentDescription = stringResource(R.string.details))
                     }
                 }

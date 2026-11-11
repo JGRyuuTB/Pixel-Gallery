@@ -277,6 +277,8 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     var selected by remember { mutableStateOf<Set<Uri>>(emptySet()) }
     var moveItems by remember { mutableStateOf<List<MediaFile>?>(null) }
     var viewer by remember { mutableStateOf<ViewerRequest?>(null) }
+    // Edward Elric entra al laboratorio: la foto que se está editando (null = editor cerrado)
+    var editing by remember { mutableStateOf<MediaFile?>(null) }
     var lastViewer by remember { mutableStateOf<ViewerRequest?>(null) }
 
     // ---- Eren grita libertad, el código también
@@ -700,6 +702,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                         onClose = { viewer = null },
                         onTrash = { m -> trashItems(listOf(m)) { viewer = null } },
                         onPageChanged = { viewerCurrent = it },
+                        onEdit = { m -> editing = m },
                         onDragDismiss = {
                             dragDismissed = true
                             viewer = null
@@ -707,6 +710,18 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                     )
                 }
             }
+        }
+
+        // Totoro abre la puerta del laboratorio: el editor va por encima del visor y de todo lo demás
+        editing?.let { target ->
+            EditorScreen(
+                media = target,
+                onClose = { editing = null },
+                onSaved = {
+                    editing = null
+                    reload++
+                },
+            )
         }
     }
     }

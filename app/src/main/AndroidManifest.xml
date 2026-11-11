@@ -10,6 +10,10 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Aang aprende a doblar la tierra: solo Android 9 o menor necesita permiso para guardar la copia editada -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:enableOnBackInvokedCallback="true"

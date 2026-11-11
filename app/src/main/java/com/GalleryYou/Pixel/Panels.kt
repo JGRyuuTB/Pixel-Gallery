@@ -232,13 +232,8 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 )
                 SwitchRow(
                     title = stringResource(R.string.settings_ambient_bg),
-                    subtitle = if (canBlur) {
-                        stringResource(R.string.settings_ambient_bg_desc)
-                    } else {
-                        stringResource(R.string.requires_android12)
-                    },
-                    checked = settings.ambientBg && canBlur,
-                    enabled = canBlur,
+                    subtitle = stringResource(R.string.settings_ambient_bg_desc),
+                    checked = settings.ambientBg,
                     onChange = { settings.updateAmbientBg(it) },
                 )
                 SwitchRow(

@@ -1,5 +1,13 @@
 # Registro de cambios
 
+## 1.9.4
+
+- Editor de fotos: nuevo botón con un lápiz en el visor (solo para fotos que no sean animadas ni estén en la papelera). Permite recortar con la mano o con proporciones (libre, original, 1:1, 4:3, 3:4, 16:9, 9:16), girar, voltear en espejo, ajustar brillo, contraste, saturación y calidez, y aplicar filtros (Vívido, Frío, Cálido, B/N, Sepia, Desvaído, Drama). El original no se toca: se guarda una copia junto a él (o en Pictures/Pixel Gallery si esa carpeta no admite fotos nuevas). Las fotos PNG se guardan como PNG y el resto como JPEG; el tamaño máximo guardado es de 4096 px por lado.
+- Fotos animadas: las miniaturas ya no muestran la palabra GIF, solo un icono de foto animada.
+- Fondo de la cuadrícula de fotos, videos y álbumes: ahora son tres luces de aurora con los colores de las fotos que se ven (arriba, en medio y abajo), que cambian con suavidad al desplazar, más un velo del color del tema para leer bien. Funciona en cualquier versión de Android; desde Android 12 se suma la primera foto difuminada. Se sigue activando y desactivando en Ajustes, en Apariencia.
+- Visor: los botones de la barra superior miden 44 dp para que quepa el del editor.
+- Android 9 o menor: se declara el permiso de escritura (solo hasta la API 28) para poder guardar la copia editada.
+
 ## 1.9.1
 
 - Barra de filtros (Todo, Fotos, Videos): ahora va centrada por defecto y se ajusta desde Ajustes, en el nuevo grupo "Barra de filtros": tamaño, ancho (al mínimo es Auto), distancia superior y posición (izquierda, centro o derecha). Incluye vista previa en vivo que se queda fija arriba mientras mueves los controles.

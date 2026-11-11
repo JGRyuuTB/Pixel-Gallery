@@ -467,6 +467,54 @@ object AppIcons {
         )
     }
 
+    // Mob Psycho 100: el poder psíquico en movimiento (insignia de foto animada, sin la palabra GIF)
+    val Animated: ImageVector by lazy {
+        build("Animated",
+            solid("M8.6,12 A3.4,3.4 0 1 0 15.4,12 A3.4,3.4 0 1 0 8.6,12 Z"),
+            line("M20.22,13.75 A8.4,8.4 0 0 1 17.62,18.24"),
+            line("M14.60,19.99 A8.4,8.4 0 0 1 9.40,19.99"),
+            line("M6.38,18.24 A8.4,8.4 0 0 1 3.78,13.75"),
+            line("M3.78,10.25 A8.4,8.4 0 0 1 6.38,5.76"),
+            line("M9.40,4.01 A8.4,8.4 0 0 1 14.60,4.01"),
+            line("M17.62,5.76 A8.4,8.4 0 0 1 20.22,10.25"),
+        )
+    }
+    // Edward Elric aplaude la alquimia: iconos del editor de fotos
+    val Edit: ImageVector by lazy {
+        build("Edit",
+            line("M15.5,4.5 L19.5,8.5 L8.5,19.5 L4,20 L4.5,15.5 Z"),
+            line("M13,7 L17,11"),
+        )
+    }
+    val Crop: ImageVector by lazy {
+        build("Crop",
+            line("M7,3 V17 H21"),
+            line("M3,7 H17 V21"),
+        )
+    }
+    val Tune: ImageVector by lazy {
+        build("Tune",
+            line("M4,7 H20"),
+            line("M4,17 H20"),
+            solid("M6.8,7 A2.2,2.2 0 1 0 11.2,7 A2.2,2.2 0 1 0 6.8,7 Z"),
+            solid("M12.8,17 A2.2,2.2 0 1 0 17.2,17 A2.2,2.2 0 1 0 12.8,17 Z"),
+        )
+    }
+    val FlipH: ImageVector by lazy {
+        build("FlipH",
+            line("M12,3 V21"),
+            line("M9,7 L3.5,17 H9 Z"),
+            line("M15,7 L20.5,17 H15 Z"),
+        )
+    }
+    val FlipV: ImageVector by lazy {
+        build("FlipV",
+            line("M3,12 H21"),
+            line("M7,9 H17 L12,3.5 Z"),
+            line("M7,15 H17 L12,20.5 Z"),
+        )
+    }
+
     // ------------------------------------------------------------------ Ora ora ora ora ora ora
 
     private class Part(val d: String, val kind: Int, val alpha: Float)
