@@ -136,7 +136,8 @@ class MainActivity : ComponentActivity() {
             }
             GaleriaTheme(settings) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-                    GaleriaApp(settings)
+                    // Opening de anime: la animación de inicio se coloca por encima de toda la app
+                    StartupGate(settings) { GaleriaApp(settings) }
                 }
             }
         }

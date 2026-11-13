@@ -208,6 +208,8 @@
     <string name="player_tune_floating_note">就像没有查克拉的鸣人：宽度、位置和距离仅在悬浮面板下生效</string>
     <string name="settings_ambient_bg">模糊背景</string>
     <string name="settings_ambient_bg_desc">镜花水月：背景呼吸着你照片的色彩，像一片朦胧的极光</string>
+    <string name="settings_startup_anim">启动动画</string>
+    <string name="settings_startup_anim_desc">就像动漫片头：打开图库前，四颗彩色光球翩翩起舞</string>
     <string name="cd_edit">编辑</string>
     <string name="cd_animated_photo">动态照片</string>
     <string name="editor_title">编辑照片</string>

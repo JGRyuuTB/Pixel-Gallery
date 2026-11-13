@@ -212,6 +212,8 @@
     <string name="player_tune_floating_note">Wie Naruto ohne Chakra: Breite, Position und Abstand wirken nur beim schwebenden Panel</string>
     <string name="settings_ambient_bg">Unscharfer Hintergrund</string>
     <string name="settings_ambient_bg_desc">Kyōka Suigetsu: Der Hintergrund atmet die Farben deiner Fotos, wie eine verschwommene Aurora</string>
+    <string name="settings_startup_anim">Startanimation</string>
+    <string name="settings_startup_anim_desc">Wie ein Anime-Opening: Vier bunte Kugeln tanzen, bevor die Galerie sich öffnet</string>
     <string name="cd_edit">Bearbeiten</string>
     <string name="cd_animated_photo">Animiertes Foto</string>
     <string name="editor_title">Foto bearbeiten</string>

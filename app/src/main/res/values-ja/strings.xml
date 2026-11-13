@@ -208,6 +208,8 @@
     <string name="player_tune_floating_note">チャクラのないナルトのように、幅・位置・距離はフローティングパネルでのみ有効です</string>
     <string name="settings_ambient_bg">ぼかし背景</string>
     <string name="settings_ambient_bg_desc">鏡花水月：背景が写真の色を映し、ぼんやりしたオーロラのように息づきます</string>
+    <string name="settings_startup_anim">起動アニメーション</string>
+    <string name="settings_startup_anim_desc">アニメのオープニングのように、ギャラリーが開く前に4つの色の玉が踊ります</string>
     <string name="cd_edit">編集</string>
     <string name="cd_animated_photo">動く写真</string>
     <string name="editor_title">写真を編集</string>

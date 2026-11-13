@@ -236,10 +236,13 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     checked = settings.ambientBg,
                     onChange = { settings.updateAmbientBg(it) },
                 )
+                // Gojo y Sukuna comparten el cielo: con el Acrílico el interruptor queda fijo, porque ese estilo ya trae su propio cristal líquido
+                val lockedLiquid = BlurStyles.getOrNull(settings.blur - 1)?.fixedLiquid
                 SwitchRow(
                     title = stringResource(R.string.settings_liquid_glass),
                     subtitle = stringResource(R.string.settings_liquid_glass_desc),
-                    checked = settings.liquidGlass,
+                    checked = lockedLiquid ?: settings.liquidGlass,
+                    enabled = lockedLiquid == null,
                     onChange = { settings.updateLiquidGlass(it) },
                 )
                 SwitchRow(
@@ -247,6 +250,12 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     subtitle = stringResource(R.string.settings_animations_desc),
                     checked = settings.animations,
                     onChange = { settings.updateAnimations(it) },
+                )
+                SwitchRow(
+                    title = stringResource(R.string.settings_startup_anim),
+                    subtitle = stringResource(R.string.settings_startup_anim_desc),
+                    checked = settings.startupAnim,
+                    onChange = { settings.updateStartupAnim(it) },
                 )
             }
 

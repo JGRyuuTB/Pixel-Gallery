@@ -29,6 +29,15 @@ class AppSettings(context: Context) {
     var animations by mutableStateOf(prefs.getBoolean("animations", true))
         private set
 
+    /** Opening de anime: cuatro orbes de colores bailan al abrir la galería (se puede apagar en Ajustes) */
+    var startupAnim by mutableStateOf(prefs.getBoolean("startupAnim", true))
+        private set
+
+    fun updateStartupAnim(value: Boolean) {
+        startupAnim = value
+        prefs.edit().putBoolean("startupAnim", value).apply()
+    }
+
     /** Tatakae: sigue luchando, sigue compilando */
     var gap by mutableIntStateOf(prefs.getInt("gap", 2))
         private set
@@ -57,7 +66,16 @@ class AppSettings(context: Context) {
     }
 
     /** Light escribe aquí en su Death Note */
-    var blur by mutableIntStateOf(prefs.getInt("blur", 0).coerceIn(0, 7))
+    // Nami redibuja el mapa: desde la 1.10.3 el cristal Acrílico (nivel 7) es el de serie.
+    // Una sola vez se aplica también a quien ya tenía la app; después el ajuste manda y se puede cambiar cuando quieras.
+    var blur by mutableIntStateOf(
+        if (prefs.getBoolean("acrylicApplied", false)) {
+            prefs.getInt("blur", 7).coerceIn(0, 7)
+        } else {
+            prefs.edit().putInt("blur", 7).putBoolean("acrylicApplied", true).apply()
+            7
+        },
+    )
         private set
 
     fun updateBlur(value: Int) {

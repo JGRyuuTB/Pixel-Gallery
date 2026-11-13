@@ -56,6 +56,9 @@ class BackdropState(val source: GraphicsLayer, val blurred: GraphicsLayer) {
 
     /** Muda muda muda: nada de código muerto */
     val style: BlurStyle? get() = BlurStyles.getOrNull(level - 1)
+
+    /** Light Yagami decide qué cara enseña la libreta: el aspecto líquido real, con el estilo por delante del interruptor */
+    val liquidLook: Boolean get() = style?.fixedLiquid ?: liquid
 }
 
 /** Tsundere: parece fría, pero funciona */
@@ -80,6 +83,11 @@ class BlurStyle(
     val forceRefraction: Boolean = false,
     /** Nani?! ¿Quién se atrevió a tocar esto? */
     val dispersion: Float = 0.12f,
+    /**
+     * Gojo y Sukuna comparten el cielo: si no es null, el estilo ignora el interruptor de Liquid Glass y usa siempre este valor.
+     * El Acrílico lo usa para verse idéntico a su captura de referencia (que se midió con Liquid Glass activo).
+     */
+    val fixedLiquid: Boolean? = null,
 ) {
     fun resolveTint(base: Color): Color = when (tintMode) {
         TintMode.Theme -> base.copy(alpha = (base.alpha * tintAlpha).coerceIn(0f, 1f))
@@ -100,7 +108,7 @@ val BlurStyles = listOf(
     // Soy el que será Rey de los Piratas, dijo Luffy
     BlurStyle(
         R.string.blur_acrylic, 10f, 1.20f, 1.08f, TintMode.Light, 0.22f, 18f,
-        refraction = 1.5f, forceRefraction = true, dispersion = 0.04f,
+        refraction = 1.5f, forceRefraction = true, dispersion = 0.04f, fixedLiquid = true,
     ),
 )
 
@@ -120,7 +128,9 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
     val refractive = (settings.liquidGlass || BlurStyles.getOrNull(level - 1)?.forceRefraction == true) &&
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     val baseRadius = (BlurStyles.getOrNull(level - 1)?.radiusDp ?: 14f).dp
-    state.radius = with(density) { (if (refractive) baseRadius * 0.45f else baseRadius).toPx() }
+    // Zoro afila el desenfoque: el Acrílico usa siempre el radio fino de su referencia, incluso en Android 12 (sin refracción)
+    val tight = refractive || BlurStyles.getOrNull(level - 1)?.forceRefraction == true
+    state.radius = with(density) { (if (tight) baseRadius * 0.45f else baseRadius).toPx() }
     return state
 }
 
@@ -132,7 +142,7 @@ fun rememberBackdropState(settings: AppSettings): BackdropState {
 fun BackdropState?.glassLuma(bg: Float, surface: Float, frost: Float = 0f): Float {
     val st = this?.style
     if (this == null || !enabled || st == null) return surface
-    val k = if (liquid) 0.5f else 1f
+    val k = if (liquidLook) 0.5f else 1f
     val a = (st.tintAlpha * k).coerceIn(0f, 1f)
     var l = (bg * st.brightness + st.lift / 255f).coerceIn(0f, 1f)
     l = when (st.tintMode) {
@@ -172,7 +182,7 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
         if (state.enabled) {
             state.source.record { this@drawWithContent.drawContent() }
             drawLayer(state.source)
-            if (state.appliedRadius != state.radius || state.appliedLiquid != state.liquid ||
+            if (state.appliedRadius != state.radius || state.appliedLiquid != state.liquidLook ||
                 state.appliedLevel != state.level
             ) {
                 state.blurred.renderEffect = BlurEffect(state.radius, state.radius, TileMode.Clamp)
@@ -183,14 +193,14 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
                 val gain = st?.brightness ?: 1f
                 val lift = st?.lift ?: 0f
                 state.blurred.colorFilter = ColorFilter.colorMatrix(
-                    if (state.liquid) {
+                    if (state.liquidLook) {
                         saturationLift(sat * 1.24f, gain * 1.07f, 8f + lift)
                     } else {
                         saturationLift(sat, gain, lift)
                     },
                 )
                 state.appliedRadius = state.radius
-                state.appliedLiquid = state.liquid
+                state.appliedLiquid = state.liquidLook
                 state.appliedLevel = state.level
             }
             state.blurred.record { drawLayer(state.source) }
@@ -301,7 +311,7 @@ fun Modifier.backdropBlur(state: BackdropState?, tint: Color, corner: Dp = 0.dp)
                     drawLayer(state.blurred)
                 }
                 val base = state.style?.resolveTint(tint) ?: tint
-                drawRect(if (state.liquid) base.copy(alpha = base.alpha * 0.6f) else base)
+                drawRect(if (state.liquidLook) base.copy(alpha = base.alpha * 0.6f) else base)
             }
         }
 }
@@ -336,7 +346,7 @@ fun Modifier.glassSurface(
     return this
         .onGloballyPositioned { pos = it.positionInRoot() }
         .drawBehind {
-            val liquid = state?.liquid == true
+            val liquid = state?.liquidLook == true
             val style = state?.style
             val strength = if (liquid || refract || style?.forceRefraction == true) (style?.refraction ?: 1f) else 0f
             val r = corner.toPx()

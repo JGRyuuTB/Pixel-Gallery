@@ -212,6 +212,8 @@
     <string name="player_tune_floating_note">Como o Naruto sem chakra: largura, posição e distância só funcionam com o painel flutuante</string>
     <string name="settings_ambient_bg">Fundo desfocado</string>
     <string name="settings_ambient_bg_desc">Kyōka Suigetsu: o fundo respira as cores das suas fotos, como uma aurora desfocada</string>
+    <string name="settings_startup_anim">Animação de abertura</string>
+    <string name="settings_startup_anim_desc">Como a abertura de um anime: quatro orbes coloridos dançam antes da galeria abrir</string>
     <string name="cd_edit">Editar</string>
     <string name="cd_animated_photo">Foto animada</string>
     <string name="editor_title">Editar foto</string>

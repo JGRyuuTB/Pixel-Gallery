@@ -220,6 +220,8 @@
     <string name="player_tune_floating_note">Как Наруто без чакры: ширина, положение и отступ работают только с плавающей панелью</string>
     <string name="settings_ambient_bg">Размытый фон</string>
     <string name="settings_ambient_bg_desc">Кёка Суйгэцу: фон дышит цветами твоих фото, как размытое сияние</string>
+    <string name="settings_startup_anim">Анимация запуска</string>
+    <string name="settings_startup_anim_desc">Как опенинг аниме: четыре цветных шара танцуют перед открытием галереи</string>
     <string name="cd_edit">Изменить</string>
     <string name="cd_animated_photo">Анимированное фото</string>
     <string name="editor_title">Редактировать фото</string>

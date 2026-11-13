@@ -1,5 +1,11 @@
 # Registro de cambios
 
+## 1.10.3
+
+- Animación de inicio: al abrir la app, cuatro orbes con los colores del icono (rojo, amarillo, verde y azul) brotan del centro, esperan respirando, giran un cuarto de vuelta y se encogen hasta desaparecer, y entonces aparece la galería. Es la misma idea que la del vídeo de referencia, con las formas en las posiciones del icono (rojo arriba, amarillo a la derecha, verde abajo y azul a la izquierda). Un toque la salta. Se activa y desactiva en Ajustes → Apariencia ("Animación de inicio") y no se muestra si las animaciones están apagadas.
+- Cristal acrílico: el estilo Acrílico se ve ahora igual que en la captura de referencia, con Liquid Glass o sin él (ese estilo trae su propio cristal líquido, así que el interruptor queda fijo cuando está elegido) y también en Android 12, con el mismo radio fino de desenfoque. Medido sobre la captura, el tinte blanco, el brillo superior y el borde coinciden con los valores del estilo.
+- Acrílico por defecto: es el estilo de serie en instalaciones nuevas y se aplica una sola vez a quien ya tenía la app; después se puede cambiar en Ajustes → Apariencia → "Desenfoque de la interfaz".
+
 ## 1.9.4
 
 - Editor de fotos: nuevo botón con un lápiz en el visor (solo para fotos que no sean animadas ni estén en la papelera). Permite recortar con la mano o con proporciones (libre, original, 1:1, 4:3, 3:4, 16:9, 9:16), girar, voltear en espejo, ajustar brillo, contraste, saturación y calidez, y aplicar filtros (Vívido, Frío, Cálido, B/N, Sepia, Desvaído, Drama). El original no se toca: se guarda una copia junto a él (o en Pictures/Pixel Gallery si esa carpeta no admite fotos nuevas). Las fotos PNG se guardan como PNG y el resto como JPEG; el tamaño máximo guardado es de 4096 px por lado.

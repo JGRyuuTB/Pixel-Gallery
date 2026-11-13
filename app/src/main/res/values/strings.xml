@@ -212,6 +212,8 @@
     <string name="player_tune_floating_note">Like Naruto without chakra: width, position and distance only work with the floating panel</string>
     <string name="settings_ambient_bg">Blurred background</string>
     <string name="settings_ambient_bg_desc">Kyōka Suigetsu: the background breathes the colors of your photos, like a blurry aurora</string>
+    <string name="settings_startup_anim">Startup animation</string>
+    <string name="settings_startup_anim_desc">Like an anime opening: four colorful orbs dance before the gallery opens</string>
     <string name="cd_edit">Edit</string>
     <string name="cd_animated_photo">Animated photo</string>
     <string name="editor_title">Edit photo</string>
