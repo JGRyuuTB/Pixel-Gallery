@@ -416,7 +416,7 @@ fun ViewerScreen(
 
             AnimatedVisibility(
                 visible = chrome,
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier.align(Alignment.TopCenter).graphicsLayer { alpha = ViewerMotion.chromeAlpha() },
                 enter = fadeIn(tween(Motion.Medium, easing = LinearOutSlowInEasing)) +
                     slideInVertically(tween(Motion.Medium, easing = Motion.EmphasizedDecelerate)) { -it / 2 },
                 exit = fadeOut(tween(Motion.Short, easing = FastOutLinearInEasing)) +
@@ -890,6 +890,23 @@ private fun VideoPlayerContent(
             bottomPad = bottomPad,
             fill = fillScreen,
         ) {
+            // Hasta que ExoPlayer pinta su primer fotograma se ve la miniatura en lugar de un recuadro negro, y luego se funde (adiós al salto gris → negro → vídeo)
+            var rendered by remember(m.uri) { mutableStateOf(false) }
+            DisposableEffect(exo) {
+                val listener = object : Player.Listener {
+                    override fun onRenderedFirstFrame() {
+                        rendered = true
+                    }
+                }
+                exo.addListener(listener)
+                onDispose { exo.removeListener(listener) }
+            }
+            val posterAlpha by animateFloatAsState(
+                targetValue = if (rendered) 0f else 1f,
+                animationSpec = tween(if (settings.animations) Motion.Medium else 0, easing = LinearOutSlowInEasing),
+                label = "videoPoster",
+            )
+            Box(Modifier.fillMaxSize()) {
             AndroidView(
                 factory = { ctx ->
                     // Sharingan activado: este código ve todo
@@ -906,6 +923,16 @@ private fun VideoPlayerContent(
                 },
                 modifier = Modifier.fillMaxSize(),
             )
+            if (posterAlpha > 0.01f) {
+                AsyncImage(
+                    model = thumbRequest(m.uri, 1080),
+                    imageLoader = LocalGalleryLoader.current,
+                    contentDescription = null,
+                    contentScale = if (fillScreen) ContentScale.Crop else ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = posterAlpha },
+                )
+            }
+            }
         }
 
         // Totoro cuida este rincón del bosque
@@ -969,7 +996,7 @@ private fun VideoPlayerContent(
 
         AnimatedVisibility(
             visible = chrome,
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter).graphicsLayer { alpha = ViewerMotion.chromeAlpha() },
             enter = fadeIn(tween(Motion.Medium, easing = LinearOutSlowInEasing)) +
                 slideInVertically(tween(Motion.Medium, easing = Motion.EmphasizedDecelerate)) { it },
             exit = fadeOut(tween(Motion.Short, easing = FastOutLinearInEasing)) +

@@ -43,9 +43,27 @@ object Motion {
     /** Enfatizado al salir: se va acelerando */
     val EmphasizedAccelerate = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
 
+    /** Transformación de contenedor (abrir foto o vídeo): arranca con calma, no se come todo el movimiento al principio y aterriza suave */
+    val Container = CubicBezierEasing(0.3f, 0f, 0.1f, 1f)
+    /** Cerrar: simétrica y suave, para que se vea el viaje de vuelta a la miniatura */
+    val ContainerExit = CubicBezierEasing(0.4f, 0f, 0.2f, 1f)
+    const val ContainerOpen = 480
+    const val ContainerClose = 380
+
     const val Short = 200
     const val Medium = 300
     const val Long = 450
+}
+
+/**
+ * Progreso de apertura del visor (0 = miniatura, 1 = pantalla completa). MainActivity lo publica y los paneles
+ * del reproductor lo leen para desvanecerse antes de que la tarjeta se encoja, como las capas de un jutsu que se disipan.
+ */
+object ViewerMotion {
+    var progress: () -> Float = { 1f }
+
+    /** Los paneles solo se ven en la segunda mitad del viaje: aparecen al final al abrir y se van primero al cerrar */
+    fun chromeAlpha(): Float = ((progress() - 0.55f) / 0.45f).coerceIn(0f, 1f)
 }
 
 /**

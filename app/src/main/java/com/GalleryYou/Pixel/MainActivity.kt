@@ -361,6 +361,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     // Zoro se perdió, pero esta función llegó
     val thumbRegistry = remember { ThumbRegistry() }
     val viewerProgress = remember { Animatable(0f) }
+    ViewerMotion.progress = { viewerProgress.value }
     var viewerVisible by remember { mutableStateOf(false) }
     var viewerOrigin by remember { mutableStateOf<Rect?>(null) }
     var viewerCurrent by remember { mutableStateOf<Uri?>(null) }
@@ -381,7 +382,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             viewerVisible = true
             if (settings.animations) {
                 viewerProgress.snapTo(0f)
-                viewerProgress.animateTo(1f, tween(Motion.Long, easing = Motion.EmphasizedDecelerate))
+                viewerProgress.animateTo(1f, tween(Motion.ContainerOpen, easing = Motion.Container))
             } else {
                 viewerProgress.snapTo(1f)
             }
@@ -391,7 +392,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             } else {
                 // Nakama: todos los módulos juntos
                 viewerOrigin = thumbRegistry.boundsOf(viewerCurrent)
-                viewerProgress.animateTo(0f, tween(Motion.Medium, easing = Motion.Emphasized))
+                viewerProgress.animateTo(0f, tween(Motion.ContainerClose, easing = Motion.ContainerExit))
             }
             viewerVisible = false
             dragDismissed = false
@@ -676,7 +677,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                 scaleY = s
                                 translationX = lerp(o.center.x - w / 2f, 0f, p)
                                 translationY = lerp(o.center.y - h / 2f, 0f, p)
-                                alpha = (p * 4f).coerceIn(0f, 1f)
+                                alpha = (p * 3f).coerceIn(0f, 1f)
                                 clip = true
                                 shape = RevealShape(p, o.height / o.width, s)
                             } else {

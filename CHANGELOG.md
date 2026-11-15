@@ -1,7 +1,14 @@
 # Registro de cambios
 
+## 1.13.6
+
+- Barra de progreso animada: al tocar un punto de la barra o deslizar, el relleno y el pulgar viajan hasta el nuevo sitio con un muelle suave en lugar de saltar de golpe, y el pulgar da un pequeño pulso al tocar. Durante la reproducción normal sigue al vídeo al instante.
+
 ## 1.12.9
 
+- Abrir y cerrar fotos y vídeos mucho más fluido (revisado frame a frame con una grabación): la apertura usa una curva de transformación de contenedor más suave de 480 ms (antes gastaba casi todo el movimiento en los primeros 100 ms) y el cierre dura 380 ms con una curva simétrica en lugar de desaparecer en un par de fotogramas.
+- Al abrir un vídeo se ve su miniatura hasta que llega el primer fotograma y luego se funde, en vez del salto recuadro gris → negro → vídeo.
+- Las barras de arriba y del reproductor se desvanecen antes de que la tarjeta se encoja al cerrar, y aparecen al final al abrir, para que no se rompan a mitad del viaje.
 - Las animaciones que ya existían ahora usan el movimiento de Material 3: la barra de selección entra con eje vertical y fundido, las insignias de selección y el icono de play/pausa aparecen con efecto de escala, las miniaturas seleccionadas se encogen y redondean sus esquinas con la curva enfatizada (antes cambiaban de golpe), y la etiqueta de la barra de navegación se expande y se contrae con las mismas curvas.
 
 ## 1.11.7

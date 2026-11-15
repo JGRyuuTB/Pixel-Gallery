@@ -1,6 +1,10 @@
 package com.GalleryYou.Pixel
 
 import androidx.compose.animation.core.LinearEasing
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -98,6 +102,25 @@ fun SeekStyleBar(
     var dragging by remember { mutableStateOf(false) }
     var last by remember { mutableFloatStateOf(progress) }
     val onChangeNow by rememberUpdatedState(onChange)
+
+    // Posición dibujada: durante la reproducción sigue al vídeo al instante, pero al tocar o arrastrar viaja con un muelle suave
+    // (Goku usa el Instant Transmission, pero la barra va en nube voladora)
+    val shown = remember { Animatable(progress) }
+    var smoothing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    fun settleSoon() {
+        scope.launch {
+            delay(450)
+            smoothing = false
+        }
+    }
+    LaunchedEffect(progress, smoothing, animations) {
+        if (smoothing && animations) {
+            shown.animateTo(progress, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium))
+        } else {
+            shown.snapTo(progress)
+        }
+    }
     val onFinishNow by rememberUpdatedState(onFinish)
 
     // Naruto infla el pulgar de la barra cuando la sostienes con el dedo
@@ -125,6 +148,14 @@ fun SeekStyleBar(
                         val pad = SeekPad.toPx()
                         val f = ((o.x - pad) / (size.width - 2 * pad)).coerceIn(0f, 1f)
                         last = f
+                        smoothing = true
+                        // Un pulso breve del pulgar para que se note el toque
+                        dragging = true
+                        scope.launch {
+                            delay(180)
+                            dragging = false
+                        }
+                        settleSoon()
                         onChangeNow(f)
                         onFinishNow(f)
                     },
@@ -135,15 +166,18 @@ fun SeekStyleBar(
                     onDragStart = { o ->
                         val pad = SeekPad.toPx()
                         dragging = true
+                        smoothing = true
                         last = ((o.x - pad) / (size.width - 2 * pad)).coerceIn(0f, 1f)
                         onChangeNow(last)
                     },
                     onDragEnd = {
                         dragging = false
+                        settleSoon()
                         onFinishNow(last)
                     },
                     onDragCancel = {
                         dragging = false
+                        settleSoon()
                         onFinishNow(last)
                     },
                     onHorizontalDrag = { change, _ ->
@@ -161,7 +195,7 @@ fun SeekStyleBar(
         modifier
             .then(gestures)
             .drawBehind {
-                val p = progress.coerceIn(0f, 1f)
+                val p = shown.value.coerceIn(0f, 1f)
                 val phase = if (moving) phaseState.value else 0f
                 when (style) {
                     1 -> drawWave(p, phase, active, track)
