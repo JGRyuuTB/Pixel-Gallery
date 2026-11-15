@@ -137,8 +137,8 @@ private fun orbThemeFor(icon: Int): OrbTheme = when (icon) {
 /** Bleach, Bankai exprés de 1,7 segundos (antes 2,6): duración total de la coreografía, y un toque la salta */
 private const val StartupMs = 1700
 
-/** Kakashi da la señal a los 450 ms: la galería empieza a componerse por debajo, ya pasado el primer impulso de los orbes */
-private const val ContentDelayMs = 300L
+/** Kakashi espera un respiro (120 ms) tras el final de los orbes para que la galería se componga bajo el telón antes de que caiga */
+private const val ContentDelayMs = 120L
 
 // ------------------------------------------------------------------ Curvas de movimiento
 
@@ -319,23 +319,21 @@ private fun StartupAnimation(iconIndex: Int, onEmerged: () -> Unit, onFinished: 
                 1f,
                 tween(((1f - progress.value) * StartupMs).toInt().coerceAtLeast(1), easing = LinearEasing),
             )
+            // La coreografía termina completa, sin que la galería le robe fotogramas; solo entonces se compone la app bajo el telón
+            onEmerged()
+            delay(ContentDelayMs)
+            skipFade.animateTo(1f, tween(260, easing = LinearEasing))
         } else {
             onEmerged()
             skipFade.animateTo(1f, tween(220, easing = LinearEasing))
         }
         onFinished()
     }
-    LaunchedEffect(Unit) {
-        delay(ContentDelayMs)
-        onEmerged()
-    }
-
     Box(
         Modifier
             .fillMaxSize()
             .graphicsLayer {
-                val closing = easeInOutCubic(span(progress.value, 0.88f, 1f))
-                alpha = (1f - closing) * (1f - skipFade.value)
+                alpha = 1f - skipFade.value
             }
             .then(
                 if (theme.background != null) {

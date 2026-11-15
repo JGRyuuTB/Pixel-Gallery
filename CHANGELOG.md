@@ -1,9 +1,10 @@
 # Registro de cambios
 
-## 1.13.8
+## 1.13.10
 
 - Menos lag al desplazarte por las fotos: cada miniatura ya no carga un animador y una corrutina de pulsación propios (el efecto de hundido al tocar sigue igual), las esquinas solo se animan en modo selección, la insignia de selección solo existe cuando seleccionas y la entrada animada solo se aplica a la primera pantalla en lugar de a cada miniatura nueva que aparece al hacer scroll.
 - Cristal más ligero sin perder nada: el desenfoque del fondo (barra de filtros, barra de navegación y paneles del reproductor) se calcula ahora a media resolución, así que la GPU trabaja una cuarta parte en cada fotograma del scroll y se ve igual.
+- Animación de inicio completa: la galería ya no se compone mientras suena el opening (eso le robaba fotogramas y a veces solo se veía un círculo suelto). Ahora la animación corre entera y fluida y la app aparece justo cuando termina, con un fundido corto.
 
 ## 1.13.6
 
