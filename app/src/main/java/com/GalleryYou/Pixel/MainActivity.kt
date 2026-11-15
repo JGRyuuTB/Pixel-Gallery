@@ -45,6 +45,8 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -379,7 +381,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             viewerVisible = true
             if (settings.animations) {
                 viewerProgress.snapTo(0f)
-                viewerProgress.animateTo(1f, tween(420, easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)))
+                viewerProgress.animateTo(1f, tween(Motion.Long, easing = Motion.EmphasizedDecelerate))
             } else {
                 viewerProgress.snapTo(1f)
             }
@@ -389,7 +391,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             } else {
                 // Nakama: todos los módulos juntos
                 viewerOrigin = thumbRegistry.boundsOf(viewerCurrent)
-                viewerProgress.animateTo(0f, tween(300, easing = FastOutSlowInEasing))
+                viewerProgress.animateTo(0f, tween(Motion.Medium, easing = Motion.Emphasized))
             }
             viewerVisible = false
             dragDismissed = false
@@ -433,17 +435,12 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         AnimatedContent(
             targetState = screen,
             modifier = Modifier.fillMaxSize(),
+            // Eje compartido de Material: entrar a un álbum avanza, salir retrocede, el resto se funde
             transitionSpec = {
-                if (!settings.animations) {
-                    EnterTransition.None togetherWith ExitTransition.None
-                } else if (targetState.kind == 2 && initialState.kind != 2) {
-                    (slideInHorizontally(tween(320, easing = FastOutSlowInEasing)) { w -> w / 3 } + fadeIn(tween(260))) togetherWith
-                        (slideOutHorizontally(tween(320, easing = FastOutSlowInEasing)) { w -> -w / 6 } + fadeOut(tween(200)))
-                } else if (initialState.kind == 2 && targetState.kind != 2) {
-                    (slideInHorizontally(tween(320, easing = FastOutSlowInEasing)) { w -> -w / 6 } + fadeIn(tween(260))) togetherWith
-                        (slideOutHorizontally(tween(320, easing = FastOutSlowInEasing)) { w -> w / 3 } + fadeOut(tween(200)))
-                } else {
-                    fadeIn(tween(200)) togetherWith fadeOut(tween(120))
+                when {
+                    targetState.kind == 2 && initialState.kind != 2 -> sharedAxisX(true, settings.animations)
+                    initialState.kind == 2 && targetState.kind != 2 -> sharedAxisX(false, settings.animations)
+                    else -> fadeThrough(settings.animations)
                 }
             },
             label = "screens",
@@ -528,8 +525,9 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                 targetState = inSelection,
                                 transitionSpec = {
                                     if (settings.animations) {
-                                        (fadeIn(tween(220)) + slideInVertically(tween(220)) { h -> -h / 3 }) togetherWith
-                                            fadeOut(tween(120))
+                                        (fadeIn(tween(210, delayMillis = 60, easing = LinearOutSlowInEasing)) +
+                                            slideInVertically(tween(Motion.Medium, easing = Motion.EmphasizedDecelerate)) { h -> -h / 3 }) togetherWith
+                                            fadeOut(tween(90, easing = FastOutLinearInEasing))
                                     } else {
                                         EnterTransition.None togetherWith ExitTransition.None
                                     }
@@ -590,15 +588,8 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                     AnimatedContent(
                         modifier = Modifier.fillMaxSize().backdropSource(backdrop),
                         targetState = tab,
-                        transitionSpec = {
-                            if (settings.animations) {
-                                val dir = if (targetState > initialState) 1 else -1
-                                (slideInHorizontally(tween(280)) { w -> dir * w / 6 } + fadeIn(tween(220))) togetherWith
-                                    (slideOutHorizontally(tween(220)) { w -> -dir * w / 6 } + fadeOut(tween(120)))
-                            } else {
-                                EnterTransition.None togetherWith ExitTransition.None
-                            }
-                        },
+                        // Fundido a través de Material entre pestañas: sale una, entra la otra creciendo
+                        transitionSpec = { fadeThrough(settings.animations) },
                         label = "tabs",
                     ) { current ->
                         when (current) {

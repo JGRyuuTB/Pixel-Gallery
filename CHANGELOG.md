@@ -1,7 +1,13 @@
 # Registro de cambios
 
+## 1.12.9
+
+- Las animaciones que ya existían ahora usan el movimiento de Material 3: la barra de selección entra con eje vertical y fundido, las insignias de selección y el icono de play/pausa aparecen con efecto de escala, las miniaturas seleccionadas se encogen y redondean sus esquinas con la curva enfatizada (antes cambiaban de golpe), y la etiqueta de la barra de navegación se expande y se contrae con las mismas curvas.
+
 ## 1.11.7
 
+- Animaciones Material Design en toda la app, con las mismas curvas y duraciones de Material 3 (nuevo Motion.kt): eje compartido al entrar y salir de un álbum y de Acerca de, fundido a través al cambiar de pestaña (Fotos, Álbumes, Papelera, Ajustes), entrada escalonada con escala en los grupos de Ajustes y los álbumes, y un efecto de hundido al tocar filas de Ajustes, botones y tarjetas.
+- Abrir y cerrar una foto o vídeo usa ahora el easing enfatizado de Material (entra frenando, sale rápido); los paneles del reproductor y los saltos de 5 s entran y salen con las mismas curvas. Todo respeta el ajuste "Animaciones".
 - Barra de filtros: 6 estilos a elegir en Ajustes > Barra de filtros (Cápsulas, Segmentado, Subrayado, Compacta, Texto y Contorno), cada uno con su tarjeta de previsualización.
 - La barra de progreso "Clásica" vuelve a ser la de siempre (relleno grueso, pulgar de rayita y puntito final) y es la que viene por defecto.
 - Barra de progreso del reproductor: ahora se puede tocar en cualquier punto de la barra para saltar allí (además de arrastrar). Hay 7 estilos a elegir en Ajustes > Reproductor (Clásica, Ola, Hilo, Píldora, Puntos, Ecualizador y Neón), cada uno con su vista previa y con el reproductor de muestra que cambia al instante.

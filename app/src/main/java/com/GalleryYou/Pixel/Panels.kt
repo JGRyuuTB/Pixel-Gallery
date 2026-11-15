@@ -132,17 +132,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
 
     AnimatedContent(
         targetState = showAbout,
-        transitionSpec = {
-            if (!settings.animations) {
-                EnterTransition.None togetherWith ExitTransition.None
-            } else if (targetState) {
-                (slideInHorizontally(tween(300)) { w -> w / 3 } + fadeIn(tween(240))) togetherWith
-                    (slideOutHorizontally(tween(300)) { w -> -w / 6 } + fadeOut(tween(180)))
-            } else {
-                (slideInHorizontally(tween(300)) { w -> -w / 6 } + fadeIn(tween(240))) togetherWith
-                    (slideOutHorizontally(tween(300)) { w -> w / 3 } + fadeOut(tween(180)))
-            }
-        },
+        transitionSpec = { sharedAxisX(targetState, settings.animations) },
         label = "about",
     ) { about ->
     if (about) {
@@ -191,7 +181,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     supportingContent = { Text(languageName) },
                     leadingContent = { Icon(AppIcons.Globe, contentDescription = null) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { showLanguage = true },
+                    modifier = Modifier.pressFeedback().clickable { showLanguage = true },
                 )
             }
 
@@ -498,7 +488,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     supportingContent = { Text(updateStatus) },
                     leadingContent = { Icon(AppIcons.Download, contentDescription = null) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.pressFeedback().clickable {
                         val st = updater.state
                         if (st is UpdateState.Available || st is UpdateState.Ready || st is UpdateState.Downloading) {
                             updater.dialogVisible = true
@@ -522,7 +512,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     leadingContent = { Icon(AppIcons.Info, contentDescription = null) },
                     trailingContent = { Icon(AppIcons.ArrowForward, contentDescription = null) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { showAbout = true },
+                    modifier = Modifier.pressFeedback().clickable { showAbout = true },
                 )
             }
 
@@ -769,6 +759,7 @@ private fun IconTile(option: AppIconOption, selected: Boolean, animations: Boole
     Column(
         modifier = Modifier
             .width(72.dp)
+            .pressFeedback(0.94f)
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp),
@@ -853,7 +844,7 @@ private fun SwitchRow(
             Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        modifier = Modifier.clickable(enabled = enabled) { onChange(!checked) },
+        modifier = Modifier.pressFeedback().clickable(enabled = enabled) { onChange(!checked) },
     )
 }
 

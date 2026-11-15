@@ -20,6 +20,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -719,17 +720,23 @@ fun Thumb(
     val scale: State<Float>? = if (selectionMode) {
         animateFloatAsState(
             targetValue = if (isSelected) 0.86f else 1f,
-            animationSpec = if (animations) spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow) else snap(),
+            animationSpec = if (animations) tween(Motion.Medium, easing = Motion.Emphasized) else snap(),
             label = "thumbSelect",
         )
     } else {
         null
     }
-    val corner = when {
+    val cornerTarget = when {
         isSelected -> 20.dp
         roundedCorners -> 12.dp
         else -> 4.dp
     }
+    // Las esquinas también cambian con la curva de Material, no de golpe
+    val corner by animateDpAsState(
+        targetValue = cornerTarget,
+        animationSpec = if (animations) tween(Motion.Medium, easing = Motion.Emphasized) else snap(),
+        label = "thumbCorner",
+    )
     // Kakashi copia una sola vez: la posición se registra al nacer, no en cada fotograma de scroll
     val registered = remember(m.uri) { BooleanArray(1) }
     // Kawaii desu: pequeño y eficiente (una sola capa gráfica por miniatura en vez de dos)
@@ -831,8 +838,8 @@ fun Thumb(
         AnimatedVisibility(
             visible = selectionMode,
             modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
-            enter = fadeIn() + scaleIn(initialScale = 0.4f),
-            exit = fadeOut() + scaleOut(targetScale = 0.4f),
+            enter = popIn(0.4f),
+            exit = popOut(0.4f),
         ) {
             val primary = MaterialTheme.colorScheme.primary
             Box(
@@ -845,8 +852,8 @@ fun Thumb(
             ) {
                 AnimatedVisibility(
                     visible = isSelected,
-                    enter = fadeIn() + scaleIn(initialScale = 0.3f),
-                    exit = fadeOut() + scaleOut(targetScale = 0.3f),
+                    enter = popIn(0.3f),
+                    exit = popOut(0.3f),
                 ) {
                     Icon(
                         AppIcons.Check,
@@ -1014,7 +1021,7 @@ fun MoveSheet(
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { newAlbum = true },
+                    modifier = Modifier.pressFeedback().clickable { newAlbum = true },
                 )
             }
             items(targets, key = { it.id }) { album ->
@@ -1034,7 +1041,7 @@ fun MoveSheet(
                         )
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable { onPick(album.relativePath) },
+                    modifier = Modifier.pressFeedback().clickable { onPick(album.relativePath) },
                 )
             }
         }

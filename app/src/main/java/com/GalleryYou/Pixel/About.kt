@@ -358,6 +358,7 @@ private fun LinkButton(icon: ImageVector, description: String, onClick: () -> Un
     Column(
         modifier = Modifier
             .size(44.dp)
+            .pressFeedback(0.9f)
             .clip(CircleShape)
             .background(scheme.primary)
             .clickable(onClick = onClick),

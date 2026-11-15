@@ -38,6 +38,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -415,8 +417,10 @@ fun ViewerScreen(
             AnimatedVisibility(
                 visible = chrome,
                 modifier = Modifier.align(Alignment.TopCenter),
-                enter = fadeIn() + slideInVertically { -it / 2 },
-                exit = fadeOut() + slideOutVertically { -it / 2 },
+                enter = fadeIn(tween(Motion.Medium, easing = LinearOutSlowInEasing)) +
+                    slideInVertically(tween(Motion.Medium, easing = Motion.EmphasizedDecelerate)) { -it / 2 },
+                exit = fadeOut(tween(Motion.Short, easing = FastOutLinearInEasing)) +
+                    slideOutVertically(tween(Motion.Short, easing = Motion.EmphasizedAccelerate)) { -it / 2 },
             ) {
                 CompositionLocalProvider(LocalContentColor provides topContent) {
                 Row(
@@ -940,8 +944,8 @@ private fun VideoPlayerContent(
             modifier = Modifier
                 .align(if (lastDir < 0) Alignment.CenterStart else Alignment.CenterEnd)
                 .padding(horizontal = 40.dp),
-            enter = fadeIn() + scaleIn(initialScale = 0.6f),
-            exit = fadeOut() + scaleOut(targetScale = 0.8f),
+            enter = popIn(),
+            exit = popOut(),
         ) {
             Box(
                 Modifier.size(72.dp).background(Color.Black.copy(alpha = 0.55f), CircleShape),
@@ -966,8 +970,10 @@ private fun VideoPlayerContent(
         AnimatedVisibility(
             visible = chrome,
             modifier = Modifier.align(Alignment.BottomCenter),
-            enter = fadeIn() + slideInVertically { it },
-            exit = fadeOut() + slideOutVertically { it },
+            enter = fadeIn(tween(Motion.Medium, easing = LinearOutSlowInEasing)) +
+                slideInVertically(tween(Motion.Medium, easing = Motion.EmphasizedDecelerate)) { it },
+            exit = fadeOut(tween(Motion.Short, easing = FastOutLinearInEasing)) +
+                slideOutVertically(tween(Motion.Short, easing = Motion.EmphasizedAccelerate)) { it },
         ) {
             val shownPosition = dragFraction?.let { (it * duration).toLong() } ?: position
             val shift = rememberBorderShift(settings.playerBorder, settings.animations && isPlaying)
@@ -1353,8 +1359,7 @@ private fun PlayPauseButton(
             targetState = state,
             transitionSpec = {
                 if (animations) {
-                    (fadeIn(tween(160)) + scaleIn(initialScale = 0.6f)) togetherWith
-                        (fadeOut(tween(100)) + scaleOut(targetScale = 0.6f))
+                    popIn(0.6f) togetherWith popOut(0.6f)
                 } else {
                     fadeIn(tween(0)) togetherWith fadeOut(tween(0))
                 }

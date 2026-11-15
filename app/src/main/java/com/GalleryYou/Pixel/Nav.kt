@@ -11,6 +11,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
@@ -375,11 +377,11 @@ private fun ClassicNavItem(
         NavIcon(dest, selected, fg, 22.dp * tuning.icon, badge)
         AnimatedVisibility(
             visible = selected,
-            enter = fadeIn(tween(if (animations) 200 else 0)) + expandHorizontally(
-                animationSpec = if (animations) spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow) else snap(),
+            enter = fadeIn(if (animations) tween(Motion.Medium, delayMillis = 60, easing = LinearOutSlowInEasing) else snap()) + expandHorizontally(
+                animationSpec = if (animations) tween(Motion.Medium, easing = Motion.Emphasized) else snap(),
             ),
-            exit = fadeOut(tween(if (animations) 100 else 0)) + shrinkHorizontally(
-                animationSpec = if (animations) tween(180) else snap(),
+            exit = fadeOut(if (animations) tween(90, easing = FastOutLinearInEasing) else snap()) + shrinkHorizontally(
+                animationSpec = if (animations) tween(Motion.Short, easing = Motion.EmphasizedAccelerate) else snap(),
             ),
         ) {
             Text(

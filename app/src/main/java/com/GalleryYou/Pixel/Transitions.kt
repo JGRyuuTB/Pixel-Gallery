@@ -83,12 +83,15 @@ fun Modifier.staggerIn(index: Int, stepMs: Int = 45): Modifier = composed {
     LaunchedEffect(Unit) {
         if (progress.value < 1f) {
             delay(index.coerceIn(0, 12) * stepMs.toLong())
-            progress.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
+            progress.animateTo(1f, tween(Motion.Long, easing = Motion.EmphasizedDecelerate))
         }
     }
     graphicsLayer {
         val p = progress.value
         alpha = p
-        translationY = (1f - p) * 36.dp.toPx()
+        translationY = (1f - p) * 32.dp.toPx()
+        val sc = 0.94f + 0.06f * p
+        scaleX = sc
+        scaleY = sc
     }
 }
