@@ -448,9 +448,8 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             label = "screens",
         ) { s ->
         when {
-            s.kind == 0 -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+            // Sin círculo de carga: la lista llega ya leída durante el opening, y si tarda un instante se ve el fondo limpio
+            s.kind == 0 -> Box(Modifier.fillMaxSize())
 
             s.kind == 2 -> albums.firstOrNull { it.id == s.id }?.let { album -> AlbumDetail(
                 album = album,

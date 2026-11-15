@@ -1,10 +1,11 @@
 # Registro de cambios
 
-## 1.13.10
+## 1.13.11
 
 - Menos lag al desplazarte por las fotos: cada miniatura ya no carga un animador y una corrutina de pulsación propios (el efecto de hundido al tocar sigue igual), las esquinas solo se animan en modo selección, la insignia de selección solo existe cuando seleccionas y la entrada animada solo se aplica a la primera pantalla en lugar de a cada miniatura nueva que aparece al hacer scroll.
 - Cristal más ligero sin perder nada: el desenfoque del fondo (barra de filtros, barra de navegación y paneles del reproductor) se calcula ahora a media resolución, así que la GPU trabaja una cuarta parte en cada fotograma del scroll y se ve igual.
 - Animación de inicio completa: la galería ya no se compone mientras suena el opening (eso le robaba fotogramas y a veces solo se veía un círculo suelto). Ahora la animación corre entera y fluida y la app aparece justo cuando termina, con un fundido corto.
+- Sin círculos tras la animación de inicio: se quita el indicador de carga redondo que aparecía al terminar el opening y el telón del sistema de Android 12 o superior ya no muestra el icono de la app en un círculo, solo el color de fondo, y ese color es ahora el mismo fondo de la app (colores dinámicos), así que el paso del arranque a la animación no se nota. Los iconos con degradado propio lo funden suavemente encima.
 
 ## 1.13.6
 

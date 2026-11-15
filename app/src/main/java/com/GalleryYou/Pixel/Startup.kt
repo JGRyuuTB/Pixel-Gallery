@@ -335,15 +335,18 @@ private fun StartupAnimation(iconIndex: Int, onEmerged: () -> Unit, onFinished: 
             .graphicsLayer {
                 alpha = 1f - skipFade.value
             }
-            .then(
-                if (theme.background != null) {
-                    Modifier.background(theme.background)
-                } else {
-                    Modifier.background(themeBackground)
-                },
-            )
+            // Siempre empieza con el fondo normal de la app (el mismo del telón del sistema); el degradado propio del icono se funde encima
+            .background(themeBackground)
             .pointerInput(Unit) { detectTapGestures { skipped = true } },
     ) {
+        theme.background?.let { bg ->
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { alpha = easeInOutCubic(span(progress.value, 0f, 0.2f)) }
+                    .background(bg),
+            )
+        }
         Canvas(Modifier.fillMaxSize()) {
             val t = progress.value
             val m = minOf(size.width, size.height)
