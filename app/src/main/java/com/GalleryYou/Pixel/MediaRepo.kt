@@ -3,6 +3,7 @@ package com.GalleryYou.Pixel
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
+import kotlinx.coroutines.async
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -37,6 +38,29 @@ data class Album(
     val items: List<MediaFile>,
     val relativePath: String,
 )
+
+/**
+ * Naruto manda un clon de sombra por delante: la lista de fotos se empieza a leer en segundo plano nada más abrir la app,
+ * mientras suena el opening, y la galería la recoge lista cuando se compone.
+ */
+object MediaPrefetch {
+    @Volatile
+    private var pending: kotlinx.coroutines.Deferred<Pair<List<MediaFile>, List<MediaFile>>?>? = null
+
+    fun start(context: Context) {
+        val app = context.applicationContext
+        pending = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).async {
+            runCatching { MediaRepo.load(app) to MediaRepo.loadTrash(app) }.getOrNull()
+        }
+    }
+
+    /** Entrega el resultado una sola vez; vacío o fallido (por ejemplo sin permisos aún) = null y se carga como siempre */
+    suspend fun take(): Pair<List<MediaFile>, List<MediaFile>>? {
+        val p = pending ?: return null
+        pending = null
+        return p.await()?.takeIf { it.first.isNotEmpty() }
+    }
+}
 
 object MediaRepo {
 

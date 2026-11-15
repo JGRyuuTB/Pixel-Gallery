@@ -134,11 +134,11 @@ private fun orbThemeFor(icon: Int): OrbTheme = when (icon) {
     else -> OrbTheme(DefaultOrbColors)
 }
 
-/** Bleach, Bankai de 2,6 segundos: duración total de la coreografía, y un toque la salta */
-private const val StartupMs = 2600
+/** Bleach, Bankai exprés de 1,7 segundos (antes 2,6): duración total de la coreografía, y un toque la salta */
+private const val StartupMs = 1700
 
 /** Kakashi da la señal a los 450 ms: la galería empieza a componerse por debajo, ya pasado el primer impulso de los orbes */
-private const val ContentDelayMs = 450L
+private const val ContentDelayMs = 300L
 
 // ------------------------------------------------------------------ Curvas de movimiento
 

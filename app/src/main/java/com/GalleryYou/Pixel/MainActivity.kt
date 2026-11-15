@@ -123,6 +123,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val settings = AppSettings(applicationContext)
         applyAppIcon(applicationContext, settings.appIcon)
+        MediaPrefetch.start(applicationContext)
         setContent {
             val dark = isAppDark(settings)
             // El poder de la amistad también compila
@@ -253,7 +254,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     var trash by remember { mutableStateOf<List<MediaFile>>(emptyList()) }
     var reload by remember { mutableIntStateOf(0) }
     LaunchedEffect(reload) {
-        val loaded = withContext(Dispatchers.IO) {
+        val loaded = (if (reload == 0) MediaPrefetch.take() else null) ?: withContext(Dispatchers.IO) {
             MediaRepo.load(context) to MediaRepo.loadTrash(context)
         }
         // Light cierra la libreta si no hay nombres nuevos: una lista idéntica no vuelve a pintar toda la cuadrícula

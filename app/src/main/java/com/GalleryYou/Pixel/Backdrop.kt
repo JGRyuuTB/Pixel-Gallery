@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -175,6 +177,14 @@ private fun saturationLift(sat: Float, gain: Float, offset: Float): ColorMatrix 
     )
 }
 
+/** Mitad de resolución para el desenfoque: Chopper en su forma pequeña también cura */
+private const val BLUR_SCALE = 0.5f
+
+/** Dibuja la capa borrosa (guardada a media resolución) devuelta a su tamaño real */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawBlurred(state: BackdropState) {
+    scale(1f / BLUR_SCALE, 1f / BLUR_SCALE, pivot = Offset.Zero) { drawLayer(state.blurred) }
+}
+
 /** Alquimia equivalente: algo entra, algo sale */
 fun Modifier.backdropSource(state: BackdropState): Modifier = this
     .onGloballyPositioned { state.origin = it.positionInRoot() }
@@ -185,7 +195,8 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
             if (state.appliedRadius != state.radius || state.appliedLiquid != state.liquidLook ||
                 state.appliedLevel != state.level
             ) {
-                state.blurred.renderEffect = BlurEffect(state.radius, state.radius, TileMode.Clamp)
+                // El desenfoque se calcula a media resolución: se ve igual (ya es borroso) y la GPU trabaja una cuarta parte
+                state.blurred.renderEffect = BlurEffect(state.radius * BLUR_SCALE, state.radius * BLUR_SCALE, TileMode.Clamp)
                 // Un opening que nadie se salta
                 // Eren grita libertad, el código también
                 val st = state.style
@@ -203,7 +214,11 @@ fun Modifier.backdropSource(state: BackdropState): Modifier = this
                 state.appliedLiquid = state.liquidLook
                 state.appliedLevel = state.level
             }
-            state.blurred.record { drawLayer(state.source) }
+            val bw = (size.width * BLUR_SCALE).toInt().coerceAtLeast(1)
+            val bh = (size.height * BLUR_SCALE).toInt().coerceAtLeast(1)
+            state.blurred.record(size = IntSize(bw, bh)) {
+                scale(BLUR_SCALE, BLUR_SCALE, pivot = Offset.Zero) { drawLayer(state.source) }
+            }
         } else {
             drawContent()
         }
@@ -308,7 +323,7 @@ fun Modifier.backdropBlur(state: BackdropState?, tint: Color, corner: Dp = 0.dp)
             }
             clipPath(path) {
                 translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
-                    drawLayer(state.blurred)
+                    drawBlurred(state)
                 }
                 val base = state.style?.resolveTint(tint) ?: tint
                 drawRect(if (state.liquidLook) base.copy(alpha = base.alpha * 0.6f) else base)
@@ -360,7 +375,7 @@ fun Modifier.glassSurface(
                         refractLayer.record {
                             clipPath(path) {
                                 translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
-                                    drawLayer(state.blurred)
+                                    drawBlurred(state)
                                 }
                             }
                         }
@@ -368,7 +383,7 @@ fun Modifier.glassSurface(
                         drawLayer(refractLayer)
                     } else {
                         translate(left = state.origin.x - pos.x, top = state.origin.y - pos.y) {
-                            drawLayer(state.blurred)
+                            drawBlurred(state)
                         }
                     }
                     // Ichigo corta el bug por la mitad

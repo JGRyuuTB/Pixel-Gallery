@@ -35,6 +35,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -82,6 +83,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -587,6 +590,8 @@ fun MediaGrid(
     val prefetched = remember(items, thumbPx) { HashSet<Int>() }
     // Miniaturas que ya entraron una vez: solo la primera aparición se anima.
     val seen = remember { HashSet<Uri>() }
+    // Solo la primera pantalla se anima al aparecer: animar cada miniatura nueva mientras haces scroll era lo que más pesaba (Shinji, no te subas al robot con lag)
+    val bornAt = remember { System.currentTimeMillis() }
 
     // Etiquetas de día ya calculadas: formatear fechas en cada aparición era un lastre
     val dayLabels = remember(groups, todayText, yesterdayText) { HashMap<Int, String>() }
@@ -663,7 +668,7 @@ fun MediaGrid(
                 val firstTime = remember { seen.add(indexed.value.uri) }
                 Thumb(
                     modifier = if (settings.animations) Modifier.animateItem() else Modifier,
-                    animateIn = settings.animations && firstTime,
+                    animateIn = settings.animations && firstTime && System.currentTimeMillis() - bornAt < 1500L,
                     enterDelay = (indexed.index % settings.photoColumns) * 32,
                     m = indexed.value,
                     selectionMode = selectionMode,
@@ -708,13 +713,10 @@ fun Thumb(
             enter.animateTo(1f, tween(360, easing = FastOutSlowInEasing))
         }
     }
-    // Pulsar la miniatura la hunde un poco, como un botón de verdad.
-    val pressed by interaction.collectIsPressedAsState()
-    val pressScale by animateFloatAsState(
-        targetValue = if (pressed) 0.95f else 1f,
-        animationSpec = if (animations) spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium) else snap(),
-        label = "thumbPress",
-    )
+    // Pulsar la miniatura la hunde un poco, como un botón de verdad. Ligero: no cuesta nada hasta que alguien toca
+    // (antes cada celda tenía una corrutina escuchando pulsaciones y un animador de estado, y con cientos de celdas se notaba al hacer scroll).
+    val pressAnim = remember { Animatable(1f) }
+    val pressScope = rememberCoroutineScope()
 
     // Un opening que nadie se salta
     val scale: State<Float>? = if (selectionMode) {
@@ -732,11 +734,16 @@ fun Thumb(
         else -> 4.dp
     }
     // Las esquinas también cambian con la curva de Material, no de golpe
-    val corner by animateDpAsState(
-        targetValue = cornerTarget,
-        animationSpec = if (animations) tween(Motion.Medium, easing = Motion.Emphasized) else snap(),
-        label = "thumbCorner",
-    )
+    // (solo en modo selección: un animador por miniatura fuera de él era peso muerto durante el scroll)
+    val corner: Dp = if (selectionMode) {
+        animateDpAsState(
+            targetValue = cornerTarget,
+            animationSpec = if (animations) tween(Motion.Medium, easing = Motion.Emphasized) else snap(),
+            label = "thumbCorner",
+        ).value
+    } else {
+        cornerTarget
+    }
     // Kakashi copia una sola vez: la posición se registra al nacer, no en cada fotograma de scroll
     val registered = remember(m.uri) { BooleanArray(1) }
     // Kawaii desu: pequeño y eficiente (una sola capa gráfica por miniatura en vez de dos)
@@ -752,13 +759,23 @@ fun Thumb(
             .graphicsLayer {
                 val e = enter?.value ?: 1f
                 alpha = e
-                val s = (0.84f + 0.16f * e) * pressScale * (scale?.value ?: 1f)
+                val s = (0.84f + 0.16f * e) * pressAnim.value * (scale?.value ?: 1f)
                 scaleX = s
                 scaleY = s
                 translationY = (1f - e) * 24.dp.toPx()
             }
             .clip(RoundedCornerShape(corner))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .pointerInput(animations) {
+                if (animations) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        pressScope.launch { pressAnim.animateTo(0.95f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium)) }
+                        waitForUpOrCancellation()
+                        pressScope.launch { pressAnim.animateTo(1f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium)) }
+                    }
+                }
+            }
             .combinedClickable(
                 interactionSource = interaction,
                 indication = null,
@@ -835,8 +852,10 @@ fun Thumb(
             }
         }
 
+        if (selectionMode) {
+        val badgeState = remember { androidx.compose.animation.core.MutableTransitionState(!animations).apply { targetState = true } }
         AnimatedVisibility(
-            visible = selectionMode,
+            visibleState = badgeState,
             modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
             enter = popIn(0.4f),
             exit = popOut(0.4f),
@@ -863,6 +882,7 @@ fun Thumb(
                     )
                 }
             }
+        }
         }
     }
 }

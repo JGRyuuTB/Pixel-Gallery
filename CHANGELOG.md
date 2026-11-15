@@ -1,7 +1,14 @@
 # Registro de cambios
 
+## 1.13.8
+
+- Menos lag al desplazarte por las fotos: cada miniatura ya no carga un animador y una corrutina de pulsación propios (el efecto de hundido al tocar sigue igual), las esquinas solo se animan en modo selección, la insignia de selección solo existe cuando seleccionas y la entrada animada solo se aplica a la primera pantalla en lugar de a cada miniatura nueva que aparece al hacer scroll.
+- Cristal más ligero sin perder nada: el desenfoque del fondo (barra de filtros, barra de navegación y paneles del reproductor) se calcula ahora a media resolución, así que la GPU trabaja una cuarta parte en cada fotograma del scroll y se ve igual.
+
 ## 1.13.6
 
+- Arreglo: al deslizar el dedo por la barra de progreso, ahora la barra va pegada al dedo todo el tiempo (antes se quedaba quieta y saltaba al soltar). El efecto suave solo se aplica al tocar un punto y al soltar.
+- Inicio más rápido: la animación de inicio dura 1,7 s (antes 2,6 s) y la lista de fotos se empieza a leer en segundo plano nada más abrir la app, así que la galería ya está lista cuando termina el opening.
 - Barra de progreso animada: al tocar un punto de la barra o deslizar, el relleno y el pulgar viajan hasta el nuevo sitio con un muelle suave en lugar de saltar de golpe, y el pulgar da un pequeño pulso al tocar. Durante la reproducción normal sigue al vídeo al instante.
 
 ## 1.12.9

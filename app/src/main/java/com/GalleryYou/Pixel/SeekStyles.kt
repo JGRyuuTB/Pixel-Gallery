@@ -107,6 +107,8 @@ fun SeekStyleBar(
     // (Goku usa el Instant Transmission, pero la barra va en nube voladora)
     val shown = remember { Animatable(progress) }
     var smoothing by remember { mutableStateOf(false) }
+    // Con el dedo encima la barra va pegada a él: reiniciar una animación en cada evento táctil la dejaba sin avanzar hasta soltar
+    var fingerDown by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     fun settleSoon() {
         scope.launch {
@@ -114,8 +116,8 @@ fun SeekStyleBar(
             smoothing = false
         }
     }
-    LaunchedEffect(progress, smoothing, animations) {
-        if (smoothing && animations) {
+    LaunchedEffect(progress, smoothing, fingerDown, animations) {
+        if (smoothing && animations && !fingerDown) {
             shown.animateTo(progress, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium))
         } else {
             shown.snapTo(progress)
@@ -167,16 +169,19 @@ fun SeekStyleBar(
                         val pad = SeekPad.toPx()
                         dragging = true
                         smoothing = true
+                        fingerDown = true
                         last = ((o.x - pad) / (size.width - 2 * pad)).coerceIn(0f, 1f)
                         onChangeNow(last)
                     },
                     onDragEnd = {
                         dragging = false
+                        fingerDown = false
                         settleSoon()
                         onFinishNow(last)
                     },
                     onDragCancel = {
                         dragging = false
+                        fingerDown = false
                         settleSoon()
                         onFinishNow(last)
                     },
