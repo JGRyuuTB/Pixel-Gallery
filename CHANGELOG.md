@@ -1,7 +1,9 @@
 # Registro de cambios
 
-## 1.11.6
+## 1.11.7
 
+- Barra de filtros: 6 estilos a elegir en Ajustes > Barra de filtros (Cápsulas, Segmentado, Subrayado, Compacta, Texto y Contorno), cada uno con su tarjeta de previsualización.
+- La barra de progreso "Clásica" vuelve a ser la de siempre (relleno grueso, pulgar de rayita y puntito final) y es la que viene por defecto.
 - Barra de progreso del reproductor: ahora se puede tocar en cualquier punto de la barra para saltar allí (además de arrastrar). Hay 7 estilos a elegir en Ajustes > Reproductor (Clásica, Ola, Hilo, Píldora, Puntos, Ecualizador y Neón), cada uno con su vista previa y con el reproductor de muestra que cambia al instante.
 
 ## 1.10.4

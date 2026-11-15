@@ -377,6 +377,8 @@ class HeaderTuning(
     val top: Dp = 6.dp,
     /** Mikasa mira hacia donde protege: 0 izquierda, 1 centro, 2 derecha */
     val align: Int = 1,
+    /** Gojo elige su técnica: estilo de los filtros (0 cápsulas … 5 contorno) */
+    val style: Int = 0,
 )
 
 fun AppSettings.headerTuning() = HeaderTuning(
@@ -384,6 +386,7 @@ fun AppSettings.headerTuning() = HeaderTuning(
     width = if (headerWidth <= 50) 0f else headerWidth / 100f,
     top = headerTop.dp,
     align = headerAlign,
+    style = headerStyle,
 )
 
 @Composable
@@ -427,13 +430,11 @@ fun FloatingHeader(
                     corner = 17.dp * s + 5.dp,
                 )
                 .padding(horizontal = 5.dp, vertical = 5.dp),
-            horizontalArrangement = if (stretched) Arrangement.SpaceEvenly else Arrangement.spacedBy(6.dp),
+            horizontalArrangement = if (stretched) Arrangement.SpaceEvenly else Arrangement.spacedBy(headerChipSpacing(tuning.style)),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (filter != null) {
-                labels.forEachIndexed { index, label ->
-                    RoundFilterChip(label, icons[index], filter == index, s) { onFilter(index) }
-                }
+                HeaderChips(style = tuning.style, filter = filter, scale = s, onFilter = onFilter)
             } else {
                 // Hinata sin Naruto: sin filtros (Álbumes) la barra solo lleva el nombre de la sección
                 Text(
@@ -450,7 +451,7 @@ fun FloatingHeader(
 
 /** Todoroki: hielo a la izquierda, fuego a la derecha */
 @Composable
-private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean, scale: Float, onClick: () -> Unit) {
+internal fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean, scale: Float, interactive: Boolean = true, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     val bg by animateColorAsState(
         if (selected) scheme.primaryContainer else Color.Transparent,
@@ -464,7 +465,7 @@ private fun RoundFilterChip(label: String, icon: ImageVector, selected: Boolean,
             .clip(CircleShape)
             .background(bg)
             .border(1.dp, if (selected) Color.Transparent else scheme.outline.copy(alpha = 0.55f), CircleShape)
-            .clickable(interactionSource = source, indication = null, onClick = onClick)
+            .clickable(interactionSource = source, indication = null, enabled = interactive, onClick = onClick)
             .padding(start = 4.dp * scale, end = 12.dp * scale),
         verticalAlignment = Alignment.CenterVertically,
     ) {

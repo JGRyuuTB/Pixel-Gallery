@@ -292,4 +292,12 @@
     <string name="seek_style_dots">Puntos</string>
     <string name="seek_style_equalizer">Ecualizador</string>
     <string name="seek_style_neon">Neón</string>
+    <string name="settings_header_style">Estilo de los filtros</string>
+    <string name="settings_header_style_desc">Gojo cambia de técnica sin perder el estilo: toca una tarjeta para ver cómo queda</string>
+    <string name="header_style_capsules">Cápsulas</string>
+    <string name="header_style_segmented">Segmentado</string>
+    <string name="header_style_underline">Subrayado</string>
+    <string name="header_style_compact">Compacta</string>
+    <string name="header_style_text">Texto</string>
+    <string name="header_style_outline">Contorno</string>
 </resources>

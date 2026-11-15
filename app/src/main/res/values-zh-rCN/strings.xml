@@ -287,4 +287,11 @@
     <string name="seek_style_dots">圆点</string>
     <string name="seek_style_equalizer">均衡器</string>
     <string name="seek_style_neon">霓虹</string>
+    <string name="settings_header_style">筛选样式</string>
+    <string name="header_style_capsules">胶囊</string>
+    <string name="header_style_segmented">分段</string>
+    <string name="header_style_underline">下划线</string>
+    <string name="header_style_compact">紧凑</string>
+    <string name="header_style_text">文字</string>
+    <string name="header_style_outline">轮廓</string>
 </resources>

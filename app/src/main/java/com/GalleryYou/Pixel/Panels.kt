@@ -321,6 +321,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                 // Sailor Moon se mira en el espejo: así queda la barra de filtros con cada cambio
                 HeaderPreview(settings = settings, scroll = scroll, pin = headerPin)
                 Column(Modifier.onSizeChanged { headerPin.rowsHeight = it.height }) {
+                    HeaderStylePicker(settings)
                     SliderRow(
                         title = stringResource(R.string.header_tune_size),
                         valueText = "${settings.headerScale}%",

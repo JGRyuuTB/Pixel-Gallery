@@ -292,4 +292,12 @@
     <string name="seek_style_dots">Dots</string>
     <string name="seek_style_equalizer">Equalizer</string>
     <string name="seek_style_neon">Neon</string>
+    <string name="settings_header_style">Filter style</string>
+    <string name="settings_header_style_desc">Gojo switches techniques without losing style: tap a card to see how it looks</string>
+    <string name="header_style_capsules">Capsules</string>
+    <string name="header_style_segmented">Segmented</string>
+    <string name="header_style_underline">Underline</string>
+    <string name="header_style_compact">Compact</string>
+    <string name="header_style_text">Text</string>
+    <string name="header_style_outline">Outline</string>
 </resources>

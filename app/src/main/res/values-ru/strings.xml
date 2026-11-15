@@ -299,4 +299,11 @@
     <string name="seek_style_dots">Точки</string>
     <string name="seek_style_equalizer">Эквалайзер</string>
     <string name="seek_style_neon">Неон</string>
+    <string name="settings_header_style">Стиль фильтров</string>
+    <string name="header_style_capsules">Капсулы</string>
+    <string name="header_style_segmented">Сегменты</string>
+    <string name="header_style_underline">Подчёркивание</string>
+    <string name="header_style_compact">Компактный</string>
+    <string name="header_style_text">Текст</string>
+    <string name="header_style_outline">Контур</string>
 </resources>

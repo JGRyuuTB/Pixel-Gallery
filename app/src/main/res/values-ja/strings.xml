@@ -287,4 +287,11 @@
     <string name="seek_style_dots">ドット</string>
     <string name="seek_style_equalizer">イコライザー</string>
     <string name="seek_style_neon">ネオン</string>
+    <string name="settings_header_style">フィルターのスタイル</string>
+    <string name="header_style_capsules">カプセル</string>
+    <string name="header_style_segmented">セグメント</string>
+    <string name="header_style_underline">下線</string>
+    <string name="header_style_compact">コンパクト</string>
+    <string name="header_style_text">テキスト</string>
+    <string name="header_style_outline">アウトライン</string>
 </resources>

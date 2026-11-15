@@ -291,4 +291,11 @@
     <string name="seek_style_dots">Punti</string>
     <string name="seek_style_equalizer">Equalizzatore</string>
     <string name="seek_style_neon">Neon</string>
+    <string name="settings_header_style">Stile dei filtri</string>
+    <string name="header_style_capsules">Capsule</string>
+    <string name="header_style_segmented">Segmentato</string>
+    <string name="header_style_underline">Sottolineato</string>
+    <string name="header_style_compact">Compatto</string>
+    <string name="header_style_text">Testo</string>
+    <string name="header_style_outline">Contorno</string>
 </resources>

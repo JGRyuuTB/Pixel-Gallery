@@ -93,6 +93,7 @@ fun SeekStyleBar(
     val active = scheme.primary
     val accent = scheme.tertiary
     val track = scheme.onSurface.copy(alpha = 0.22f)
+    val soft = scheme.secondaryContainer
 
     var dragging by remember { mutableStateOf(false) }
     var last by remember { mutableFloatStateOf(progress) }
@@ -169,7 +170,7 @@ fun SeekStyleBar(
                     4 -> drawDots(p, grow, active, track)
                     5 -> drawEqualizer(p, active, track)
                     6 -> drawNeon(p, grow, active, accent, track)
-                    else -> drawClassic(p, grow, active, track)
+                    else -> drawClassic(p, grow, active, soft)
                 }
             },
     )
@@ -182,15 +183,25 @@ private fun DrawScope.span(): Pair<Float, Float> {
     return pad to (size.width - pad)
 }
 
-/** Clásica: pista fina con círculo, la de siempre pero a tu medida */
-private fun DrawScope.drawClassic(p: Float, grow: Float, active: Color, track: Color) {
+/** Clásica: la de siempre (como en tu captura): relleno grueso, pulgar de rayita con huecos y un puntito al final, estilo Material You */
+private fun DrawScope.drawClassic(p: Float, grow: Float, active: Color, soft: Color) {
     val (x0, x1) = span()
     val cy = size.height / 2f
     val px = x0 + (x1 - x0) * p
-    val h = 4.dp.toPx()
-    drawRoundRect(track, Offset(x0, cy - h / 2), Size(x1 - x0, h), CornerRadius(h / 2))
-    drawRoundRect(active, Offset(x0, cy - h / 2), Size(max(px - x0, 0f), h), CornerRadius(h / 2))
-    drawCircle(active, (7.dp.toPx() + 3.dp.toPx() * grow), Offset(px, cy))
+    val h = min(16.dp.toPx(), size.height * 0.5f)
+    val gap = 6.dp.toPx()
+    val tw = 4.dp.toPx() + 1.5.dp.toPx() * grow
+    val th = min(32.dp.toPx(), size.height)
+    val left = px - gap - tw / 2
+    val right = px + gap + tw / 2
+    if (left > x0) {
+        drawRoundRect(active, Offset(x0, cy - h / 2), Size(left - x0, h), CornerRadius(h / 2))
+    }
+    if (x1 > right) {
+        drawRoundRect(soft, Offset(right, cy - h / 2), Size(x1 - right, h), CornerRadius(h / 2))
+        drawCircle(active, 2.5.dp.toPx(), Offset(x1 - h / 2, cy))
+    }
+    drawRoundRect(active, Offset(px - tw / 2, cy - th / 2), Size(tw, th), CornerRadius(tw / 2))
 }
 
 /** Ola: la parte recorrida ondula como el mar de Ponyo */

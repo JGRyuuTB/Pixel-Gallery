@@ -180,6 +180,15 @@ class AppSettings(context: Context) {
         prefs.edit().putInt("headerTop", headerTop).apply()
     }
 
+    /** Mensaje oculto (rot13): Tbwb qvpr: ab pbzcebzrgb a'fr fnor */
+    var headerStyle by mutableIntStateOf(prefs.getInt("headerStyle", 0).coerceIn(0, HeaderStyleCount - 1))
+        private set
+
+    fun updateHeaderStyle(v: Int) {
+        headerStyle = v.coerceIn(0, HeaderStyleCount - 1)
+        prefs.edit().putInt("headerStyle", headerStyle).apply()
+    }
+
     fun updateHeaderAlign(v: Int) {
         headerAlign = v.coerceIn(0, 2)
         prefs.edit().putInt("headerAlign", headerAlign).apply()
