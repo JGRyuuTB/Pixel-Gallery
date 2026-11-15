@@ -279,4 +279,12 @@
     <string name="icon_flat">扁平</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">像素画</string>
+    <string name="settings_seek_style">进度条</string>
+    <string name="seek_style_classic">经典</string>
+    <string name="seek_style_wave">波浪</string>
+    <string name="seek_style_thread">细线</string>
+    <string name="seek_style_pill">胶囊</string>
+    <string name="seek_style_dots">圆点</string>
+    <string name="seek_style_equalizer">均衡器</string>
+    <string name="seek_style_neon">霓虹</string>
 </resources>

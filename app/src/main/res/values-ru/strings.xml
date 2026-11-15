@@ -291,4 +291,12 @@
     <string name="icon_flat">Плоский</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">Пиксель-арт</string>
+    <string name="settings_seek_style">Полоса прогресса</string>
+    <string name="seek_style_classic">Классика</string>
+    <string name="seek_style_wave">Волна</string>
+    <string name="seek_style_thread">Нить</string>
+    <string name="seek_style_pill">Пилюля</string>
+    <string name="seek_style_dots">Точки</string>
+    <string name="seek_style_equalizer">Эквалайзер</string>
+    <string name="seek_style_neon">Неон</string>
 </resources>

@@ -283,4 +283,12 @@
     <string name="icon_flat">Flach</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">Pixel Art</string>
+    <string name="settings_seek_style">Fortschrittsbalken</string>
+    <string name="seek_style_classic">Klassisch</string>
+    <string name="seek_style_wave">Welle</string>
+    <string name="seek_style_thread">Faden</string>
+    <string name="seek_style_pill">Pille</string>
+    <string name="seek_style_dots">Punkte</string>
+    <string name="seek_style_equalizer">Equalizer</string>
+    <string name="seek_style_neon">Neon</string>
 </resources>

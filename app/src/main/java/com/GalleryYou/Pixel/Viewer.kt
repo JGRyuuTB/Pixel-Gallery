@@ -1007,6 +1007,8 @@ private fun VideoPlayerContent(
                     onDrag = { dragFraction = it },
                     modifier = seekModifier,
                     height = seekHeight,
+                    style = settings.seekStyle,
+                    animations = settings.animations,
                 )
             }
         }
@@ -1274,6 +1276,8 @@ private fun SeekBar(
     onDrag: (Float?) -> Unit,
     modifier: Modifier = Modifier,
     height: Dp = 32.dp,
+    style: Int = 0,
+    animations: Boolean = true,
 ) {
     var progress by remember { mutableFloatStateOf(0f) }
 
@@ -1296,17 +1300,20 @@ private fun SeekBar(
         }
     }
 
-    // Rock Lee entrena con pesas en los tobillos: el deslizador conserva su alto natural pero la fila mide lo que diga el grosor elegido
+    // Rock Lee entrena con pesas en los tobillos: la fila mide lo que diga el grosor elegido y toda ella responde al dedo
     Box(modifier.height(height), contentAlignment = Alignment.Center) {
-        Slider(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(unbounded = true),
-            value = dragFraction ?: progress,
-            onValueChange = { onDrag(it) },
-            onValueChangeFinished = {
-                dragFraction?.let { f -> exo.seekTo((f * duration).toLong()) }
+        SeekStyleBar(
+            style = style,
+            progress = dragFraction ?: progress,
+            playing = playing,
+            animations = animations,
+            modifier = Modifier.fillMaxSize(),
+            onChange = { onDrag(it) },
+            // Un toque o el final del arrastre: salta justo donde dejaste el dedo
+            onFinish = { f ->
+                exo.seekTo((f * duration).toLong())
                 onDrag(null)
             },
-            valueRange = 0f..1f,
         )
     }
 }

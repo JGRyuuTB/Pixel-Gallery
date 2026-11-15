@@ -283,4 +283,13 @@
     <string name="icon_flat">Flat</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">Pixel Art</string>
+    <string name="settings_seek_style">Progress bar</string>
+    <string name="settings_seek_style_desc">Ichigo cuts through time with his Zangetsu: tap the bar anywhere to jump there, or drag it</string>
+    <string name="seek_style_classic">Classic</string>
+    <string name="seek_style_wave">Wave</string>
+    <string name="seek_style_thread">Thread</string>
+    <string name="seek_style_pill">Pill</string>
+    <string name="seek_style_dots">Dots</string>
+    <string name="seek_style_equalizer">Equalizer</string>
+    <string name="seek_style_neon">Neon</string>
 </resources>

@@ -49,6 +49,9 @@ class AppSettings(context: Context) {
     /** Mensaje oculto (rot13): Gngnxnr: fvthr pbzcvynaqb */
     var playerBorder by mutableIntStateOf(prefs.getInt("playerBorder", 2))
         private set
+    /** Mensaje oculto (rot13): Vpuvtb pbegn ry gvrzcb pba fh Mnatrgfh */
+    var seekStyle by mutableIntStateOf(prefs.getInt("seekStyle", 0).coerceIn(0, SeekStyleCount - 1))
+        private set
     /** Índice del icono de la app dentro de [AppIconOptions] (migra el antiguo ajuste Material You sí/no). */
     var appIcon by mutableIntStateOf(
         prefs.getInt("appIcon", if (prefs.getBoolean("materialYouIcon", false)) 1 else 0)
@@ -316,6 +319,12 @@ class AppSettings(context: Context) {
     fun updateAutoplay(value: Boolean) {
         autoplay = value
         prefs.edit().putBoolean("autoplay", value).apply()
+    }
+
+    /** Ichigo elige su Zangetsu: el estilo de la barra de progreso */
+    fun updateSeekStyle(value: Int) {
+        seekStyle = value.coerceIn(0, SeekStyleCount - 1)
+        prefs.edit().putInt("seekStyle", seekStyle).apply()
     }
 
     fun updatePlayerBorder(value: Int) {

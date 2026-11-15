@@ -410,6 +410,7 @@ fun SettingsScreen(settings: AppSettings, updater: Updater, onBack: () -> Unit) 
                     selected = settings.playerBorder,
                     onSelect = { settings.updatePlayerBorder(it) },
                 )
+                SeekStylePicker(settings)
                 ChoiceRow(
                     title = stringResource(R.string.settings_player_panel),
                     subtitle = stringResource(R.string.settings_player_panel_desc),
@@ -715,10 +716,14 @@ private fun PlayerPreview(settings: AppSettings, scroll: ScrollState, pin: NavPi
                 insets = false,
             ) { seekModifier, seekHeight ->
                 Box(seekModifier.height(seekHeight), contentAlignment = Alignment.Center) {
-                    Slider(
-                        modifier = Modifier.fillMaxWidth().wrapContentHeight(unbounded = true),
-                        value = progress,
-                        onValueChange = { progress = it },
+                    SeekStyleBar(
+                        style = settings.seekStyle,
+                        progress = progress,
+                        playing = playing,
+                        animations = settings.animations,
+                        modifier = Modifier.fillMaxSize(),
+                        onChange = { progress = it },
+                        onFinish = { progress = it },
                     )
                 }
             }

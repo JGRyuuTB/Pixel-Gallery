@@ -283,4 +283,12 @@
     <string name="icon_flat">Aplat</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">Pixel Art</string>
+    <string name="settings_seek_style">Barre de progression</string>
+    <string name="seek_style_classic">Classique</string>
+    <string name="seek_style_wave">Vague</string>
+    <string name="seek_style_thread">Fil</string>
+    <string name="seek_style_pill">Pilule</string>
+    <string name="seek_style_dots">Points</string>
+    <string name="seek_style_equalizer">Égaliseur</string>
+    <string name="seek_style_neon">Néon</string>
 </resources>

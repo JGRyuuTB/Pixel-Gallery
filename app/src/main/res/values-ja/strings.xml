@@ -279,4 +279,12 @@
     <string name="icon_flat">フラット</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">ドット絵</string>
+    <string name="settings_seek_style">プログレスバー</string>
+    <string name="seek_style_classic">クラシック</string>
+    <string name="seek_style_wave">ウェーブ</string>
+    <string name="seek_style_thread">スレッド</string>
+    <string name="seek_style_pill">ピル</string>
+    <string name="seek_style_dots">ドット</string>
+    <string name="seek_style_equalizer">イコライザー</string>
+    <string name="seek_style_neon">ネオン</string>
 </resources>

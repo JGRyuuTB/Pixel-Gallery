@@ -1,5 +1,9 @@
 # Registro de cambios
 
+## 1.11.6
+
+- Barra de progreso del reproductor: ahora se puede tocar en cualquier punto de la barra para saltar allí (además de arrastrar). Hay 7 estilos a elegir en Ajustes > Reproductor (Clásica, Ola, Hilo, Píldora, Puntos, Ecualizador y Neón), cada uno con su vista previa y con el reproductor de muestra que cambia al instante.
+
 ## 1.10.4
 
 - Animación de inicio por icono: el opening ahora cambia según el icono elegido en Ajustes. Cada icono trae su propia temporada con sus colores y su estilo: rojo, amarillo, verde y azul con brillo de esfera (Pixel Style), contornos (Contorno), cristal translúcido sobre fondo violeta (Cristal), gris sobre fondo oscuro (Mono), degradado de atardecer con fondo naranja y morado (Atardecer), pétalos rosas con el puntito blanco central (Sakura), líneas de neón con resplandor sobre fondo oscuro (Neón), colores lisos (Plano y Pastel), casillas cuadradas de píxel (Pixel Art), los colores del sistema (Material You) y los cuatro colores clásicos (Por defecto). El orden y las posiciones de los orbes siguen el del icono.

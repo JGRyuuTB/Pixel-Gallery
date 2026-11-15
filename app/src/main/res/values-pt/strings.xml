@@ -283,4 +283,12 @@
     <string name="icon_flat">Plano</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">Pixel Art</string>
+    <string name="settings_seek_style">Barra de progresso</string>
+    <string name="seek_style_classic">Clássica</string>
+    <string name="seek_style_wave">Onda</string>
+    <string name="seek_style_thread">Fio</string>
+    <string name="seek_style_pill">Pílula</string>
+    <string name="seek_style_dots">Pontos</string>
+    <string name="seek_style_equalizer">Equalizador</string>
+    <string name="seek_style_neon">Neon</string>
 </resources>

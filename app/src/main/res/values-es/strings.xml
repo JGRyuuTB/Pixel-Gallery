@@ -283,4 +283,13 @@
     <string name="icon_flat">Plano</string>
     <string name="icon_pixel">Pixel Style</string>
     <string name="icon_anime">Pixel Art</string>
+    <string name="settings_seek_style">Barra de progreso</string>
+    <string name="settings_seek_style_desc">Ichigo corta el tiempo con su Zangetsu: toca la barra en cualquier punto para saltar allí o arrástrala</string>
+    <string name="seek_style_classic">Clásica</string>
+    <string name="seek_style_wave">Ola</string>
+    <string name="seek_style_thread">Hilo</string>
+    <string name="seek_style_pill">Píldora</string>
+    <string name="seek_style_dots">Puntos</string>
+    <string name="seek_style_equalizer">Ecualizador</string>
+    <string name="seek_style_neon">Neón</string>
 </resources>
