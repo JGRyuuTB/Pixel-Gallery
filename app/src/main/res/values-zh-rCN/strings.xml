@@ -166,6 +166,7 @@
     <string name="update_install">安装</string>
     <string name="update_not_now">暂不</string>
     <string name="update_ready_body">如果 Android 请求允许从此应用安装，请开启后返回并点击“安装”。</string>
+    <string name="update_play_protect_note">如果 Play Protect 提示扫描此应用，这是正常提示：Google 还没见过这个文件，并不是威胁。点按“扫描应用”，完成后继续安装。</string>
     <string name="update_size_mb">大小：%1$.1f MB</string>
     <string name="update_status_available">可用：版本 %1$s</string>
     <string name="update_status_checking">正在检查…</string>

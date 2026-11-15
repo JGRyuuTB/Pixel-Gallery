@@ -166,6 +166,7 @@
     <string name="update_install">Instalar</string>
     <string name="update_not_now">Ahora no</string>
     <string name="update_ready_body">Si Android te pide permiso para instalar desde esta app, actívalo, vuelve y pulsa Instalar.</string>
+    <string name="update_play_protect_note">Si Play Protect pide analizar la app, es un aviso normal: Google aún no ha visto este archivo, no es una amenaza. Toca «Analizar app» y, cuando termine, sigue con la instalación.</string>
     <string name="update_size_mb">Tamaño: %1$.1f MB</string>
     <string name="update_status_available">Disponible: versión %1$s</string>
     <string name="update_status_checking">Buscando…</string>

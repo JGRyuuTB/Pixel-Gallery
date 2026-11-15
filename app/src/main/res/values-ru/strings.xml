@@ -166,6 +166,7 @@
     <string name="update_install">Установить</string>
     <string name="update_not_now">Не сейчас</string>
     <string name="update_ready_body">Если Android запросит разрешение на установку из этого приложения, включите его, вернитесь и нажмите «Установить».</string>
+    <string name="update_play_protect_note">Если Play Protect предложит проверить приложение, это обычное уведомление: Google ещё не видел этот файл, это не угроза. Нажми «Проверить приложение» и после завершения продолжи установку.</string>
     <string name="update_size_mb">Размер: %1$.1f МБ</string>
     <string name="update_status_available">Доступна версия %1$s</string>
     <string name="update_status_checking">Поиск…</string>

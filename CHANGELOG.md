@@ -1,5 +1,10 @@
 # Registro de cambios
 
+## 1.10.4
+
+- Animación de inicio por icono: el opening ahora cambia según el icono elegido en Ajustes. Cada icono trae su propia temporada con sus colores y su estilo: rojo, amarillo, verde y azul con brillo de esfera (Pixel Style), contornos (Contorno), cristal translúcido sobre fondo violeta (Cristal), gris sobre fondo oscuro (Mono), degradado de atardecer con fondo naranja y morado (Atardecer), pétalos rosas con el puntito blanco central (Sakura), líneas de neón con resplandor sobre fondo oscuro (Neón), colores lisos (Plano y Pastel), casillas cuadradas de píxel (Pixel Art), los colores del sistema (Material You) y los cuatro colores clásicos (Por defecto). El orden y las posiciones de los orbes siguen el del icono.
+- Play Protect: el diálogo "Se recomienda analizar la app" no es una detección de amenazas, sino el aviso de "App scan recommended" que Google muestra con las apps que instalas desde fuera de Play y que todavía no ha visto. Los diálogos de actualización lo explican ahora antes de instalar (Toca "Analizar app" y sigue con la instalación), en los 9 idiomas. No hay ninguna opción en el código para eliminar ese aviso.
+
 ## 1.10.3
 
 - Animación de inicio: al abrir la app, cuatro orbes con los colores del icono (rojo, amarillo, verde y azul) brotan del centro, esperan respirando, giran un cuarto de vuelta y se encogen hasta desaparecer, y entonces aparece la galería. Es la misma idea que la del vídeo de referencia, con las formas en las posiciones del icono (rojo arriba, amarillo a la derecha, verde abajo y azul a la izquierda). Un toque la salta. Se activa y desactiva en Ajustes → Apariencia ("Animación de inicio") y no se muestra si las animaciones están apagadas.

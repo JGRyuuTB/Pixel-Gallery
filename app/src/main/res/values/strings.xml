@@ -166,6 +166,7 @@
     <string name="update_install">Install</string>
     <string name="update_not_now">Not now</string>
     <string name="update_ready_body">If Android asks for permission to install from this app, enable it, come back and tap Install.</string>
+    <string name="update_play_protect_note">If Play Protect asks to scan the app, that is a normal notice: Google hasn’t seen this file yet, it is not a threat. Tap “Scan app” and continue with the install when it finishes.</string>
     <string name="update_size_mb">Size: %1$.1f MB</string>
     <string name="update_status_available">Available: version %1$s</string>
     <string name="update_status_checking">Checking…</string>

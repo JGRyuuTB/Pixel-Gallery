@@ -23,24 +23,116 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.colorResource
 import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.delay
 
 /**
  * Opening de anime: cuatro orbes bailan alrededor del centro antes de que empiece la función
- * Los colores salen del icono de la app (rojo, amarillo, verde y azul) y la coreografía imita el arranque del vídeo de referencia:
- * las formas brotan del centro, esperan respirando, giran un cuarto de vuelta y se encogen hasta desaparecer.
+ * La coreografía imita el arranque del vídeo de referencia: las formas brotan del centro, esperan respirando,
+ * giran un cuarto de vuelta y se encogen hasta desaparecer. Cada icono de la app trae su propia temporada
+ * (colores, estilo de dibujo y fondo), así que el opening cambia según el icono elegido en Ajustes.
  */
-private val OrbRed = Color(0xFFFF6E5F)
-private val OrbYellow = Color(0xFFFFCD1F)
-private val OrbGreen = Color(0xFF27E378)
-private val OrbBlue = Color(0xFF6CAEFF)
+
+/** Cómo se rellena cada orbe: degradado lineal, esfera con brillo radial o color liso */
+private enum class Shading { Linear, Radial, Solid }
+
+/** Cómo se dibuja la forma: relleno, contorno, cristal, neón con resplandor o píxeles */
+private enum class OrbStyle { Fill, Outline, Glass, Neon, Pixel }
+
+/**
+ * Una temporada del opening, calcada del icono de la app: colores en el orden arriba, derecha, abajo e izquierda,
+ * el estilo, la opacidad, un fondo propio (null = el del tema) y si lleva el puntito blanco central del icono Sakura.
+ */
+private class OrbTheme(
+    val colors: List<Color>,
+    val highlights: List<Color> = emptyList(),
+    val shading: Shading = Shading.Linear,
+    val style: OrbStyle = OrbStyle.Fill,
+    val fillAlpha: Float = 1f,
+    val background: Brush? = null,
+    val centerDot: Boolean = false,
+)
+
+private fun hexColors(vararg values: Long) = values.map { Color(it) }
+
+private val DefaultOrbColors = hexColors(0xFF4285F4, 0xFF34C9A0, 0xFF9C6EF0, 0xFFF25C8A)
+
+/**
+ * Sailor Moon elige su transformación: la temporada que corresponde al icono seleccionado (índice de [AppIconOptions]).
+ * 0 Por defecto, 1 Material You, 2 Contorno, 3 Pastel, 4 Cristal, 5 Mono, 6 Atardecer, 7 Sakura, 8 Neón, 9 Plano, 10 Pixel Style, 11 Pixel Art.
+ */
+@Composable
+private fun orbThemeFor(icon: Int): OrbTheme = when (icon) {
+    // Material You: los mismos cuatro colores del sistema que usa el icono (se resuelven solos en Android 12 o superior)
+    1 -> OrbTheme(
+        colors = listOf(
+            colorResource(R.color.ic_you_p1),
+            colorResource(R.color.ic_you_p2),
+            colorResource(R.color.ic_you_p3),
+            colorResource(R.color.ic_you_p4),
+        ),
+        fillAlpha = 0.95f,
+    )
+    2 -> OrbTheme(DefaultOrbColors, style = OrbStyle.Outline, shading = Shading.Solid)
+    3 -> OrbTheme(
+        hexColors(0xFFA8C7FA, 0xFF9FE5CF, 0xFFD9C2FA, 0xFFFAB8CC),
+        shading = Shading.Solid,
+        fillAlpha = 0.9f,
+    )
+    4 -> OrbTheme(
+        hexColors(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF),
+        shading = Shading.Solid,
+        style = OrbStyle.Glass,
+        background = Brush.verticalGradient(listOf(Color(0xFF1B1F3B), Color(0xFF4A2A6B))),
+    )
+    5 -> OrbTheme(
+        hexColors(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF),
+        shading = Shading.Solid,
+        fillAlpha = 0.5f,
+        background = SolidColor(Color(0xFF1C1B1F)),
+    )
+    6 -> OrbTheme(
+        hexColors(0xFFFFE29A, 0xFFFFB199, 0xFFFF7EB3, 0xFFFFFFFF),
+        fillAlpha = 0.92f,
+        background = Brush.verticalGradient(listOf(Color(0xFFFF9966), Color(0xFF6A3093))),
+    )
+    7 -> OrbTheme(
+        hexColors(0xFFFF9EBB, 0xFFFFC1D6, 0xFFF77AA3, 0xFFFFB3C9),
+        fillAlpha = 0.9f,
+        centerDot = true,
+    )
+    8 -> OrbTheme(
+        hexColors(0xFF00E5FF, 0xFF39FF88, 0xFFB388FF, 0xFFFF4081),
+        shading = Shading.Solid,
+        style = OrbStyle.Neon,
+        background = SolidColor(Color(0xFF0A0A14)),
+    )
+    9 -> OrbTheme(DefaultOrbColors, shading = Shading.Solid)
+    // Pixel Style: rojo arriba, amarillo a la derecha, verde abajo y azul a la izquierda, con brillo de esfera
+    10 -> OrbTheme(
+        colors = hexColors(0xFFFF2D1F, 0xFFFFC400, 0xFF00D95F, 0xFF1F7BFF),
+        highlights = hexColors(0xFFFF8A7A, 0xFFFFF07A, 0xFF7DFFB0, 0xFF8CC4FF),
+        shading = Shading.Radial,
+        fillAlpha = 0.96f,
+    )
+    11 -> OrbTheme(DefaultOrbColors, shading = Shading.Solid, style = OrbStyle.Pixel)
+    else -> OrbTheme(DefaultOrbColors)
+}
 
 /** Bleach, Bankai de 2,6 segundos: duración total de la coreografía, y un toque la salta */
 private const val StartupMs = 2600
@@ -115,12 +207,76 @@ private fun cloverShape(): Path {
     return path
 }
 
-/** Sailor Moon pule la esfera: un pincel algo más claro arriba a la izquierda, como el brillo de las esferas del icono */
-private fun orbBrush(base: Color) = Brush.linearGradient(
-    colors = listOf(lerp(base, Color.White, 0.32f), base),
-    start = Offset(-1f, -1f),
-    end = Offset(1f, 1f),
-)
+/** Sailor Moon pule la esfera: el pincel de cada orbe según la temporada (brillo arriba a la izquierda, como en el icono) */
+private fun orbBrush(theme: OrbTheme, i: Int): Brush {
+    val base = theme.colors[i]
+    return when (theme.shading) {
+        Shading.Linear -> Brush.linearGradient(
+            colors = listOf(lerp(base, Color.White, 0.32f), base),
+            start = Offset(-1f, -1f),
+            end = Offset(1f, 1f),
+        )
+        Shading.Radial -> Brush.radialGradient(
+            colors = listOf(theme.highlights.getOrElse(i) { lerp(base, Color.White, 0.4f) }, base),
+            center = Offset(-0.3f, -0.4f),
+            radius = 1.5f,
+        )
+        Shading.Solid -> SolidColor(base)
+    }
+}
+
+/** Dibuja una de las cuatro formas (0 píldora, 1 hexágono, 2 círculo, 3 trébol) con el pincel y el estilo dados */
+private fun DrawScope.drawOrb(index: Int, brush: Brush, alpha: Float, style: DrawStyle, hexagon: Path, clover: Path) {
+    when (index) {
+        0 -> withTransform({ rotate(-30f, Offset.Zero) }) {
+            drawRoundRect(
+                brush = brush,
+                topLeft = Offset(-0.58f, -0.95f),
+                size = Size(1.16f, 1.9f),
+                cornerRadius = CornerRadius(0.58f, 0.58f),
+                alpha = alpha,
+                style = style,
+            )
+        }
+        1 -> drawPath(hexagon, brush, alpha = alpha, style = style)
+        2 -> drawCircle(brush, radius = 0.95f, center = Offset.Zero, alpha = alpha, style = style)
+        else -> drawPath(clover, brush, alpha = alpha, style = style)
+    }
+}
+
+/** Todoroki comprueba qué casillas toca el hielo: ¿está el punto (x, y) dentro de la forma [shape]? Sirve para el estilo Pixel Art */
+private fun insideShape(shape: Int, x: Float, y: Float): Boolean = when (shape) {
+    0 -> {
+        val a = 30f * (PI / 180.0).toFloat()
+        val xr = x * cos(a) - y * sin(a)
+        val yr = x * sin(a) + y * cos(a)
+        val dy = maxOf(abs(yr) - 0.37f, 0f)
+        xr * xr + dy * dy <= 0.58f * 0.58f
+    }
+    1 -> abs(x) <= 0.866f && abs(x * 0.5f + y * 0.866f) <= 0.866f && abs(x * 0.5f - y * 0.866f) <= 0.866f
+    2 -> x * x + y * y <= 0.95f * 0.95f
+    else -> sqrt(x * x + y * y) <= 1f - 0.13f * cos(4f * atan2(y, x))
+}
+
+private const val PixelGrid = 11
+private const val PixelHalf = 1.05f
+
+/** Casillas (pares x, y) de una forma, listas para pintar píxeles: se calculan una sola vez */
+private fun pixelCells(shape: Int): FloatArray {
+    val cell = 2f * PixelHalf / PixelGrid
+    val out = ArrayList<Float>()
+    for (gy in 0 until PixelGrid) {
+        for (gx in 0 until PixelGrid) {
+            val x = -PixelHalf + (gx + 0.5f) * cell
+            val y = -PixelHalf + (gy + 0.5f) * cell
+            if (insideShape(shape, x, y)) {
+                out.add(x)
+                out.add(y)
+            }
+        }
+    }
+    return out.toFloatArray()
+}
 
 // ------------------------------------------------------------------ Pantalla
 
@@ -136,6 +292,7 @@ fun StartupGate(settings: AppSettings, content: @Composable () -> Unit) {
     if (contentReady) content()
     if (showSplash) {
         StartupAnimation(
+            iconIndex = settings.appIcon,
             onEmerged = { contentReady = true },
             onFinished = { showSplash = false },
         )
@@ -143,17 +300,17 @@ fun StartupGate(settings: AppSettings, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun StartupAnimation(onEmerged: () -> Unit, onFinished: () -> Unit) {
-    val background = MaterialTheme.colorScheme.background
+private fun StartupAnimation(iconIndex: Int, onEmerged: () -> Unit, onFinished: () -> Unit) {
+    val themeBackground = MaterialTheme.colorScheme.background
     val progress = remember { Animatable(0f) }
     val skipFade = remember { Animatable(0f) }
     var skipped by remember { mutableStateOf(false) }
     val hexagon = remember { roundedHexagon() }
     val clover = remember { cloverShape() }
-    val redBrush = remember { orbBrush(OrbRed) }
-    val yellowBrush = remember { orbBrush(OrbYellow) }
-    val greenBrush = remember { orbBrush(OrbGreen) }
-    val blueBrush = remember { orbBrush(OrbBlue) }
+    // Temporada del icono elegido: colores, estilo y fondo propios
+    val theme = orbThemeFor(iconIndex)
+    val brushes = remember(iconIndex, theme.colors) { List(4) { orbBrush(theme, it) } }
+    val pixels = remember { Array(4) { pixelCells(it) } }
 
     // Rock Lee corre su vuelta completa; si el usuario toca, el telón cae en un instante
     LaunchedEffect(skipped) {
@@ -180,7 +337,13 @@ private fun StartupAnimation(onEmerged: () -> Unit, onFinished: () -> Unit) {
                 val closing = easeInOutCubic(span(progress.value, 0.88f, 1f))
                 alpha = (1f - closing) * (1f - skipFade.value)
             }
-            .background(background)
+            .then(
+                if (theme.background != null) {
+                    Modifier.background(theme.background)
+                } else {
+                    Modifier.background(themeBackground)
+                },
+            )
             .pointerInput(Unit) { detectTapGestures { skipped = true } },
     ) {
         Canvas(Modifier.fillMaxSize()) {
@@ -213,20 +376,45 @@ private fun StartupAnimation(onEmerged: () -> Unit, onFinished: () -> Unit) {
                     rotate(turn + 14f * hold * (1f - leave) * (if (i % 2 == 0) 1f else -1f), Offset.Zero)
                     scale(s, s, Offset.Zero)
                 }) {
-                    when (i) {
-                        0 -> withTransform({ rotate(-30f, Offset.Zero) }) {
-                            drawRoundRect(
-                                brush = redBrush,
-                                topLeft = Offset(-0.58f, -0.95f),
-                                size = Size(1.16f, 1.9f),
-                                cornerRadius = CornerRadius(0.58f, 0.58f),
-                                alpha = a,
-                            )
+                    val brush = brushes[i]
+                    val fa = a * theme.fillAlpha
+                    when (theme.style) {
+                        OrbStyle.Fill -> drawOrb(i, brush, fa, Fill, hexagon, clover)
+                        OrbStyle.Outline -> drawOrb(i, brush, a, Stroke(0.14f), hexagon, clover)
+                        OrbStyle.Glass -> {
+                            drawOrb(i, brush, a * 0.2f, Fill, hexagon, clover)
+                            drawOrb(i, brush, a * 0.75f, Stroke(0.07f), hexagon, clover)
                         }
-                        1 -> drawPath(hexagon, yellowBrush, alpha = a)
-                        2 -> drawCircle(greenBrush, radius = 0.95f, center = Offset.Zero, alpha = a)
-                        else -> drawPath(clover, blueBrush, alpha = a)
+                        // Neón: relleno apenas visible, un halo ancho y suave y el filo brillante encima
+                        OrbStyle.Neon -> {
+                            drawOrb(i, brush, a * 0.12f, Fill, hexagon, clover)
+                            drawOrb(i, brush, a * 0.28f, Stroke(0.34f), hexagon, clover)
+                            drawOrb(i, brush, a, Stroke(0.12f), hexagon, clover)
+                        }
+                        // Pixel Art: cada forma se arma con casillas cuadradas, como el icono
+                        OrbStyle.Pixel -> {
+                            val cell = 2f * PixelHalf / PixelGrid
+                            val side = cell * 0.92f
+                            val cells = pixels[i]
+                            var k = 0
+                            while (k < cells.size) {
+                                drawRect(
+                                    brush = brush,
+                                    topLeft = Offset(cells[k] - side / 2f, cells[k + 1] - side / 2f),
+                                    size = Size(side, side),
+                                    alpha = fa,
+                                )
+                                k += 2
+                            }
+                        }
                     }
+                }
+            }
+            // Puntito blanco del icono Sakura: aparece con los orbes y se encoge con ellos
+            if (theme.centerDot) {
+                val dot = unit * 0.42f * easeOutBack(span(t, 0.10f, 0.30f)) * (1f - easeInCubic(span(leave, 0.15f, 1f))) * breathe
+                if (dot > 0.5f) {
+                    drawCircle(Color.White, radius = dot, center = center, alpha = clamp01(span(t, 0.10f, 0.20f) * 3f))
                 }
             }
         }

@@ -166,6 +166,7 @@
     <string name="update_install">インストール</string>
     <string name="update_not_now">後で</string>
     <string name="update_ready_body">Android がこのアプリからのインストール許可を求めたら、許可してから戻り、「インストール」をタップしてください。</string>
+    <string name="update_play_protect_note">Play Protectがアプリのスキャンを勧めてきても、これは通常の通知です。Googleがこのファイルをまだ見たことがないだけで、脅威ではありません。「アプリをスキャン」をタップし、完了したらインストールを続けてください。</string>
     <string name="update_size_mb">サイズ：%1$.1f MB</string>
     <string name="update_status_available">利用可能：バージョン %1$s</string>
     <string name="update_status_checking">確認中…</string>

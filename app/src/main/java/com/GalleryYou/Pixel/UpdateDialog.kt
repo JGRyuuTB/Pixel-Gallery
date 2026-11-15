@@ -52,6 +52,13 @@ fun UpdateDialog(updater: Updater) {
                                 .verticalScroll(rememberScrollState()),
                         )
                     }
+                    // L explica el caso: el aviso de Play Protect no es una amenaza, es un archivo que Google aún no ha visto
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        stringResource(R.string.update_play_protect_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             },
             confirmButton = {
@@ -82,9 +89,16 @@ fun UpdateDialog(updater: Updater) {
             onDismissRequest = { updater.dismiss() },
             title = { Text(stringResource(R.string.update_status_ready)) },
             text = {
-                Text(
-                    stringResource(R.string.update_ready_body),
-                )
+                Column {
+                    Text(stringResource(R.string.update_ready_body))
+                    // Shinigami de guardia: se repite la explicación justo antes de instalar, que es cuando aparece el aviso
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        stringResource(R.string.update_play_protect_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             },
             confirmButton = { TextButton(onClick = { updater.install() }) { Text(stringResource(R.string.update_install)) } },
             dismissButton = { TextButton(onClick = { updater.dismiss() }) { Text(stringResource(R.string.action_close)) } },

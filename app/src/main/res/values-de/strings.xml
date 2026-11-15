@@ -166,6 +166,7 @@
     <string name="update_install">Installieren</string>
     <string name="update_not_now">Nicht jetzt</string>
     <string name="update_ready_body">Wenn Android um Erlaubnis bittet, aus dieser App zu installieren, aktiviere sie, komm zurück und tippe auf Installieren.</string>
+    <string name="update_play_protect_note">Wenn Play Protect zum Scannen der App auffordert, ist das ein normaler Hinweis: Google kennt diese Datei noch nicht, es ist keine Bedrohung. Tippe auf „App scannen“ und fahre danach mit der Installation fort.</string>
     <string name="update_size_mb">Größe: %1$.1f MB</string>
     <string name="update_status_available">Verfügbar: Version %1$s</string>
     <string name="update_status_checking">Suche läuft …</string>
