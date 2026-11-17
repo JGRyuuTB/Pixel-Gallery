@@ -225,6 +225,7 @@
     <string name="settings_startup_anim_desc">Как опенинг аниме: четыре цветных шара танцуют перед открытием галереи</string>
     <string name="cd_edit">Изменить</string>
     <string name="cd_animated_photo">Анимированное фото</string>
+    <string name="pick_done">Выбрать (%1$d)</string>
     <string name="editor_title">Редактировать фото</string>
     <string name="editor_close">Закрыть редактор</string>
     <string name="editor_save">Сохранить</string>

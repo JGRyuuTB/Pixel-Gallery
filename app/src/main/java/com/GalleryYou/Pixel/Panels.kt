@@ -15,7 +15,6 @@ import androidx.compose.ui.zIndex
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.content.res.ResourcesCompat
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,14 +40,6 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.horizontalScroll

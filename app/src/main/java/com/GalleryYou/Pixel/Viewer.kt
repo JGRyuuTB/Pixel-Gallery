@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.produceState
 import androidx.compose.animation.animateColorAsState
 import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.compose.ui.graphics.RectangleShape
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -41,8 +40,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -70,10 +67,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -89,7 +84,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -454,7 +448,7 @@ fun ViewerScreen(
                         )
                     }
                     // Botones de 44 dp para que quepa el lápiz del editor sin apretar la fecha
-                    if (!current.isVideo && current.expiresMillis == 0L && !current.mime.equals("image/gif", ignoreCase = true)) {
+                    if (!current.isVideo && current.expiresMillis == 0L && !rememberIsAnimated(current)) {
                         IconButton(onClick = { onEdit(current) }, modifier = Modifier.size(44.dp)) {
                             Icon(AppIcons.Edit, contentDescription = stringResource(R.string.cd_edit))
                         }

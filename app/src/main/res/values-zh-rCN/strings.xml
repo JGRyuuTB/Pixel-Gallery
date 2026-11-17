@@ -213,6 +213,7 @@
     <string name="settings_startup_anim_desc">就像动漫片头：打开图库前，四颗彩色光球翩翩起舞</string>
     <string name="cd_edit">编辑</string>
     <string name="cd_animated_photo">动态照片</string>
+    <string name="pick_done">选择 (%1$d)</string>
     <string name="editor_title">编辑照片</string>
     <string name="editor_close">关闭编辑器</string>
     <string name="editor_save">保存</string>

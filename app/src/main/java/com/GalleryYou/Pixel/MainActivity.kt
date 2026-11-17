@@ -11,10 +11,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.Spring
 import coil.decode.ImageDecoderDecoder
@@ -22,6 +19,7 @@ import coil.decode.GifDecoder
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import androidx.compose.material3.ExtendedFloatingActionButton
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -39,12 +37,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Animatable
@@ -52,17 +48,11 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,8 +61,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -285,6 +273,15 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     var editing by remember { mutableStateOf<MediaFile?>(null) }
     var lastViewer by remember { mutableStateOf<ViewerRequest?>(null) }
 
+    // Naruto: ¡me convertiré en la galería predeterminada! Modo "ver archivo" y modo "elegir foto para otra app"
+    val activity = remember { context.findActivity() }
+    val external = remember { parseExternal(activity?.intent) }
+    val pickMode = external?.kind == EXT_PICK
+    val pickMultiple = external?.multiple == true
+    var picked by remember { mutableStateOf<Set<Uri>>(emptySet()) }
+    var externalHandled by remember { mutableStateOf(false) }
+    var externalViewing by remember { mutableStateOf(false) }
+
     // ---- Eren grita libertad, el código también
     var pending by remember { mutableStateOf<(() -> Unit)?>(null) }
     val intentLauncher = rememberLauncherForActivityResult(
@@ -310,7 +307,10 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             return
         }
         val uris = items.map { it.uri }
-        launchRequest(MediaStore.createTrashRequest(context.contentResolver, uris, true).intentSender) {
+        // Un archivo que no es de MediaStore (abierto desde otra app) no se puede mover a la papelera
+        val sender = runCatching { MediaStore.createTrashRequest(context.contentResolver, uris, true).intentSender }.getOrNull()
+            ?: return
+        launchRequest(sender) {
             toast(context.resources.getQuantityString(R.plurals.toast_trashed, items.size, items.size))
             selected = emptySet()
             onDone()
@@ -378,6 +378,23 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     }
 
     val viewerOpen = viewer != null
+
+    // Abrir una foto o vídeo desde otra app: se muestra directo en el visor y al cerrarlo se vuelve a la app de origen
+    LaunchedEffect(media, externalHandled) {
+        val request = external
+        val list = media
+        if (request?.kind == EXT_VIEW && !externalHandled && list != null) {
+            val uri = request?.uri ?: return@LaunchedEffect
+            externalHandled = true
+            externalViewing = true
+            val index = indexOfExternal(list, uri)
+            if (index >= 0) open(list, index)
+            else open(listOf(withContext(Dispatchers.IO) { externalMedia(context, uri) }), 0)
+        }
+    }
+    LaunchedEffect(viewerOpen, viewerVisible) {
+        if (externalViewing && !viewerOpen && !viewerVisible) activity?.finish()
+    }
     LaunchedEffect(viewerOpen) {
         if (viewerOpen) {
             viewerVisible = true
@@ -406,15 +423,23 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
 
     // ---- Shinji, sube al robot de una vez
     val all = media.orEmpty()
-    val filtered = remember(all, filterMode) {
+    // Al elegir fotos para otra app solo se ofrece lo que esa app pidió (solo imágenes, solo vídeos...)
+    val pool = remember(all, external) {
+        if (external?.kind == EXT_PICK) all.filter { mimeMatches(it, external?.mimes.orEmpty()) } else all
+    }
+    val filtered = remember(pool, filterMode) {
         when (filterMode) {
-            1 -> all.filter { !it.isVideo }
-            2 -> all.filter { it.isVideo }
-            else -> all
+            1 -> pool.filter { !it.isVideo }
+            2 -> pool.filter { it.isVideo }
+            else -> pool
         }
     }
+    fun pickClick(m: MediaFile) {
+        if (pickMultiple) picked = if (m.uri in picked) picked - m.uri else picked + m.uri
+        else finishPick(activity, listOf(m))
+    }
     val unnamedAlbum = stringResource(R.string.album_unnamed)
-    val albums = remember(all, unnamedAlbum) { MediaRepo.albums(all, unnamedAlbum) }
+    val albums = remember(pool, unnamedAlbum) { MediaRepo.albums(pool, unnamedAlbum) }
     val openAlbum = albums.firstOrNull { it.id == openAlbumId }
     val selectedItems = remember(all, selected) { all.filter { it.uri in selected } }
 
@@ -426,6 +451,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     BackHandler(enabled = selected.isNotEmpty() && tab == 0) { selected = emptySet() }
     BackHandler(enabled = tab >= 2) { tab = 0 }
     BackHandler(enabled = viewer != null) { viewer = null }
+    BackHandler(enabled = pickMode && picked.isNotEmpty() && viewer == null) { picked = emptySet() }
 
     CompositionLocalProvider(LocalThumbRegistry provides thumbRegistry) {
     Box(Modifier.fillMaxSize()) {
@@ -454,15 +480,17 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             s.kind == 2 -> albums.firstOrNull { it.id == s.id }?.let { album -> AlbumDetail(
                 album = album,
                 settings = settings,
-                selected = selected,
+                selected = if (pickMode) picked else selected,
+                pickMode = pickMode,
                 onBack = {
                     openAlbumId = null
                     selected = emptySet()
                 },
                 onClick = { m, index ->
-                    if (selected.isNotEmpty()) toggle(m) else open(album.items, index)
+                    if (pickMode) pickClick(m)
+                    else if (selected.isNotEmpty()) toggle(m) else open(album.items, index)
                 },
-                onLongClick = { m -> toggle(m) },
+                onLongClick = { m -> if (pickMode) pickClick(m) else toggle(m) },
                 onClearSelection = { selected = emptySet() },
                 onSelectAll = { selected = album.items.map { it.uri }.toSet() },
                 onMove = { moveItems = selectedItems },
@@ -601,12 +629,13 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                                     items = filtered,
                                     padding = gridPadding,
                                     settings = settings,
-                                    selected = selected,
+                                    selected = if (pickMode) picked else selected,
                                     header = null,
                                     onClick = { m, index ->
-                                        if (selected.isNotEmpty()) toggle(m) else open(filtered, index)
+                                        if (pickMode) pickClick(m)
+                                        else if (selected.isNotEmpty()) toggle(m) else open(filtered, index)
                                     },
-                                    onLongClick = { m -> toggle(m) },
+                                    onLongClick = { m -> if (pickMode) pickClick(m) else toggle(m) },
                                 )
                             }
 
@@ -649,6 +678,19 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
                 }
             }
         }
+        }
+
+        // Selector de otra app con varias fotos: botón para confirmar lo marcado
+        if (pickMode && picked.isNotEmpty() && !viewerVisible) {
+            ExtendedFloatingActionButton(
+                onClick = { finishPick(activity, pool.filter { it.uri in picked }) },
+                icon = { Icon(AppIcons.Check, contentDescription = null) },
+                text = { Text(stringResource(R.string.pick_done, picked.size)) },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 86.dp),
+            )
         }
 
         // Alquimia equivalente: algo entra, algo sale
@@ -739,6 +781,7 @@ fun AlbumDetail(
     album: Album,
     settings: AppSettings,
     selected: Set<Uri>,
+    pickMode: Boolean = false,
     onBack: () -> Unit,
     onClick: (MediaFile, Int) -> Unit,
     onLongClick: (MediaFile) -> Unit,
@@ -749,7 +792,7 @@ fun AlbumDetail(
 ) {
     Scaffold(
         topBar = {
-            if (selected.isNotEmpty()) {
+            if (selected.isNotEmpty() && !pickMode) {
                 SelectionTopBar(
                     count = selected.size,
                     onClose = onClearSelection,

@@ -470,7 +470,7 @@ object AppIcons {
     // Mob Psycho 100: el poder psíquico en movimiento (insignia de foto animada, sin la palabra GIF)
     val Animated: ImageVector by lazy {
         build("Animated",
-            solid("M8.6,12 A3.4,3.4 0 1 0 15.4,12 A3.4,3.4 0 1 0 8.6,12 Z"),
+            solid("M10,8.6 L15.6,12 L10,15.4 Z"),
             line("M20.22,13.75 A8.4,8.4 0 0 1 17.62,18.24"),
             line("M14.60,19.99 A8.4,8.4 0 0 1 9.40,19.99"),
             line("M6.38,18.24 A8.4,8.4 0 0 1 3.78,13.75"),

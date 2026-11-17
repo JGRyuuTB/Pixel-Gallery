@@ -217,6 +217,7 @@
     <string name="settings_startup_anim_desc">Comme un opening d’anime : quatre orbes colorés dansent avant l’ouverture de la galerie</string>
     <string name="cd_edit">Modifier</string>
     <string name="cd_animated_photo">Photo animée</string>
+    <string name="pick_done">Choisir (%1$d)</string>
     <string name="editor_title">Modifier la photo</string>
     <string name="editor_close">Fermer l’éditeur</string>
     <string name="editor_save">Enregistrer</string>

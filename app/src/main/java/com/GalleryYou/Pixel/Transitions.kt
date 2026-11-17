@@ -8,7 +8,6 @@ import androidx.compose.ui.composed
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Animatable
 import android.net.Uri
 import androidx.compose.runtime.staticCompositionLocalOf

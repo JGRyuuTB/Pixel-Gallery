@@ -213,6 +213,7 @@
     <string name="settings_startup_anim_desc">アニメのオープニングのように、ギャラリーが開く前に4つの色の玉が踊ります</string>
     <string name="cd_edit">編集</string>
     <string name="cd_animated_photo">動く写真</string>
+    <string name="pick_done">選択 (%1$d)</string>
     <string name="editor_title">写真を編集</string>
     <string name="editor_close">エディターを閉じる</string>
     <string name="editor_save">保存</string>

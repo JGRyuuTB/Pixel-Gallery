@@ -217,6 +217,7 @@
     <string name="settings_startup_anim_desc">Wie ein Anime-Opening: Vier bunte Kugeln tanzen, bevor die Galerie sich öffnet</string>
     <string name="cd_edit">Bearbeiten</string>
     <string name="cd_animated_photo">Animiertes Foto</string>
+    <string name="pick_done">Auswählen (%1$d)</string>
     <string name="editor_title">Foto bearbeiten</string>
     <string name="editor_close">Editor schließen</string>
     <string name="editor_save">Speichern</string>

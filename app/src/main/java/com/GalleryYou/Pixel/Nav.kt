@@ -21,6 +21,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -44,6 +45,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.semantics.Role
+import kotlin.math.abs
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -218,10 +221,25 @@ private fun Modifier.navGestures(count: Int, selected: Int, onSelect: (Int) -> U
         }
 }
 
+/**
+ * Gojo Satoru: el infinito, pero al tocar. Pulsar encoge un poco el elemento y soltar lo devuelve con un resorte;
+ * es solo una transformación de dibujo, el fondo con blur de la barra no se toca.
+ */
 @Composable
-private fun Modifier.plainClick(onClick: () -> Unit): Modifier {
+private fun Modifier.navPress(animations: Boolean, onClick: () -> Unit): Modifier {
     val source = remember { MutableInteractionSource() }
-    return clickable(interactionSource = source, indication = null, onClick = onClick)
+    val pressed by source.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed && animations) 0.92f else 1f,
+        animationSpec = if (animations) spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium) else snap(),
+        label = "navPress",
+    )
+    return this
+        .graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        }
+        .clickable(interactionSource = source, indication = null, role = Role.Tab, onClick = onClick)
 }
 
 @Composable
@@ -269,8 +287,18 @@ private fun NavIcon(
     badge: Int,
     modifier: Modifier = Modifier,
     red: Boolean = false,
+    pop: Boolean = false,
 ) {
-    Box(modifier) {
+    // Naruto invoca su clon: el icono elegido rebota un poco al activarse
+    val popScale by animateFloatAsState(
+        targetValue = if (pop && selected) 1.12f else 1f,
+        animationSpec = if (pop) spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium) else snap(),
+        label = "navIconPop",
+    )
+    Box(modifier.graphicsLayer {
+        scaleX = popScale
+        scaleY = popScale
+    }) {
         Icon(
             imageVector = if (selected) dest.iconSelected else dest.icon,
             contentDescription = stringResource(dest.labelRes),
@@ -369,12 +397,12 @@ private fun ClassicNavItem(
     Row(
         modifier = Modifier
             .fillMaxHeight()
+            .navPress(animations, onClick)
             .background(bg, tuning.shape)
-            .plainClick(onClick)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        NavIcon(dest, selected, fg, 22.dp * tuning.icon, badge)
+        NavIcon(dest, selected, fg, 22.dp * tuning.icon, badge, pop = animations)
         AnimatedVisibility(
             visible = selected,
             enter = fadeIn(if (animations) tween(Motion.Medium, delayMillis = 60, easing = LinearOutSlowInEasing) else snap()) + expandHorizontally(
@@ -426,8 +454,8 @@ private fun StackedNavItem(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .background(bg, tuning.shape)
-            .plainClick(onClick),
+            .navPress(animations, onClick)
+            .background(bg, tuning.shape),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -496,13 +524,13 @@ private fun TikTokNavBar(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
+                    .navPress(animations) { pick(i) }
                     .background(fill, tuning.shape)
-                    .border(1.dp, rim, tuning.shape)
-                    .plainClick { pick(i) },
+                    .border(1.dp, rim, tuning.shape),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    NavIcon(dest, on, Color.White, 22.dp * tuning.icon, badges[i] ?: 0, red = true)
+                    NavIcon(dest, on, Color.White, 22.dp * tuning.icon, badges[i] ?: 0, red = true, pop = animations)
                     Text(
                         stringResource(dest.labelRes),
                         color = Color.White,
@@ -571,7 +599,7 @@ private fun FullNavBar(
                     label = "fuFg",
                 )
                 Column(
-                    modifier = Modifier.weight(1f).fillMaxHeight().plainClick { pick(i) },
+                    modifier = Modifier.weight(1f).fillMaxHeight().navPress(animations) { pick(i) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -579,7 +607,7 @@ private fun FullNavBar(
                         Modifier.width(56.dp).height(28.dp).background(pill, tuning.shape),
                         contentAlignment = Alignment.Center,
                     ) {
-                        NavIcon(dest, on, fg, 22.dp * tuning.icon, badges[i] ?: 0)
+                        NavIcon(dest, on, fg, 22.dp * tuning.icon, badges[i] ?: 0, pop = animations)
                     }
                     Text(
                         stringResource(dest.labelRes),
@@ -641,10 +669,10 @@ private fun IslandNavBar(
                 label = "isFg",
             )
             Box(
-                Modifier.size(width = itemSize + 6.dp, height = itemSize).background(bg, tuning.shape).plainClick { pick(i) },
+                Modifier.size(width = itemSize + 6.dp, height = itemSize).navPress(animations) { pick(i) }.background(bg, tuning.shape),
                 contentAlignment = Alignment.Center,
             ) {
-                NavIcon(dest, on, fg, 22.dp * tuning.icon, badges[i] ?: 0)
+                NavIcon(dest, on, fg, 22.dp * tuning.icon, badges[i] ?: 0, pop = animations)
             }
         }
     }
@@ -683,11 +711,14 @@ private fun IndicatorNavBar(
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
             val itemW = maxWidth / items.size
             val pos by animateFloatAsState(selected.toFloat(), floatSpec(animations), label = "indPos")
+            // Levi Ackerman: el trazo se estira al viajar y se recoge al llegar
+            val stretch = (abs(pos - selected) * 18f).coerceAtMost(26f).dp
+            val barW = 20.dp + stretch
             Box(
                 Modifier
                     .align(Alignment.BottomStart)
-                    .offset(x = itemW * pos + (itemW - 20.dp) / 2, y = (-5).dp)
-                    .size(width = 20.dp, height = 3.dp)
+                    .offset(x = itemW * pos + (itemW - barW) / 2, y = (-5).dp)
+                    .size(width = barW, height = 3.dp)
                     .background(scheme.primary, CircleShape),
             )
             Row(Modifier.fillMaxSize()) {
@@ -699,11 +730,11 @@ private fun IndicatorNavBar(
                         label = "indFg",
                     )
                     Column(
-                        modifier = Modifier.weight(1f).fillMaxHeight().plainClick { pick(i) },
+                        modifier = Modifier.weight(1f).fillMaxHeight().navPress(animations) { pick(i) },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        NavIcon(dest, on, fg, 22.dp * tuning.icon, badges[i] ?: 0)
+                        NavIcon(dest, on, fg, 22.dp * tuning.icon, badges[i] ?: 0, pop = animations)
                         Text(
                             stringResource(dest.labelRes),
                             color = fg,
@@ -755,11 +786,13 @@ private fun BubbleNavBar(
             val itemW = maxWidth / items.size
             val bubble = maxHeight
             val pos by animateFloatAsState(selected.toFloat(), floatSpec(animations), label = "bubPos")
+            // Goku acelera: la burbuja se estira en movimiento y vuelve a ser redonda al detenerse
+            val bubbleW = bubble + (abs(pos - selected) * 14f).coerceAtMost(18f).dp
             Box(
                 Modifier
                     .align(Alignment.CenterStart)
-                    .offset(x = itemW * pos + (itemW - bubble) / 2)
-                    .size(bubble)
+                    .offset(x = itemW * pos + (itemW - bubbleW) / 2)
+                    .size(width = bubbleW, height = bubble)
                     .background(scheme.primary, tuning.shape),
             )
             Row(Modifier.fillMaxSize()) {
@@ -771,10 +804,10 @@ private fun BubbleNavBar(
                         label = "bubFg",
                     )
                     Box(
-                        Modifier.weight(1f).fillMaxHeight().plainClick { pick(i) },
+                        Modifier.weight(1f).fillMaxHeight().navPress(animations) { pick(i) },
                         contentAlignment = Alignment.Center,
                     ) {
-                        NavIcon(dest, on, fg, 24.dp * tuning.icon, badges[i] ?: 0)
+                        NavIcon(dest, on, fg, 24.dp * tuning.icon, badges[i] ?: 0, pop = animations)
                     }
                 }
             }

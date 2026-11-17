@@ -14,7 +14,6 @@ import android.net.Uri
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.Bitmap
 import android.os.Build
-import android.provider.MediaStore
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.AnimationSpec
@@ -23,10 +22,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -820,7 +815,7 @@ fun Thumb(
             }
         }
 
-        if (m.mime.equals("image/gif", ignoreCase = true)) {
+        if (rememberIsAnimated(m)) {
             // Mob Psycho 100: sin letras, solo el icono de foto animada
             Surface(
                 color = Color.Black.copy(alpha = 0.55f),

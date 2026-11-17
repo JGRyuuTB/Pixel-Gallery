@@ -217,6 +217,7 @@
     <string name="settings_startup_anim_desc">Like an anime opening: four colorful orbs dance before the gallery opens</string>
     <string name="cd_edit">Edit</string>
     <string name="cd_animated_photo">Animated photo</string>
+    <string name="pick_done">Select (%1$d)</string>
     <string name="editor_title">Edit photo</string>
     <string name="editor_close">Close editor</string>
     <string name="editor_save">Save</string>

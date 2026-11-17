@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 1.13.16
+
+- Fotos animadas de cualquier formato: el icono de "disparo dinámico" (aro punteado con triángulo de reproducción) aparece ahora en GIF, WebP animado, AVIF animado y APNG, y no en los vídeos. El formato se detecta leyendo solo la cabecera del archivo, en segundo plano y con caché, sin frenar el scroll.
+- Galería predeterminada: la app aparece al abrir una foto o vídeo desde otras apps (se muestra directo en el visor y al cerrarlo vuelves a la app de origen) y en el selector de medios de webs y apps ("subir foto"), con elección de una o varias fotos y respetando el filtro (solo imágenes, solo vídeos...). También se declara como app de Galería para los ajustes de apps predeterminadas.
+- Barras de navegación más pulidas en todos sus estilos, sin tocar el cristal ni el desenfoque: el elemento se hunde al pulsar y vuelve con un resorte, el icono activo rebota al seleccionarse, el indicador y la burbuja se estiran al viajar entre pestañas y cada pestaña se anuncia como tal para TalkBack.
+- Código más limpio: se eliminan 37 imports sin usar.
+
 ## 1.13.11
 
 - Menos lag al desplazarte por las fotos: cada miniatura ya no carga un animador y una corrutina de pulsación propios (el efecto de hundido al tocar sigue igual), las esquinas solo se animan en modo selección, la insignia de selección solo existe cuando seleccionas y la entrada animada solo se aplica a la primera pantalla en lugar de a cada miniatura nueva que aparece al hacer scroll.

@@ -217,6 +217,7 @@
     <string name="settings_startup_anim_desc">Como el opening de un anime: cuatro orbes de colores bailan antes de abrir la galería</string>
     <string name="cd_edit">Editar</string>
     <string name="cd_animated_photo">Foto animada</string>
+    <string name="pick_done">Elegir (%1$d)</string>
     <string name="editor_title">Editar foto</string>
     <string name="editor_close">Cerrar editor</string>
     <string name="editor_save">Guardar</string>
