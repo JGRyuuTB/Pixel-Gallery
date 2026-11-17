@@ -1,5 +1,9 @@
 # Registro de cambios
 
+## 1.13.17
+
+- Publicación automática: cada vez que se sube una versión a `main`, GitHub Actions compila el APK y lo publica como release con las notas de esta lista (antes solo se publicaba al crear una etiqueta a mano).
+
 ## 1.13.16
 
 - Fotos animadas de cualquier formato: el icono de "disparo dinámico" (aro punteado con triángulo de reproducción) aparece ahora en GIF, WebP animado, AVIF animado y APNG, y no en los vídeos. El formato se detecta leyendo solo la cabecera del archivo, en segundo plano y con caché, sin frenar el scroll.
