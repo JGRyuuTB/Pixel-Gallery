@@ -1,5 +1,9 @@
 # Registro de cambios
 
+## 1.13.19
+
+- Arreglo de compilación: se restaura un import que faltaba en el modo de galería predeterminada. Incluye todo lo de 1.13.16 y 1.13.17.
+
 ## 1.13.17
 
 - Publicación automática: cada vez que se sube una versión a `main`, GitHub Actions compila el APK y lo publica como release con las notas de esta lista (antes solo se publicaba al crear una etiqueta a mano).

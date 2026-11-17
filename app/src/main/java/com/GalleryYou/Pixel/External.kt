@@ -6,6 +6,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 
 /** Naruto: ¡me convertiré en la galería predeterminada! Qué piden las otras apps cuando me abren. */
