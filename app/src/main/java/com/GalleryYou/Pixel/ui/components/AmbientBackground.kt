@@ -267,7 +267,6 @@ fun PermissionScreen(onRequest: () -> Unit, onSettings: () -> Unit) {
         Spacer(Modifier.height(28.dp))
         Button(
             onClick = onRequest,
-            shapes = ButtonDefaults.shapes(),
             shape = RoundedCornerShape(20.dp),
         ) {
             Text(stringResource(R.string.permission_allow))
