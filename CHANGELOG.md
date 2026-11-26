@@ -1,5 +1,14 @@
 # Registro de cambios
 
+## 1.17.9
+
+- Rediseño completo con el lenguaje visual **Material 3 Expressive** inspirado en Pixel Player You (Koda): `MaterialExpressiveTheme`, `MotionScheme.expressive()`, tipografía Roboto Flex + Montserrat y transiciones predictivas (`PredictiveBackStack`).
+- Más de 30 paletas de color curadas en 6 categorías, colores dinámicos de fondo de pantalla, 5 estilos tonales (`Tonal`, `Vibrant`, `Expressive`, `Fruit Salad`, `Mono`), modo negro puro AMOLED y escala de interfaz (`Display size`) con vista previa en vivo.
+- Navegación flotante expresiva (`HorizontalFloatingToolbar` con gesto de arrastre entre pestañas, ocultación al desplazarse y riel lateral `HomeFloatingRail` para tablets), además de opción clásica Material y barra de selección flotante (`MediaSelectionDeck`) con snackbars descartables.
+- Hub de Ajustes renovado con búsqueda instantánea, tarjetas segmentadas (`SegmentedColumn`), iconos troquelados (`MaterialShapes`), explicaciones al mantener pulsado y selector de los 12 iconos de aplicación con vista previa fija.
+- Bienvenida (Onboarding) expresiva con paginador horizontal, indicador ondulado y formas animadas (`Morph`).
+- Sistema de vibración háptica configurable (`Apagada`, `Sutil`, `Equilibrada`, `Expresiva`).
+
 ## 1.13.19
 
 - Arreglo de compilación: se restaura un import que faltaba en el modo de galería predeterminada. Incluye todo lo de 1.13.16 y 1.13.17.

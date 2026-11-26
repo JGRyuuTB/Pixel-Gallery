@@ -1,5 +1,7 @@
 package com.GalleryYou.Pixel
 
+import com.GalleryYou.Pixel.data.LocalGalleryLoader
+import com.GalleryYou.Pixel.data.MediaFile
 import android.Manifest
 import android.content.ContentResolver
 import android.content.ContentValues

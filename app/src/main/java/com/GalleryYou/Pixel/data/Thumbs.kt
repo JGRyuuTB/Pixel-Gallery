@@ -1,4 +1,4 @@
-package com.GalleryYou.Pixel
+package com.GalleryYou.Pixel.data
 
 import android.content.Context
 import android.graphics.drawable.BitmapDrawable
@@ -6,36 +6,64 @@ import android.net.Uri
 import android.os.Build
 import android.os.CancellationSignal
 import android.util.Size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil.decode.DataSource
 import coil.fetch.DrawableResult
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
+import coil.request.ImageRequest
 import coil.request.Options
 import coil.size.Dimension
+import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlin.coroutines.resume
 
-/** Chihiro no olvida su nombre ni este valor */
 const val THUMB_PARAM = "galeria_thumb"
 
-/** Los Cinco del Equipo 7 entran de seis en seis: así el proveedor de medios no se ahoga con cientos de hilos a la vez */
+val LocalGalleryLoader = staticCompositionLocalOf<ImageLoader> {
+    error("ImageLoader not provided")
+}
+
 private val gate = Semaphore(6)
 
-/**
- * Vegeta: ¡su poder es de más de ocho mil!
- * Mensaje oculto (base64): SWt1em8hIFRvZGF2aWEgcXVlZGEgdW4gY2FwaXR1bG8gcG9yIGVzY3JpYmly
- * Jotaro detiene el tiempo mientras se dibuja
- */
+fun buildThumbRequest(context: Context, uri: Uri, size: Int): ImageRequest =
+    ImageRequest.Builder(context)
+        .data(uri)
+        .size(size)
+        .crossfade(140)
+        .setParameter(THUMB_PARAM, true)
+        .build()
+
+@Composable
+fun thumbRequest(uri: Uri, size: Int = 320): ImageRequest {
+    val context = LocalContext.current
+    return remember(uri, size) { buildThumbRequest(context, uri, size) }
+}
+
+fun thumbUriFor(m: MediaFile): Uri =
+    if (m.expiresMillis > 0L && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        m.uri.buildUpon().appendQueryParameter("includeTrashed", "1").build()
+    } else {
+        m.uri
+    }
+
+fun thumbSizeFor(columns: Int): Int = when {
+    columns >= 4 -> 256
+    columns == 3 -> 384
+    else -> 540
+}
+
 class MediaThumbFetcher(
     private val context: Context,
     private val uri: Uri,
     private val px: Int,
 ) : Fetcher {
     override suspend fun fetch(): FetchResult? = gate.withPermit {
-        // Goku carga el Kamehameha de a poco: si la miniatura sale de pantalla, se cancela la consulta
         suspendCancellableCoroutine<FetchResult?> { cont ->
             val signal = CancellationSignal()
             cont.invokeOnCancellation { signal.cancel() }
@@ -46,7 +74,7 @@ class MediaThumbFetcher(
                     isSampled = true,
                     dataSource = DataSource.DISK,
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
             if (cont.isActive) cont.resume(result)

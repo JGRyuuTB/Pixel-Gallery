@@ -1,5 +1,17 @@
 package com.GalleryYou.Pixel
 
+import com.GalleryYou.Pixel.data.AppSettings
+import com.GalleryYou.Pixel.data.LocalGalleryLoader
+import com.GalleryYou.Pixel.data.MediaFile
+import com.GalleryYou.Pixel.data.buildThumbRequest
+import com.GalleryYou.Pixel.data.findActivity
+import com.GalleryYou.Pixel.data.formatDateSkeleton
+import com.GalleryYou.Pixel.data.formatDuration
+import com.GalleryYou.Pixel.data.formatSize
+import com.GalleryYou.Pixel.data.rememberIsAnimated
+import com.GalleryYou.Pixel.data.thumbRequest
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.snap
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -141,6 +153,9 @@ import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 
 data class ViewerRequest(val items: List<MediaFile>, val start: Int)
+
+private fun <T> motion(enabled: Boolean): AnimationSpec<T> =
+    if (enabled) spring(stiffness = Spring.StiffnessMediumLow) else snap()
 
 private fun share(context: Context, m: MediaFile) {
     val intent = Intent(Intent.ACTION_SEND).apply {

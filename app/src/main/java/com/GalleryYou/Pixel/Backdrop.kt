@@ -1,5 +1,6 @@
 package com.GalleryYou.Pixel
 
+import com.GalleryYou.Pixel.data.AppSettings
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.asComposeRenderEffect

@@ -301,4 +301,113 @@
     <string name="header_style_compact">Compacta</string>
     <string name="header_style_text">Texto</string>
     <string name="header_style_outline">Contorno</string>
+
+    <!-- Paleta Expresiva y Tamaño de Pantalla -->
+    <string name="sp_color_palette">Paleta de colores</string>
+    <string name="palette_style_title">Estilo de paleta</string>
+    <string name="palette_style_description">Controla qué tan vibrantes, suaves o expresivos se sienten los colores en toda la interfaz.</string>
+    <string name="palette_style_presets_hint">Se aplica a todas las paletas integradas. Los colores dinámicos siguen el motor del sistema.</string>
+    <string name="palette_style_tonal_spot">Tonal</string>
+    <string name="palette_style_vibrant">Vibrante</string>
+    <string name="palette_style_expressive">Expresivo</string>
+    <string name="palette_style_fruit_salad">Frutal</string>
+    <string name="palette_style_monochrome">Mono</string>
+    <string name="cp_dynamic_cd">Colores dinámicos del fondo</string>
+    <string name="cd_selected">Seleccionado</string>
+    <string name="cd_clear_search">Limpiar búsqueda</string>
+
+    <string name="sp_display_size">Tamaño de pantalla</string>
+    <string name="sp_display_size_preview">Vista previa</string>
+    <string name="sp_display_size_scale">Escala de interfaz</string>
+    <string name="sp_display_size_compact">Compacta</string>
+    <string name="sp_display_size_default">Normal</string>
+    <string name="sp_display_size_large">Grande</string>
+    <string name="sp_display_size_reset">Restablecer</string>
+    <string name="sp_display_size_percent">%1$d%%</string>
+    <string name="sp_display_size_about">Sobre el tamaño de pantalla</string>
+    <string name="sp_display_size_note_system">Escala iconos, tarjetas y espacios sin cambiar el tamaño del sistema Android.</string>
+    <string name="sp_display_size_note_excluded">Suelta el deslizador para aplicar la nueva escala en toda la galería.</string>
+    <string name="sp_display_size_preview_title">Recuerdos de Verano</string>
+    <string name="sp_display_size_preview_sub">42 fotos · 3 videos</string>
+
+    <!-- Pantalla principal y barra de selección -->
+    <string name="home_greeting_morning">Buenos días</string>
+    <string name="home_greeting_afternoon">Buenas tardes</string>
+    <string name="home_greeting_evening">Buenas noches</string>
+    <string name="home_greeting_night">Madrugada</string>
+    <string name="home_search_photos">Buscar fotos y videos…</string>
+    <string name="home_search_albums">Buscar álbumes…</string>
+    <string name="home_search_empty_title">Sin resultados para «%1$s»</string>
+    <string name="home_search_empty_hint">Prueba otro nombre, álbum o limpia la búsqueda.</string>
+    <string name="home_collection_summary">%1$d elementos</string>
+    <string name="sel_close">Cancelar selección</string>
+    <string name="sel_select_all">Seleccionar todo</string>
+    <string name="sel_select_none">Deseleccionar todo</string>
+    <string name="sel_move">Mover</string>
+    <string name="sel_trash">Mover a la papelera</string>
+    <string name="sel_share">Compartir</string>
+    <string name="sel_restore">Restaurar</string>
+    <string name="sel_delete_forever">Eliminar definitivamente</string>
+    <plurals name="sel_count">
+        <item quantity="one">%d seleccionado</item>
+        <item quantity="other">%d seleccionados</item>
+    </plurals>
+
+    <!-- Hub de Ajustes y Subpáginas -->
+    <string name="settings_search_placeholder">Buscar ajustes…</string>
+    <string name="settings_search_empty_title">Sin ajustes para «%1$s»</string>
+    <string name="settings_search_empty_hint">Prueba buscar tema, paleta, columnas, desenfoque o reproductor.</string>
+    <string name="settings_hold_hint">Mantén pulsada cualquier fila para ver qué hace</string>
+    <string name="si_got_it">Entendido</string>
+    <string name="settings_section_look_and_feel">Apariencia y Estilo</string>
+    <string name="settings_section_gallery">Galería y Cuadrícula</string>
+    <string name="settings_section_playback">Reproductor de Video</string>
+    <string name="settings_section_system">Sistema</string>
+    <string name="settings_section_about">Acerca de</string>
+    <string name="settings_customization">Personalización</string>
+    <string name="settings_color_palette_desc">Más de 30 paletas, colores dinámicos y estilos tonales</string>
+    <string name="settings_display_size_desc">Escala de la interfaz y densidad de diseño</string>
+    <string name="settings_theme_mode">Modo de tema</string>
+    <string name="settings_theme_mode_desc">Sigue el sistema o fija claro u oscuro</string>
+    <string name="settings_amoled_dark">Negro puro AMOLED</string>
+    <string name="settings_amoled_dark_desc">Fondo #000000 real en modo oscuro, como la capa de Batman</string>
+    <string name="settings_navigation_bar">Barra de navegación</string>
+    <string name="settings_non_expressive_nav">Barra Material clásica</string>
+    <string name="settings_non_expressive_nav_desc">Usa la barra fija inferior en lugar de la píldora flotante expresiva</string>
+    <string name="settings_tab_labels">Etiquetas de pestañas</string>
+    <string name="settings_tab_labels_desc">Cuándo mostrar el nombre en la barra de navegación</string>
+    <string name="tab_labels_selected">Solo activa</string>
+    <string name="tab_labels_always">Siempre</string>
+    <string name="tab_labels_never">Solo iconos</string>
+    <string name="settings_bar_hides_on_scroll">Ocultar barra al desplazarse</string>
+    <string name="settings_bar_hides_on_scroll_desc">Esconde la barra flotante al recorrer tus fotos</string>
+    <string name="settings_show_greeting">Saludo inicial</string>
+    <string name="settings_show_greeting_desc">Muestra un saludo según la hora en la parte superior de Fotos</string>
+    <string name="settings_haptics">Vibración háptica</string>
+    <string name="settings_haptics_desc">Pulsos táctiles y resortes en botones, deslizadores y selección</string>
+    <string name="haptic_level_off">Apagada</string>
+    <string name="haptic_level_subtle">Sutil</string>
+    <string name="haptic_level_balanced">Equilibrada</string>
+    <string name="haptic_level_expressive">Expresiva</string>
+    <string name="settings_gap_none">Ninguno</string>
+    <string name="settings_version_subtitle">Versión %1$s (%2$d)</string>
+    <string name="settings_app_icon_desc">Elige entre 12 iconos del launcher con vista previa adaptativa</string>
+    <string name="app_icon_apply">Aplicar icono</string>
+    <string name="app_icon_applied_notice">Icono actualizado. El launcher puede tardar un momento en cambiarlo.</string>
+    <string name="app_icon_active_badge">Activo</string>
+    <string name="si_hub_customization">Tema, paletas de color, tamaño de pantalla, icono, barra de navegación, desenfoque, animaciones y hápticos.</string>
+    <string name="si_hub_gallery">Configura columnas de fotos y álbumes, espaciado y esquinas redondeadas.</string>
+    <string name="si_hub_player">Reproducción automática, paneles de cristal flotantes, bordes y 7 estilos de barra de progreso.</string>
+    <string name="si_hub_updates">Busca nuevas versiones en GitHub Releases e instálalas directamente.</string>
+    <string name="si_hub_language">Cambia el idioma de la galería sin cambiar el idioma de todo Android.</string>
+    <string name="si_toggle_amoled">Reemplaza los tonos oscuros por negro puro (#000000) para pantallas OLED.</string>
+    <string name="si_toggle_blur">Aplica desenfoque en tiempo real y refracción Liquid Glass AGSL al visor y reproductor.</string>
+    <string name="si_toggle_ambient">Toma los colores de las fotos visibles para pintar una aurora suave detrás de la cuadrícula.</string>
+    <string name="si_toggle_startup">Reproduce la coreografía inicial de los cuatro orbes según el icono elegido.</string>
+
+    <!-- Bienvenida Expresiva -->
+    <string name="ob_skip">Saltar</string>
+    <string name="ob_back">Atrás</string>
+    <string name="ob_next">Continuar</string>
+    <string name="ob_finish">Abrir Galería</string>
 </resources>

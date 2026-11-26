@@ -1,21 +1,17 @@
-package com.GalleryYou.Pixel
+package com.GalleryYou.Pixel.data
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Mob Psycho 100: el poder psíquico en movimiento.
- * Detecta fotos animadas de cualquier formato (GIF, WebP, AVIF, APNG) leyendo solo la cabecera del archivo.
- */
 object AnimatedImages {
     private val cache = ConcurrentHashMap<String, Boolean>()
 
@@ -25,7 +21,6 @@ object AnimatedImages {
             m == "image/heif" || m == "image/heic"
     }
 
-    /** Respuesta inmediata cuando no hace falta abrir el archivo (null = hay que mirar la cabecera) */
     fun known(m: MediaFile): Boolean? {
         if (m.isVideo) return false
         if (m.mime.equals("image/gif", ignoreCase = true)) return true
@@ -62,12 +57,10 @@ object AnimatedImages {
 
     private fun isAnimatedHeader(b: ByteArray, n: Int): Boolean {
         if (n < 16) return false
-        // WebP: RIFF....WEBP y la bandera de animación (bit 1) en VP8X
         if (tag(b, 0, "RIFF") && tag(b, 8, "WEBP")) {
             if (tag(b, 12, "VP8X") && n > 20) return (b[20].toInt() and 0x02) != 0
             return false
         }
-        // AVIF / HEIF: caja ftyp con la marca "avis" (secuencia animada) en la marca principal o compatibles
         if (tag(b, 4, "ftyp")) {
             val size = ((b[0].toInt() and 0xFF) shl 24) or ((b[1].toInt() and 0xFF) shl 16) or
                 ((b[2].toInt() and 0xFF) shl 8) or (b[3].toInt() and 0xFF)
@@ -79,7 +72,6 @@ object AnimatedImages {
             }
             return false
         }
-        // APNG: el trozo acTL aparece antes de los datos de imagen
         if (b[0] == 0x89.toByte() && tag(b, 1, "PNG")) {
             for (i in 8 until n - 3) if (tag(b, i, "acTL")) return true
             return false
@@ -88,7 +80,6 @@ object AnimatedImages {
     }
 }
 
-/** Foto animada de cualquier formato: se resuelve al instante o, si hace falta, leyendo la cabecera en segundo plano */
 @Composable
 fun rememberIsAnimated(m: MediaFile): Boolean {
     val initial = AnimatedImages.known(m)

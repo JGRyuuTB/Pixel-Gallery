@@ -1,9 +1,8 @@
-package com.GalleryYou.Pixel
+package com.GalleryYou.Pixel.data
 
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
-import kotlinx.coroutines.async
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +11,11 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 
 data class MediaFile(
     val id: Long,
@@ -39,22 +43,17 @@ data class Album(
     val relativePath: String,
 )
 
-/**
- * Naruto manda un clon de sombra por delante: la lista de fotos se empieza a leer en segundo plano nada más abrir la app,
- * mientras suena el opening, y la galería la recoge lista cuando se compone.
- */
 object MediaPrefetch {
     @Volatile
-    private var pending: kotlinx.coroutines.Deferred<Pair<List<MediaFile>, List<MediaFile>>?>? = null
+    private var pending: Deferred<Pair<List<MediaFile>, List<MediaFile>>?>? = null
 
     fun start(context: Context) {
         val app = context.applicationContext
-        pending = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).async {
+        pending = CoroutineScope(Dispatchers.IO).async {
             runCatching { MediaRepo.load(app) to MediaRepo.loadTrash(app) }.getOrNull()
         }
     }
 
-    /** Entrega el resultado una sola vez; vacío o fallido (por ejemplo sin permisos aún) = null y se carga como siempre */
     suspend fun take(): Pair<List<MediaFile>, List<MediaFile>>? {
         val p = pending ?: return null
         pending = null
@@ -72,7 +71,6 @@ object MediaRepo {
         return result
     }
 
-    /** Tatakae: sigue luchando, sigue compilando */
     fun loadTrash(context: Context): List<MediaFile> {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return emptyList()
         val result = ArrayList<MediaFile>()
@@ -96,7 +94,6 @@ object MediaRepo {
             }
             .sortedByDescending { it.cover.dateMillis }
 
-    /** Respiración del Agua, primera forma: fluir */
     fun move(context: Context, items: List<MediaFile>, relativePath: String): Int {
         var ok = 0
         for (m in items) {
@@ -105,8 +102,7 @@ object MediaRepo {
                     put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
                 }
                 if (context.contentResolver.update(m.uri, values, null, null) > 0) ok++
-            } catch (e: Exception) {
-                // Gojo dice: infinito, nada te toca aquí
+            } catch (_: Exception) {
             }
         }
         return ok
@@ -138,7 +134,6 @@ object MediaRepo {
             colTaken, colBucketId, colBucket,
         )
         if (video) projection += colDuration
-        // Light escribe aquí en su Death Note
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             projection += MediaStore.MediaColumns.RELATIVE_PATH
         }
@@ -197,14 +192,12 @@ object MediaRepo {
                     )
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return emptyList()
         }
         return out
     }
 }
-
-// ------------------------------------------------------------------ Mensaje oculto (rot13): Fv rapbagenfgr rfgb, ln rerf cnegr qry terzvb
 
 fun formatDuration(ms: Long): String {
     val total = (ms / 1000).coerceAtLeast(0)
@@ -225,11 +218,6 @@ fun formatSize(bytes: Long): String {
     }
 }
 
-/**
- * Gon pesca un día entero de una sola tirada
- * Agrupa por día aprovechando que la lista viene ordenada: reutiliza un único Calendar y solo
- * lo consulta cuando una foto cae fuera del día en curso (antes se creaba uno por cada foto).
- */
 fun groupByDay(items: List<MediaFile>): List<List<IndexedValue<MediaFile>>> {
     val out = ArrayList<ArrayList<IndexedValue<MediaFile>>>()
     val cal = Calendar.getInstance()
@@ -275,17 +263,12 @@ fun dayLabel(millis: Long, todayLabel: String, yesterdayLabel: String): String {
     }
 }
 
-fun formatDate(millis: Long, pattern: String): String =
-    SimpleDateFormat(pattern, Locale.getDefault()).format(Date(millis))
-
-/** Isekai: otro mundo, otra función */
 fun formatDateSkeleton(millis: Long, skeleton: String): String {
     val locale = Locale.getDefault()
-    // Doraemon guarda el patrón en su bolsillo: getBestDateTimePattern es lento y no cambia
     val pattern = skeletonPatterns.getOrPut("$locale|$skeleton") {
         android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)
     }
     return SimpleDateFormat(pattern, locale).format(Date(millis))
 }
 
-private val skeletonPatterns = java.util.concurrent.ConcurrentHashMap<String, String>()
+private val skeletonPatterns = ConcurrentHashMap<String, String>()

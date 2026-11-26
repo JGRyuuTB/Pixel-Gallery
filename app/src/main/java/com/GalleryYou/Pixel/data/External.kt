@@ -1,4 +1,4 @@
-package com.GalleryYou.Pixel
+package com.GalleryYou.Pixel.data
 
 import android.app.Activity
 import android.content.ClipData
@@ -9,7 +9,6 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 
-/** Naruto: ¡me convertiré en la galería predeterminada! Qué piden las otras apps cuando me abren. */
 const val EXT_VIEW = 1
 const val EXT_PICK = 2
 
@@ -20,7 +19,6 @@ class ExternalRequest(
     val uri: Uri? = null,
 )
 
-/** Lee el Intent con el que se abrió la app: ver un archivo (VIEW) o elegir fotos para otra app (GET_CONTENT / PICK) */
 fun parseExternal(intent: Intent?): ExternalRequest? {
     intent ?: return null
     return when (intent.action) {
@@ -40,7 +38,6 @@ fun parseExternal(intent: Intent?): ExternalRequest? {
     }
 }
 
-// Sailor Moon: filtro por tipo (imágenes, vídeos, un formato concreto o todo). Sin filtro, todo pasa.
 fun mimeMatches(m: MediaFile, types: List<String>): Boolean {
     if (types.isEmpty()) return true
     return types.any { t ->
@@ -55,7 +52,6 @@ fun mimeMatches(m: MediaFile, types: List<String>): Boolean {
     }
 }
 
-/** Busca el archivo recibido entre los medios ya cargados (así el visor permite deslizar a los vecinos) */
 fun indexOfExternal(all: List<MediaFile>, uri: Uri): Int {
     val direct = all.indexOfFirst { it.uri == uri }
     if (direct >= 0) return direct
@@ -67,7 +63,6 @@ fun indexOfExternal(all: List<MediaFile>, uri: Uri): Int {
     return -1
 }
 
-/** Archivo que no está en MediaStore (descargas, otras apps): se describe con lo que el sistema sepa de él */
 fun externalMedia(context: Context, uri: Uri): MediaFile {
     val resolver = context.contentResolver
     val ext = MimeTypeMap.getFileExtensionFromUrl(uri.toString()).lowercase()
@@ -102,7 +97,6 @@ fun externalMedia(context: Context, uri: Uri): MediaFile {
     )
 }
 
-/** Devuelve lo elegido a la app que lo pidió (con permiso de lectura temporal) y cierra la galería */
 fun finishPick(activity: Activity?, items: List<MediaFile>) {
     activity ?: return
     if (items.isEmpty()) return

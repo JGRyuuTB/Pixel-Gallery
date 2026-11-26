@@ -1,35 +1,18 @@
 package com.GalleryYou.Pixel
 
-import kotlinx.coroutines.delay
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.unit.Velocity
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.background
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.Spring
-import coil.decode.ImageDecoderDecoder
-import coil.decode.GifDecoder
 import android.Manifest
 import android.app.Activity
-import android.content.Intent
-import androidx.compose.material3.ExtendedFloatingActionButton
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -37,35 +20,61 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.util.lerp
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.unit.dp
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarExitDirection
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberFloatingToolbarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -79,29 +88,80 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import coil.ImageLoader
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.decode.VideoFrameDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import com.GalleryYou.Pixel.data.AppSettings
+import com.GalleryYou.Pixel.data.EXT_PICK
+import com.GalleryYou.Pixel.data.EXT_VIEW
+import com.GalleryYou.Pixel.data.LocalGalleryLoader
+import com.GalleryYou.Pixel.data.MediaFile
+import com.GalleryYou.Pixel.data.MediaPrefetch
+import com.GalleryYou.Pixel.data.MediaRepo
+import com.GalleryYou.Pixel.data.MediaThumbFetcher
+import com.GalleryYou.Pixel.data.NavTabLabels
+import com.GalleryYou.Pixel.data.applyAppIcon
+import com.GalleryYou.Pixel.data.externalMedia
+import com.GalleryYou.Pixel.data.findActivity
+import com.GalleryYou.Pixel.data.finishPick
+import com.GalleryYou.Pixel.data.indexOfExternal
+import com.GalleryYou.Pixel.data.mimeMatches
+import com.GalleryYou.Pixel.data.parseExternal
+import com.GalleryYou.Pixel.ui.components.ExpressivePullToRefresh
+import com.GalleryYou.Pixel.ui.components.PermissionScreen
+import com.GalleryYou.Pixel.ui.components.PredictiveBackStack
+import com.GalleryYou.Pixel.ui.components.navBarScrub
+import com.GalleryYou.Pixel.ui.components.navBarScrubItem
+import com.GalleryYou.Pixel.ui.components.rememberNavBarScrubState
+import com.GalleryYou.Pixel.ui.home.AlbumDetailScreen
+import com.GalleryYou.Pixel.ui.home.AlbumsGrid
+import com.GalleryYou.Pixel.ui.home.HOME_FLOATING_RAIL_RESERVE
+import com.GalleryYou.Pixel.ui.home.HOME_STANDARD_RAIL_RESERVE
+import com.GalleryYou.Pixel.ui.home.HomeFloatingRail
+import com.GalleryYou.Pixel.ui.home.HomeNavTab
+import com.GalleryYou.Pixel.ui.home.HomeStandardRail
+import com.GalleryYou.Pixel.ui.home.MediaGrid
+import com.GalleryYou.Pixel.ui.home.MediaSelectionDeck
+import com.GalleryYou.Pixel.ui.home.NavTabIcon
+import com.GalleryYou.Pixel.ui.home.PhotosHomeHeader
+import com.GalleryYou.Pixel.ui.home.TrashScreen
+import com.GalleryYou.Pixel.ui.onboarding.OnboardingScreen
+import com.GalleryYou.Pixel.ui.settings.SettingsScreen
+import com.GalleryYou.Pixel.ui.theme.PaletteStyle
+import com.GalleryYou.Pixel.ui.theme.PixelGalleryTheme
+import com.GalleryYou.Pixel.ui.theme.ThemeMode
+import com.GalleryYou.Pixel.ui.theme.currentWindowLayout
+import com.GalleryYou.Pixel.ui.theme.isThemeDark
+import com.GalleryYou.Pixel.ui.theme.safeHorizontalInsets
+import com.GalleryYou.Pixel.util.LocalHapticsLevel
+import com.GalleryYou.Pixel.util.rememberGalleryHaptics
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Shinji, sube al robot de una vez */
-private data class ScreenKey(val kind: Int, val id: Long = 0L)
-
-private val LightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
-private val DarkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
+private val EXPRESSIVE_NAV_BAR_RESERVE = 88.dp
+private val NON_EXPRESSIVE_NAV_BAR_RESERVE = 80.dp
 
 class MainActivity : ComponentActivity() {
-    /** Yuji Itadori traga el dedo, y el bug */
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.withAppLocale())
     }
@@ -109,26 +169,36 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes = window.attributes.also {
+                it.layoutInDisplayCutoutMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                } else {
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                }
+            }
+        }
+
         val settings = AppSettings(applicationContext)
         applyAppIcon(applicationContext, settings.appIcon)
         MediaPrefetch.start(applicationContext)
+
         setContent {
-            val dark = isAppDark(settings)
-            // El poder de la amistad también compila
-            DisposableEffect(dark) {
-                enableEdgeToEdge(
-                    statusBarStyle = SystemBarStyle.auto(
-                        android.graphics.Color.TRANSPARENT,
-                        android.graphics.Color.TRANSPARENT,
-                    ) { dark },
-                    navigationBarStyle = SystemBarStyle.auto(LightScrim, DarkScrim) { dark },
-                )
-                onDispose { }
-            }
-            GaleriaTheme(settings) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-                    // Opening de anime: la animación de inicio se coloca por encima de toda la app
-                    StartupGate(settings) { GaleriaApp(settings) }
+            val darkTheme = isThemeDark(ThemeMode.fromInt(settings.themeMode))
+            PixelGalleryTheme(
+                darkTheme = darkTheme,
+                colorPalette = settings.colorPalette,
+                amoledDark = settings.amoledDark,
+                uiScale = settings.uiScale,
+                paletteStyle = settings.paletteStyle,
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    StartupGate(settings) {
+                        GaleriaApp(settings)
+                    }
                 }
             }
         }
@@ -144,7 +214,6 @@ fun GaleriaApp(settings: AppSettings) {
             .components {
                 add(MediaThumbFetcher.Factory(context))
                 add(VideoFrameDecoder.Factory())
-                // Fotos animadas: GIF, WebP animado y (desde Android 12) AVIF animado.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     add(ImageDecoderDecoder.Factory())
                 } else {
@@ -183,7 +252,6 @@ fun GaleriaApp(settings: AppSettings) {
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { result -> granted = result.values.all { it } }
 
-    // Mensaje oculto (base64): UGx1cyBVbHRyYTogdHUgZXJlcyBlbCBwcm90YWdvbmlzdGEgZGUgZXN0YSBoaXN0b3JpYQ==
     LaunchedEffect(settings.onboardingDone, granted) {
         if (settings.onboardingDone && granted && settings.autoUpdate) {
             val now = System.currentTimeMillis()
@@ -197,60 +265,58 @@ fun GaleriaApp(settings: AppSettings) {
     CompositionLocalProvider(
         LocalGalleryLoader provides imageLoader,
         LocalAnimations provides settings.animations,
+        LocalHapticsLevel provides settings.hapticsLevel,
     ) {
-        if (!settings.onboardingDone) {
-            Onboarding(
+        val openAppSettings = {
+            context.startActivity(
+                Intent(
+                    android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", context.packageName, null),
+                ),
+            )
+        }
+        when {
+            !settings.onboardingDone -> OnboardingScreen(
                 settings = settings,
                 granted = granted,
                 onRequestPermission = { launcher.launch(permissions) },
-                onOpenAppSettings = {
-                    context.startActivity(
-                        Intent(
-                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            Uri.fromParts("package", context.packageName, null),
-                        ),
-                    )
-                },
+                onOpenAppSettings = openAppSettings,
                 onFinish = { settings.completeOnboarding() },
             )
-        } else if (!granted) {
-            PermissionScreen(
+            !granted -> PermissionScreen(
                 onRequest = { launcher.launch(permissions) },
-                onSettings = {
-                    context.startActivity(
-                        Intent(
-                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            Uri.fromParts("package", context.packageName, null),
-                        ),
-                    )
-                },
+                onSettings = openAppSettings,
             )
-        } else {
-            GalleryRoot(settings, updater)
+            else -> GalleryRoot(settings, updater)
         }
         UpdateDialog(updater)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GalleryRoot(settings: AppSettings, updater: Updater) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val haptics = rememberGalleryHaptics()
 
     var media by remember { mutableStateOf<List<MediaFile>?>(null) }
     var trash by remember { mutableStateOf<List<MediaFile>>(emptyList()) }
     var reload by remember { mutableIntStateOf(0) }
+    var refreshing by remember { mutableStateOf(false) }
+
     LaunchedEffect(reload) {
         val loaded = (if (reload == 0) MediaPrefetch.take() else null) ?: withContext(Dispatchers.IO) {
             MediaRepo.load(context) to MediaRepo.loadTrash(context)
         }
-        // Light cierra la libreta si no hay nombres nuevos: una lista idéntica no vuelve a pintar toda la cuadrícula
         if (loaded.first != media) media = loaded.first
         if (loaded.second != trash) trash = loaded.second
+        if (refreshing) {
+            delay(350)
+            refreshing = false
+        }
     }
 
-    // Un opening que nadie se salta
     val owner = remember { context.findActivity() as? LifecycleOwner }
     DisposableEffect(owner) {
         var first = true
@@ -265,15 +331,16 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var filterMode by rememberSaveable { mutableIntStateOf(0) }
+    var searchActive by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     var openAlbumId by rememberSaveable { mutableStateOf<Long?>(null) }
     var selected by remember { mutableStateOf<Set<Uri>>(emptySet()) }
+    var trashSelectionActive by remember { mutableStateOf(false) }
     var moveItems by remember { mutableStateOf<List<MediaFile>?>(null) }
     var viewer by remember { mutableStateOf<ViewerRequest?>(null) }
-    // Edward Elric entra al laboratorio: la foto que se está editando (null = editor cerrado)
     var editing by remember { mutableStateOf<MediaFile?>(null) }
     var lastViewer by remember { mutableStateOf<ViewerRequest?>(null) }
 
-    // Naruto: ¡me convertiré en la galería predeterminada! Modo "ver archivo" y modo "elegir foto para otra app"
     val activity = remember { context.findActivity() }
     val external = remember { parseExternal(activity?.intent) }
     val pickMode = external?.kind == EXT_PICK
@@ -282,7 +349,6 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     var externalHandled by remember { mutableStateOf(false) }
     var externalViewing by remember { mutableStateOf(false) }
 
-    // ---- Eren grita libertad, el código también
     var pending by remember { mutableStateOf<(() -> Unit)?>(null) }
     val intentLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult(),
@@ -291,8 +357,12 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         pending = null
     }
 
-    fun toast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    val snackbar = remember { SnackbarHostState() }
+    fun announce(message: String) {
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            snackbar.showSnackbar(message)
+        }
     }
 
     fun launchRequest(sender: IntentSender, onGranted: () -> Unit) {
@@ -300,18 +370,35 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         intentLauncher.launch(IntentSenderRequest.Builder(sender).build())
     }
 
+    fun shareItems(items: List<MediaFile>) {
+        if (items.isEmpty()) return
+        val intent = if (items.size == 1) {
+            Intent(Intent.ACTION_SEND).apply {
+                type = items[0].mime
+                putExtra(Intent.EXTRA_STREAM, items[0].uri)
+            }
+        } else {
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "*/*"
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(items.map { it.uri }))
+            }
+        }
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        context.startActivity(Intent.createChooser(intent, null))
+    }
+
     fun trashItems(items: List<MediaFile>, onDone: () -> Unit = {}) {
         if (items.isEmpty()) return
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            toast(context.getString(R.string.trash_needs_android11))
+            Toast.makeText(context, context.getString(R.string.trash_needs_android11), Toast.LENGTH_SHORT).show()
             return
         }
         val uris = items.map { it.uri }
-        // Un archivo que no es de MediaStore (abierto desde otra app) no se puede mover a la papelera
-        val sender = runCatching { MediaStore.createTrashRequest(context.contentResolver, uris, true).intentSender }.getOrNull()
-            ?: return
+        val sender = runCatching {
+            MediaStore.createTrashRequest(context.contentResolver, uris, true).intentSender
+        }.getOrNull() ?: return
         launchRequest(sender) {
-            toast(context.resources.getQuantityString(R.plurals.toast_trashed, items.size, items.size))
+            announce(context.resources.getQuantityString(R.plurals.toast_trashed, items.size, items.size))
             selected = emptySet()
             onDone()
             reload++
@@ -322,7 +409,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         if (items.isEmpty() || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
         val uris = items.map { it.uri }
         launchRequest(MediaStore.createTrashRequest(context.contentResolver, uris, false).intentSender) {
-            toast(context.getString(R.string.toast_restored))
+            announce(context.getString(R.string.toast_restored))
             reload++
         }
     }
@@ -331,7 +418,7 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         if (items.isEmpty() || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
         val uris = items.map { it.uri }
         launchRequest(MediaStore.createDeleteRequest(context.contentResolver, uris).intentSender) {
-            toast(context.getString(R.string.toast_deleted_forever))
+            announce(context.getString(R.string.toast_deleted_forever))
             reload++
         }
     }
@@ -339,14 +426,14 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
     fun moveItemsTo(items: List<MediaFile>, relativePath: String) {
         if (items.isEmpty()) return
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            toast(context.getString(R.string.move_needs_android11))
+            Toast.makeText(context, context.getString(R.string.move_needs_android11), Toast.LENGTH_SHORT).show()
             return
         }
         val uris = items.map { it.uri }
         launchRequest(MediaStore.createWriteRequest(context.contentResolver, uris).intentSender) {
             scope.launch {
                 val moved = withContext(Dispatchers.IO) { MediaRepo.move(context, items, relativePath) }
-                toast(
+                announce(
                     if (moved == items.size) {
                         context.getString(R.string.toast_moved)
                     } else {
@@ -359,7 +446,6 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         }
     }
 
-    // Zoro se perdió, pero esta función llegó
     val thumbRegistry = remember { ThumbRegistry() }
     val viewerProgress = remember { Animatable(0f) }
     ViewerMotion.progress = { viewerProgress.value }
@@ -379,12 +465,11 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
 
     val viewerOpen = viewer != null
 
-    // Abrir una foto o vídeo desde otra app: se muestra directo en el visor y al cerrarlo se vuelve a la app de origen
     LaunchedEffect(media, externalHandled) {
         val request = external
         val list = media
         if (request?.kind == EXT_VIEW && !externalHandled && list != null) {
-            val uri = request?.uri ?: return@LaunchedEffect
+            val uri = request.uri ?: return@LaunchedEffect
             externalHandled = true
             externalViewing = true
             val index = indexOfExternal(list, uri)
@@ -408,7 +493,6 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             if (dragDismissed || !settings.animations) {
                 viewerProgress.snapTo(0f)
             } else {
-                // Nakama: todos los módulos juntos
                 viewerOrigin = thumbRegistry.boundsOf(viewerCurrent)
                 viewerProgress.animateTo(0f, tween(Motion.ContainerClose, easing = Motion.ContainerExit))
             }
@@ -421,344 +505,494 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
         selected = if (m.uri in selected) selected - m.uri else selected + m.uri
     }
 
-    // ---- Shinji, sube al robot de una vez
     val all = media.orEmpty()
-    // Al elegir fotos para otra app solo se ofrece lo que esa app pidió (solo imágenes, solo vídeos...)
     val pool = remember(all, external) {
-        if (external?.kind == EXT_PICK) all.filter { mimeMatches(it, external?.mimes.orEmpty()) } else all
+        if (external?.kind == EXT_PICK) all.filter { mimeMatches(it, external.mimes) } else all
     }
-    val filtered = remember(pool, filterMode) {
-        when (filterMode) {
+    val filtered = remember(pool, filterMode, searchActive, searchQuery) {
+        val byType = when (filterMode) {
             1 -> pool.filter { !it.isVideo }
             2 -> pool.filter { it.isVideo }
             else -> pool
         }
+        if (searchActive && searchQuery.isNotBlank()) {
+            val q = searchQuery.trim()
+            byType.filter {
+                it.name.contains(q, ignoreCase = true) || it.bucket.contains(q, ignoreCase = true)
+            }
+        } else {
+            byType
+        }
     }
+
     fun pickClick(m: MediaFile) {
         if (pickMultiple) picked = if (m.uri in picked) picked - m.uri else picked + m.uri
         else finishPick(activity, listOf(m))
     }
+
     val unnamedAlbum = stringResource(R.string.album_unnamed)
     val albums = remember(pool, unnamedAlbum) { MediaRepo.albums(pool, unnamedAlbum) }
     val openAlbum = albums.firstOrNull { it.id == openAlbumId }
     val selectedItems = remember(all, selected) { all.filter { it.uri in selected } }
 
-    // Nobara: ¡clavo, martillo y compilación!
-    BackHandler(enabled = openAlbum != null) {
-        openAlbumId = null
-        selected = emptySet()
-    }
-    BackHandler(enabled = selected.isNotEmpty() && tab == 0) { selected = emptySet() }
-    BackHandler(enabled = tab >= 2) { tab = 0 }
+    BackHandler(enabled = selected.isNotEmpty() && tab == 0 && openAlbum == null) { selected = emptySet() }
+    BackHandler(enabled = tab >= 1 && openAlbum == null && viewer == null) { tab = 0 }
     BackHandler(enabled = viewer != null) { viewer = null }
     BackHandler(enabled = pickMode && picked.isNotEmpty() && viewer == null) { picked = emptySet() }
 
-    CompositionLocalProvider(LocalThumbRegistry provides thumbRegistry) {
-    Box(Modifier.fillMaxSize()) {
-        val screen = when {
-            media == null -> ScreenKey(0)
-            openAlbum != null -> ScreenKey(2, openAlbum.id)
-            else -> ScreenKey(1)
+    val layout = currentWindowLayout()
+    val useRail = layout.usesNavigationRail
+    val safeStartInset = safeHorizontalInsets().asPaddingValues().calculateStartPadding(LocalLayoutDirection.current)
+    val railReserve = when {
+        !useRail -> 0.dp
+        settings.nonExpressiveNavigationBar -> HOME_STANDARD_RAIL_RESERVE
+        else -> HOME_FLOATING_RAIL_RESERVE
+    }
+    val navBottomReserve = when {
+        useRail -> 16.dp
+        settings.nonExpressiveNavigationBar -> NON_EXPRESSIVE_NAV_BAR_RESERVE
+        else -> EXPRESSIVE_NAV_BAR_RESERVE
+    }
+
+    val photosGridState = rememberLazyGridState()
+    val albumsGridState = rememberLazyGridState()
+    val trashGridState = rememberLazyGridState()
+    val floatingToolbarState = rememberFloatingToolbarState()
+    val floatingToolbarScrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
+        exitDirection = FloatingToolbarExitDirection.Bottom,
+        state = floatingToolbarState,
+    )
+
+    val navTabs = listOf(
+        HomeNavTab(0, stringResource(R.string.nav_photos), Icons.Rounded.PhotoLibrary, Icons.Outlined.PhotoLibrary),
+        HomeNavTab(1, stringResource(R.string.nav_albums), Icons.Rounded.Folder, Icons.Outlined.Folder),
+        HomeNavTab(2, stringResource(R.string.nav_trash), Icons.Rounded.Delete, Icons.Outlined.DeleteOutline, trash.size),
+        HomeNavTab(3, stringResource(R.string.nav_settings), Icons.Rounded.Settings, Icons.Outlined.Settings),
+    )
+
+    val selectNavTab: (Int) -> Unit = { target ->
+        if (target == tab) {
+            scope.launch {
+                when (target) {
+                    0 -> photosGridState.animateScrollToItem(0)
+                    1 -> albumsGridState.animateScrollToItem(0)
+                    2 -> trashGridState.animateScrollToItem(0)
+                }
+            }
+        } else {
+            selected = emptySet()
+            tab = target
         }
-        AnimatedContent(
-            targetState = screen,
-            modifier = Modifier.fillMaxSize(),
-            // Eje compartido de Material: entrar a un álbum avanza, salir retrocede, el resto se funde
-            transitionSpec = {
-                when {
-                    targetState.kind == 2 && initialState.kind != 2 -> sharedAxisX(true, settings.animations)
-                    initialState.kind == 2 && targetState.kind != 2 -> sharedAxisX(false, settings.animations)
-                    else -> fadeThrough(settings.animations)
-                }
-            },
-            label = "screens",
-        ) { s ->
-        when {
-            // Sin círculo de carga: la lista llega ya leída durante el opening, y si tarda un instante se ve el fondo limpio
-            s.kind == 0 -> Box(Modifier.fillMaxSize())
+    }
 
-            s.kind == 2 -> albums.firstOrNull { it.id == s.id }?.let { album -> AlbumDetail(
-                album = album,
-                settings = settings,
-                selected = if (pickMode) picked else selected,
-                pickMode = pickMode,
-                onBack = {
-                    openAlbumId = null
-                    selected = emptySet()
-                },
-                onClick = { m, index ->
-                    if (pickMode) pickClick(m)
-                    else if (selected.isNotEmpty()) toggle(m) else open(album.items, index)
-                },
-                onLongClick = { m -> if (pickMode) pickClick(m) else toggle(m) },
-                onClearSelection = { selected = emptySet() },
-                onSelectAll = { selected = album.items.map { it.uri }.toSet() },
-                onMove = { moveItems = selectedItems },
-                onTrash = { trashItems(selectedItems) },
-            ) }
+    val navScrub = rememberNavBarScrubState(
+        tabIds = navTabs.map { it.id },
+        onHoverChange = { haptics.tick() },
+        onCommit = { target ->
+            if (target != tab) {
+                haptics.subtle()
+                selected = emptySet()
+                tab = target
+            }
+        },
+    )
 
-            else -> {
-                val inSelection = selected.isNotEmpty() && tab == 0
-                val backdrop = rememberBackdropState(settings)
+    val selectionActive = (selected.isNotEmpty() && tab == 0) || (trashSelectionActive && tab == 2)
 
-                // Sailor Moon: la barra de filtros se queda fija mientras desplazas las fotos
-                // Tirar hacia abajo desde el inicio de la lista recarga la galería (con indicador animado).
-                var refreshing by remember { mutableStateOf(false) }
-                var pullPx by remember { mutableFloatStateOf(0f) }
-                val pullThreshold = with(LocalDensity.current) { 84.dp.toPx() }
-                LaunchedEffect(refreshing) {
-                    if (refreshing) {
-                        delay(900)
-                        refreshing = false
-                    }
-                }
-                val pullEnabled = tab <= 1 && !inSelection
-                val refreshConnection = remember(pullEnabled, pullThreshold) {
-                    object : NestedScrollConnection {
-                        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                            if (pullEnabled && pullPx > 0f && available.y < 0f && source == NestedScrollSource.UserInput) {
-                                val d = maxOf(available.y, -pullPx)
-                                pullPx += d
-                                return Offset(0f, d)
-                            }
-                            return Offset.Zero
+    CompositionLocalProvider(LocalThumbRegistry provides thumbRegistry) {
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            if (media == null) {
+                Box(Modifier.fillMaxSize())
+            } else {
+                PredictiveBackStack(
+                    childOpen = openAlbum != null,
+                    onBack = {
+                        openAlbumId = null
+                        selected = emptySet()
+                    },
+                    background = {
+                        val toolbarNestedScroll = if (
+                            !settings.nonExpressiveNavigationBar &&
+                            !useRail &&
+                            settings.barHidesOnScroll &&
+                            tab <= 2
+                        ) {
+                            Modifier.nestedScroll(floatingToolbarScrollBehavior)
+                        } else {
+                            Modifier
                         }
-
-                        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                            if (pullEnabled && !refreshing && source == NestedScrollSource.UserInput && available.y > 0f) {
-                                pullPx = (pullPx + available.y * 0.5f).coerceAtMost(pullThreshold * 1.6f)
-                                return Offset(0f, available.y)
-                            }
-                            return Offset.Zero
-                        }
-
-                        override suspend fun onPreFling(available: Velocity): Velocity {
-                            if (pullPx >= pullThreshold && !refreshing) {
-                                refreshing = true
-                                reload++
-                            }
-                            if (pullPx > 0f) {
-                                val from = pullPx
-                                scope.launch {
-                                    animate(from, 0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { v, _ -> pullPx = v }
-                                }
-                            }
-                            return Velocity.Zero
-                        }
-                    }
-                }
-                Scaffold(
-                    topBar = {
-                        if (tab <= 1) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = railReserve)
+                                .then(toolbarNestedScroll),
+                        ) {
                             AnimatedContent(
-                                targetState = inSelection,
-                                transitionSpec = {
-                                    if (settings.animations) {
-                                        (fadeIn(tween(210, delayMillis = 60, easing = LinearOutSlowInEasing)) +
-                                            slideInVertically(tween(Motion.Medium, easing = Motion.EmphasizedDecelerate)) { h -> -h / 3 }) togetherWith
-                                            fadeOut(tween(90, easing = FastOutLinearInEasing))
-                                    } else {
-                                        EnterTransition.None togetherWith ExitTransition.None
+                                targetState = tab,
+                                transitionSpec = { fadeThrough(settings.animations) },
+                                label = "homeTabs",
+                                modifier = Modifier.fillMaxSize(),
+                            ) { current ->
+                                when (current) {
+                                    0 -> ExpressivePullToRefresh(
+                                        isRefreshing = refreshing,
+                                        onRefresh = {
+                                            refreshing = true
+                                            reload++
+                                        },
+                                        indicatorTopPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 8.dp,
+                                    ) {
+                                        val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                                        MediaGrid(
+                                            items = filtered,
+                                            padding = PaddingValues(
+                                                top = topInset,
+                                                bottom = navBottomReserve + 24.dp,
+                                            ),
+                                            settings = settings,
+                                            selected = if (pickMode) picked else selected,
+                                            gridState = photosGridState,
+                                            emptySearchQuery = if (searchActive) searchQuery else null,
+                                            header = {
+                                                PhotosHomeHeader(
+                                                    showGreeting = settings.showGreeting,
+                                                    itemCount = filtered.size,
+                                                    filterMode = filterMode,
+                                                    onFilterChange = { filterMode = it },
+                                                    searchActive = searchActive,
+                                                    searchQuery = searchQuery,
+                                                    onSearchToggle = {
+                                                        searchActive = !searchActive
+                                                        if (!searchActive) searchQuery = ""
+                                                    },
+                                                    onSearchQueryChange = { searchQuery = it },
+                                                )
+                                            },
+                                            onClick = { m, index ->
+                                                if (pickMode) pickClick(m)
+                                                else if (selected.isNotEmpty()) toggle(m)
+                                                else open(filtered, index)
+                                            },
+                                            onLongClick = { m -> if (pickMode) pickClick(m) else toggle(m) },
+                                        )
                                     }
-                                },
-                                label = "topBar",
-                            ) { sel ->
-                            if (sel) {
-                                SelectionTopBar(
-                                    count = selected.size,
-                                    backdrop = backdrop,
-                                    onClose = { selected = emptySet() },
-                                    onSelectAll = { selected = filtered.map { it.uri }.toSet() },
-                                ) {
-                                    IconButton(onClick = { moveItems = selectedItems }) {
-                                        Icon(AppIcons.Folder, contentDescription = stringResource(R.string.move_to_album))
-                                    }
-                                    IconButton(onClick = { trashItems(selectedItems) }) {
-                                        Icon(AppIcons.Trash, contentDescription = stringResource(R.string.move_to_trash))
-                                    }
-                                }
-                            } else {
-                                FloatingHeader(
-                                    title = stringResource(if (tab == 0) R.string.nav_photos else R.string.nav_albums),
-                                    filter = if (tab == 0) filterMode else null,
-                                    onFilter = { filterMode = it },
-                                    backdrop = backdrop,
-                                    tuning = settings.headerTuning(),
-                                )
-                            }
-                            }
-                        }
-                    },
-                    bottomBar = {
-                        GalleryNavBar(
-                            style = settings.navStyle,
-                            items = GalleryNavItems,
-                            selected = tab,
-                            animations = settings.animations,
-                            backdrop = backdrop,
-                            badges = if (trash.isNotEmpty()) mapOf(2 to trash.size) else emptyMap(),
-                            tuning = settings.navTuning(),
-                            onSelect = {
-                                selected = emptySet()
-                                tab = it
-                            },
-                        )
-                    },
-                ) { padding ->
-                    val gridPadding = PaddingValues(
-                        top = padding.calculateTopPadding(),
-                        bottom = padding.calculateBottomPadding(),
-                    )
-                    // Kamehameha! Carga la energía aquí
-                    val navInset = padding.calculateBottomPadding()
-                    val bottomOnly = Modifier.fillMaxSize()
-                    Box(Modifier.fillMaxSize().nestedScroll(refreshConnection)) {
-                    Box(Modifier.fillMaxSize().graphicsLayer { translationY = pullPx * 0.55f }) {
-                    AnimatedContent(
-                        modifier = Modifier.fillMaxSize().backdropSource(backdrop),
-                        targetState = tab,
-                        // Fundido a través de Material entre pestañas: sale una, entra la otra creciendo
-                        transitionSpec = { fadeThrough(settings.animations) },
-                        label = "tabs",
-                    ) { current ->
-                        when (current) {
-                            0 -> if (all.isEmpty()) {
-                                EmptyState(gridPadding)
-                            } else {
-                                MediaGrid(
-                                    items = filtered,
-                                    padding = gridPadding,
-                                    settings = settings,
-                                    selected = if (pickMode) picked else selected,
-                                    header = null,
-                                    onClick = { m, index ->
-                                        if (pickMode) pickClick(m)
-                                        else if (selected.isNotEmpty()) toggle(m) else open(filtered, index)
-                                    },
-                                    onLongClick = { m -> if (pickMode) pickClick(m) else toggle(m) },
-                                )
-                            }
 
-                            1 -> AlbumsGrid(
-                                albums = albums,
-                                padding = gridPadding,
-                                settings = settings,
-                                onOpen = { openAlbumId = it.id },
-                            )
+                                    1 -> ExpressivePullToRefresh(
+                                        isRefreshing = refreshing,
+                                        onRefresh = {
+                                            refreshing = true
+                                            reload++
+                                        },
+                                        indicatorTopPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 8.dp,
+                                    ) {
+                                        val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                                        AlbumsGrid(
+                                            albums = albums,
+                                            padding = PaddingValues(
+                                                top = topInset,
+                                                bottom = navBottomReserve + 24.dp,
+                                            ),
+                                            settings = settings,
+                                            gridState = albumsGridState,
+                                            onOpen = { openAlbumId = it.id },
+                                        )
+                                    }
 
-                            2 -> CompositionLocalProvider(LocalNavInset provides navInset) {
-                                Box(bottomOnly) {
-                                    TrashScreen(
+                                    2 -> TrashScreen(
                                         items = trash,
                                         settings = settings,
-                                        onBack = { tab = 0 },
+                                        bottomPadding = navBottomReserve,
+                                        selectionBottomPadding = when {
+                                            useRail -> 24.dp
+                                            settings.nonExpressiveNavigationBar -> 92.dp
+                                            else -> 20.dp
+                                        },
+                                        gridState = trashGridState,
                                         onRestore = { restoreItems(it) },
                                         onDeleteForever = { deleteForever(it) },
+                                        onSelectionActiveChange = { trashSelectionActive = it },
+                                    )
+
+                                    else -> SettingsScreen(
+                                        settings = settings,
+                                        updater = updater,
+                                        onBack = { tab = 0 },
                                     )
                                 }
                             }
+                        }
 
-                            else -> CompositionLocalProvider(LocalNavInset provides navInset) {
-                                Box(bottomOnly) {
-                                    SettingsScreen(settings = settings, updater = updater, onBack = { tab = 0 })
+                        // Navigation Rail or Bottom Bar / HorizontalFloatingToolbar
+                        if (useRail) {
+                            if (settings.nonExpressiveNavigationBar) {
+                                HomeStandardRail(
+                                    tabs = navTabs,
+                                    selectedTab = tab,
+                                    scrub = navScrub,
+                                    onSelect = selectNavTab,
+                                    modifier = Modifier.align(Alignment.CenterStart),
+                                )
+                            } else {
+                                HomeFloatingRail(
+                                    tabs = navTabs,
+                                    selectedTab = tab,
+                                    scrub = navScrub,
+                                    onSelect = selectNavTab,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterStart)
+                                        .padding(start = safeStartInset + 12.dp),
+                                )
+                            }
+                        } else if (settings.nonExpressiveNavigationBar) {
+                            NavigationBar(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .navBarScrub(navScrub),
+                            ) {
+                                navTabs.forEach { item ->
+                                    val isSel = (navScrub.hoveredTab ?: tab) == item.id
+                                    NavigationBarItem(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .navBarScrubItem(navScrub, item.id),
+                                        selected = isSel,
+                                        onClick = { selectNavTab(item.id) },
+                                        icon = { NavTabIcon(item, isSel) },
+                                        label = if (settings.tabLabels == NavTabLabels.NEVER) null else {
+                                            { Text(item.label, maxLines = 1) }
+                                        },
+                                        alwaysShowLabel = settings.tabLabels != NavTabLabels.SELECTED,
+                                    )
                                 }
                             }
+                        } else {
+                            AnimatedVisibility(
+                                visible = !selectionActive,
+                                enter = fadeIn() + scaleIn(initialScale = 0.9f),
+                                exit = fadeOut() + scaleOut(targetScale = 0.9f),
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                            ) {
+                                HorizontalFloatingToolbar(
+                                    expanded = true,
+                                    scrollBehavior = if (settings.barHidesOnScroll) floatingToolbarScrollBehavior else null,
+                                    modifier = Modifier
+                                        .navigationBarsPadding()
+                                        .padding(bottom = 20.dp)
+                                        .navBarScrub(navScrub),
+                                    content = {
+                                        navTabs.forEach { item ->
+                                            val isSel = (navScrub.hoveredTab ?: tab) == item.id
+                                            val animatedPadding by animateDpAsState(
+                                                targetValue = if (isSel) 20.dp else 12.dp,
+                                                animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                                                label = "navPadding",
+                                            )
+                                            val containerColor by animateColorAsState(
+                                                targetValue = if (isSel) {
+                                                    MaterialTheme.colorScheme.primaryContainer
+                                                } else {
+                                                    Color.Transparent
+                                                },
+                                                animationSpec = tween(200),
+                                                label = "navContainer",
+                                            )
+                                            val contentColor by animateColorAsState(
+                                                targetValue = if (isSel) {
+                                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                                },
+                                                animationSpec = tween(200),
+                                                label = "navContent",
+                                            )
+                                            Surface(
+                                                selected = isSel,
+                                                onClick = { selectNavTab(item.id) },
+                                                shape = CircleShape,
+                                                color = containerColor,
+                                                contentColor = contentColor,
+                                                modifier = Modifier
+                                                    .height(48.dp)
+                                                    .navBarScrubItem(navScrub, item.id),
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .padding(horizontal = animatedPadding)
+                                                        .animateContentSize(
+                                                            animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                                                        ),
+                                                    horizontalArrangement = Arrangement.Center,
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                ) {
+                                                    NavTabIcon(item, isSel)
+                                                    AnimatedVisibility(
+                                                        visible = when (settings.tabLabels) {
+                                                            NavTabLabels.ALWAYS -> true
+                                                            NavTabLabels.NEVER -> false
+                                                            else -> isSel
+                                                        },
+                                                        enter = fadeIn() + expandHorizontally(
+                                                            animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                                                        ),
+                                                        exit = fadeOut() + shrinkHorizontally(
+                                                            animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                                                        ),
+                                                    ) {
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Spacer(Modifier.width(8.dp))
+                                                            Text(
+                                                                text = item.label,
+                                                                style = MaterialTheme.typography.labelLarge,
+                                                                fontWeight = FontWeight.Bold,
+                                                                maxLines = 1,
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                )
+                            }
                         }
-                    }
-                    }
-                    PullIndicator(
-                        pull = { pullPx },
-                        threshold = pullThreshold,
-                        refreshing = refreshing,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = padding.calculateTopPadding()),
-                    )
-                    }
-                }
+
+                        if (!pickMode && tab == 0) {
+                            MediaSelectionDeck(
+                                visible = selected.isNotEmpty(),
+                                selectedCount = selected.size,
+                                totalCount = filtered.size,
+                                allSelected = filtered.isNotEmpty() && filtered.all { it.uri in selected },
+                                bottomPadding = when {
+                                    useRail -> 24.dp
+                                    settings.nonExpressiveNavigationBar -> 92.dp
+                                    else -> 20.dp
+                                },
+                                snackbar = snackbar,
+                                onClear = { selected = emptySet() },
+                                onToggleSelectAll = {
+                                    selected = if (filtered.all { it.uri in selected }) {
+                                        emptySet()
+                                    } else {
+                                        filtered.map { it.uri }.toSet()
+                                    }
+                                },
+                                onShare = { shareItems(selectedItems) },
+                                onMove = { moveItems = selectedItems },
+                                onTrash = { trashItems(selectedItems) },
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                            )
+                        }
+                    },
+                    foreground = { _ ->
+                        openAlbum?.let { album ->
+                            AlbumDetailScreen(
+                                album = album,
+                                settings = settings,
+                                selected = if (pickMode) picked else selected,
+                                pickMode = pickMode,
+                                onBack = {
+                                    openAlbumId = null
+                                    selected = emptySet()
+                                },
+                                onClick = { m, index ->
+                                    if (pickMode) pickClick(m)
+                                    else if (selected.isNotEmpty()) toggle(m)
+                                    else open(album.items, index)
+                                },
+                                onLongClick = { m -> if (pickMode) pickClick(m) else toggle(m) },
+                                onClearSelection = { selected = emptySet() },
+                                onToggleSelectAll = {
+                                    selected = if (album.items.all { it.uri in selected }) {
+                                        emptySet()
+                                    } else {
+                                        album.items.map { it.uri }.toSet()
+                                    }
+                                },
+                                onShare = { shareItems(selectedItems) },
+                                onMove = { moveItems = selectedItems },
+                                onTrash = { trashItems(selectedItems) },
+                            )
+                        }
+                    },
+                )
             }
-        }
-        }
 
-        // Selector de otra app con varias fotos: botón para confirmar lo marcado
-        if (pickMode && picked.isNotEmpty() && !viewerVisible) {
-            ExtendedFloatingActionButton(
-                onClick = { finishPick(activity, pool.filter { it.uri in picked }) },
-                icon = { Icon(AppIcons.Check, contentDescription = null) },
-                text = { Text(stringResource(R.string.pick_done, picked.size)) },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 86.dp),
-            )
-        }
+            if (pickMode && picked.isNotEmpty() && !viewerVisible) {
+                ExtendedFloatingActionButton(
+                    onClick = { finishPick(activity, pool.filter { it.uri in picked }) },
+                    icon = { Icon(Icons.Rounded.Check, contentDescription = null) },
+                    text = { Text(stringResource(R.string.pick_done, picked.size)) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(bottom = 96.dp),
+                )
+            }
 
-        // Alquimia equivalente: algo entra, algo sale
-        val shown = viewer ?: lastViewer
-        if (viewerVisible) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer { alpha = viewerProgress.value.coerceIn(0f, 1f) }
-                    .background(Color.Black.copy(alpha = 0.5f)),
-            )
-            shown?.let { request ->
+            val shown = viewer ?: lastViewer
+            if (viewerVisible) {
                 Box(
                     Modifier
                         .fillMaxSize()
-                        .graphicsLayer {
-                            val p = viewerProgress.value
-                            val o = viewerOrigin
-                            val w = size.width
-                            val h = size.height
-                            if (o != null && w > 0f && h > 0f) {
-                                // Mensaje oculto (rot13): Gngnxnr: fvthr pbzcvynaqb
-                                val s0 = o.width / w
-                                val s = lerp(s0, 1f, p)
-                                scaleX = s
-                                scaleY = s
-                                translationX = lerp(o.center.x - w / 2f, 0f, p)
-                                translationY = lerp(o.center.y - h / 2f, 0f, p)
-                                alpha = (p * 3f).coerceIn(0f, 1f)
-                                clip = true
-                                shape = RevealShape(p, o.height / o.width, s)
-                            } else {
-                                val s = 0.84f + 0.16f * p
-                                scaleX = s
-                                scaleY = s
-                                translationY = (1f - p) * h * 0.05f
-                                alpha = p.coerceIn(0f, 1f)
-                            }
-                        },
-                ) {
-                    ViewerScreen(
-                        request = request,
-                        settings = settings,
-                        onClose = { viewer = null },
-                        onTrash = { m -> trashItems(listOf(m)) { viewer = null } },
-                        onPageChanged = { viewerCurrent = it },
-                        onEdit = { m -> editing = m },
-                        onDragDismiss = {
-                            dragDismissed = true
-                            viewer = null
-                        },
-                    )
+                        .graphicsLayer { alpha = viewerProgress.value.coerceIn(0f, 1f) }
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                )
+                shown?.let { request ->
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                val p = viewerProgress.value
+                                val o = viewerOrigin
+                                val w = size.width
+                                val h = size.height
+                                if (o != null && w > 0f && h > 0f) {
+                                    val s0 = o.width / w
+                                    val s = lerp(s0, 1f, p)
+                                    scaleX = s
+                                    scaleY = s
+                                    translationX = lerp(o.center.x - w / 2f, 0f, p)
+                                    translationY = lerp(o.center.y - h / 2f, 0f, p)
+                                    alpha = (p * 3f).coerceIn(0f, 1f)
+                                    clip = true
+                                    shape = RevealShape(p, o.height / o.width, s)
+                                } else {
+                                    val s = 0.84f + 0.16f * p
+                                    scaleX = s
+                                    scaleY = s
+                                    translationY = (1f - p) * h * 0.05f
+                                    alpha = p.coerceIn(0f, 1f)
+                                }
+                            },
+                    ) {
+                        ViewerScreen(
+                            request = request,
+                            settings = settings,
+                            onClose = { viewer = null },
+                            onTrash = { m -> trashItems(listOf(m)) { viewer = null } },
+                            onPageChanged = { viewerCurrent = it },
+                            onEdit = { m -> editing = m },
+                            onDragDismiss = {
+                                dragDismissed = true
+                                viewer = null
+                            },
+                        )
+                    }
                 }
             }
-        }
 
-        // Totoro abre la puerta del laboratorio: el editor va por encima del visor y de todo lo demás
-        editing?.let { target ->
-            EditorScreen(
-                media = target,
-                onClose = { editing = null },
-                onSaved = {
-                    editing = null
-                    reload++
-                },
-            )
+            editing?.let { target ->
+                EditorScreen(
+                    media = target,
+                    onClose = { editing = null },
+                    onSaved = {
+                        editing = null
+                        reload++
+                    },
+                )
+            }
         }
-    }
     }
 
     val toMove = moveItems
@@ -772,105 +1006,5 @@ fun GalleryRoot(settings: AppSettings, updater: Updater) {
             },
             onDismiss = { moveItems = null },
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AlbumDetail(
-    album: Album,
-    settings: AppSettings,
-    selected: Set<Uri>,
-    pickMode: Boolean = false,
-    onBack: () -> Unit,
-    onClick: (MediaFile, Int) -> Unit,
-    onLongClick: (MediaFile) -> Unit,
-    onClearSelection: () -> Unit,
-    onSelectAll: () -> Unit,
-    onMove: () -> Unit,
-    onTrash: () -> Unit,
-) {
-    Scaffold(
-        topBar = {
-            if (selected.isNotEmpty() && !pickMode) {
-                SelectionTopBar(
-                    count = selected.size,
-                    onClose = onClearSelection,
-                    onSelectAll = onSelectAll,
-                ) {
-                    IconButton(onClick = onMove) {
-                        Icon(AppIcons.Folder, contentDescription = stringResource(R.string.move_to_album))
-                    }
-                    IconButton(onClick = onTrash) {
-                        Icon(AppIcons.Trash, contentDescription = stringResource(R.string.move_to_trash))
-                    }
-                }
-            } else {
-                TopAppBar(
-                    title = { Text(album.name) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(AppIcons.ArrowBack, contentDescription = stringResource(R.string.cd_back))
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    ),
-                )
-            }
-        },
-    ) { padding ->
-        MediaGrid(
-            items = album.items,
-            padding = PaddingValues(
-                top = padding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding(),
-            ),
-            settings = settings,
-            selected = selected,
-            header = null,
-            onClick = onClick,
-            onLongClick = onLongClick,
-        )
-    }
-}
-
-
-
-/** Círculo que baja con el dedo al tirar de la lista; gira solo mientras se recarga. */
-@Composable
-private fun PullIndicator(
-    pull: () -> Float,
-    threshold: Float,
-    refreshing: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        shadowElevation = 6.dp,
-        modifier = modifier
-            .size(42.dp)
-            .graphicsLayer {
-                val p = (pull() / threshold).coerceIn(0f, 1f)
-                val shown = if (refreshing) 1f else p
-                alpha = shown
-                scaleX = 0.6f + 0.4f * shown
-                scaleY = 0.6f + 0.4f * shown
-                translationY = if (refreshing) 28.dp.toPx() else pull() * 0.55f - 14.dp.toPx()
-            },
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            if (refreshing) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
-            } else {
-                CircularProgressIndicator(
-                    progress = { (pull() / threshold).coerceIn(0f, 1f) },
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 3.dp,
-                )
-            }
-        }
     }
 }

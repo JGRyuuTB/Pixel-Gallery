@@ -1,5 +1,6 @@
 package com.GalleryYou.Pixel
 
+import com.GalleryYou.Pixel.data.AppSettings
 import androidx.compose.animation.core.LinearEasing
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay

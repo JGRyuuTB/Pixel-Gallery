@@ -301,4 +301,113 @@
     <string name="header_style_compact">Compact</string>
     <string name="header_style_text">Text</string>
     <string name="header_style_outline">Outline</string>
+
+    <!-- Expressive Palette & Display Size -->
+    <string name="sp_color_palette">Color palette</string>
+    <string name="palette_style_title">Palette style</string>
+    <string name="palette_style_description">Controls how vibrant, soft, or expressive your chosen colors feel across the interface.</string>
+    <string name="palette_style_presets_hint">Applies to all built-in palettes below. Dynamic wallpaper colors follow Android\'s system engine.</string>
+    <string name="palette_style_tonal_spot">Tonal</string>
+    <string name="palette_style_vibrant">Vibrant</string>
+    <string name="palette_style_expressive">Expressive</string>
+    <string name="palette_style_fruit_salad">Fruit Salad</string>
+    <string name="palette_style_monochrome">Mono</string>
+    <string name="cp_dynamic_cd">Dynamic wallpaper colors</string>
+    <string name="cd_selected">Selected</string>
+    <string name="cd_clear_search">Clear search</string>
+
+    <string name="sp_display_size">Display size</string>
+    <string name="sp_display_size_preview">Live preview</string>
+    <string name="sp_display_size_scale">Interface scale</string>
+    <string name="sp_display_size_compact">Compact</string>
+    <string name="sp_display_size_default">Default</string>
+    <string name="sp_display_size_large">Large</string>
+    <string name="sp_display_size_reset">Reset</string>
+    <string name="sp_display_size_percent">%1$d%%</string>
+    <string name="sp_display_size_about">About display size</string>
+    <string name="sp_display_size_note_system">Scales icons, cards, and spacing independently of Android\'s system display size.</string>
+    <string name="sp_display_size_note_excluded">Release the slider to apply the new scale across the whole gallery.</string>
+    <string name="sp_display_size_preview_title">Summer Memories</string>
+    <string name="sp_display_size_preview_sub">42 photos · 3 videos</string>
+
+    <!-- Home Shell & Selection Deck -->
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_greeting_night">Late night</string>
+    <string name="home_search_photos">Search photos &amp; videos…</string>
+    <string name="home_search_albums">Search albums…</string>
+    <string name="home_search_empty_title">Nothing matched “%1$s”</string>
+    <string name="home_search_empty_hint">Try a different filename, album, or clear the search.</string>
+    <string name="home_collection_summary">%1$d items</string>
+    <string name="sel_close">Clear selection</string>
+    <string name="sel_select_all">Select all</string>
+    <string name="sel_select_none">Deselect all</string>
+    <string name="sel_move">Move</string>
+    <string name="sel_trash">Move to trash</string>
+    <string name="sel_share">Share</string>
+    <string name="sel_restore">Restore</string>
+    <string name="sel_delete_forever">Delete permanently</string>
+    <plurals name="sel_count">
+        <item quantity="one">%d item selected</item>
+        <item quantity="other">%d items selected</item>
+    </plurals>
+
+    <!-- Settings Hub & Subpages -->
+    <string name="settings_search_placeholder">Search settings…</string>
+    <string name="settings_search_empty_title">No settings for “%1$s”</string>
+    <string name="settings_search_empty_hint">Try searching for theme, palette, columns, blur, or player.</string>
+    <string name="settings_hold_hint">Hold any row to read what it does</string>
+    <string name="si_got_it">Got it</string>
+    <string name="settings_section_look_and_feel">Look &amp; Feel</string>
+    <string name="settings_section_gallery">Gallery &amp; Layout</string>
+    <string name="settings_section_playback">Video Player</string>
+    <string name="settings_section_system">System</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_customization">Customization</string>
+    <string name="settings_color_palette_desc">30+ curated palettes, dynamic wallpaper colors &amp; tonal styles</string>
+    <string name="settings_display_size_desc">Interface scale and layout density</string>
+    <string name="settings_theme_mode">Theme mode</string>
+    <string name="settings_theme_mode_desc">Match the phone, or lock light or dark</string>
+    <string name="settings_amoled_dark">AMOLED pure black</string>
+    <string name="settings_amoled_dark_desc">True #000000 backgrounds in dark mode, sleek like Batman\'s cape</string>
+    <string name="settings_navigation_bar">Navigation bar</string>
+    <string name="settings_non_expressive_nav">Classic Material bar</string>
+    <string name="settings_non_expressive_nav_desc">Use the docked navigation bar instead of the floating expressive pill</string>
+    <string name="settings_tab_labels">Tab labels</string>
+    <string name="settings_tab_labels_desc">When to show destination names on the navigation bar</string>
+    <string name="tab_labels_selected">Active only</string>
+    <string name="tab_labels_always">Always</string>
+    <string name="tab_labels_never">Icons only</string>
+    <string name="settings_bar_hides_on_scroll">Hide bar on scroll</string>
+    <string name="settings_bar_hides_on_scroll_desc">Tuck the floating toolbar away while scrolling through photos</string>
+    <string name="settings_show_greeting">Home greeting</string>
+    <string name="settings_show_greeting_desc">Show a time-of-day greeting at the top of Photos</string>
+    <string name="settings_haptics">Haptic feedback</string>
+    <string name="settings_haptics_desc">Tactile clicks and springs across buttons, sliders, and selection</string>
+    <string name="haptic_level_off">Off</string>
+    <string name="haptic_level_subtle">Subtle</string>
+    <string name="haptic_level_balanced">Balanced</string>
+    <string name="haptic_level_expressive">Expressive</string>
+    <string name="settings_gap_none">None</string>
+    <string name="settings_version_subtitle">Version %1$s (%2$d)</string>
+    <string name="settings_app_icon_desc">Choose from 12 launcher icons with live adaptive preview</string>
+    <string name="app_icon_apply">Apply icon</string>
+    <string name="app_icon_applied_notice">Icon updated. Your launcher may take a moment to refresh.</string>
+    <string name="app_icon_active_badge">Active</string>
+    <string name="si_hub_customization">Theme, color palettes, display size, app icon, navigation bar, blur, animations, and haptics.</string>
+    <string name="si_hub_gallery">Configure photo &amp; album grid columns, spacing, and rounded corners.</string>
+    <string name="si_hub_player">Autoplay, floating glass controls, panel borders, and 7 expressive seek bar styles.</string>
+    <string name="si_hub_updates">Check GitHub Releases for new versions and install updates directly inside the app.</string>
+    <string name="si_hub_language">Switch the interface language independently of Android\'s system settings.</string>
+    <string name="si_toggle_amoled">Replaces dark surface tones with pure black (#000000) for OLED screens.</string>
+    <string name="si_toggle_blur">Applies real-time RenderEffect blur and optional AGSL liquid glass refraction to viewer and player panels.</string>
+    <string name="si_toggle_ambient">Samples colors from the photos currently on screen to paint a soft aurora behind the grid.</string>
+    <string name="si_toggle_startup">Plays the icon-matched four-orb opening choreography when launching the app.</string>
+
+    <!-- Onboarding Expressive -->
+    <string name="ob_skip">Skip</string>
+    <string name="ob_back">Back</string>
+    <string name="ob_next">Continue</string>
+    <string name="ob_finish">Open Gallery</string>
 </resources>
